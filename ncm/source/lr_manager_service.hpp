@@ -21,7 +21,7 @@
 #include "lr_registered_location_resolver.hpp"
 #include "lr_add_on_content_location_resolver.hpp"
 
-enum LrManagerCmd
+enum LrManagerCmd : u32
 {
     Lrm_Cmd_OpenLocationResolver = 0,
     Lrm_Cmd_OpenRegisteredLocationResolver = 1,
@@ -41,6 +41,7 @@ class LocationResolverManagerService final : public IServiceObject
     public:
         DEFINE_SERVICE_DISPATCH_TABLE
         {
+            /* 1.0.0- */
             MakeServiceCommandMeta<Lrm_Cmd_OpenLocationResolver, &LocationResolverManagerService::OpenLocationResolver>(),
             MakeServiceCommandMeta<Lrm_Cmd_OpenRegisteredLocationResolver, &LocationResolverManagerService::OpenRegisteredLocationResolver>(),
             MakeServiceCommandMeta<Lrm_Cmd_RefreshLocationResolver, &LocationResolverManagerService::RefreshLocationResolver>(),
