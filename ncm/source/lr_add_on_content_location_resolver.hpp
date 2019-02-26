@@ -18,8 +18,26 @@
 #include <switch.h>
 #include <stratosphere.hpp>
 
+enum LrAocLrCmd : u32
+{
+    LrAocLr_Cmd_ResolveAddOnContentPath = 0,
+    LrAocLr_Cmd_RegisterAddOnContentStorage = 1,
+    LrAocLr_Cmd_UnregisterAllAddOnContentPath = 2,
+};
+
 class AddOnContentLocationResolverInterface : public IServiceObject
 {
+    private:
+        Result ResolveAddOnContentPath(OutPointerWithClientSize<char> out, u64 tid);
+        Result RegisterAddOnContentStorage(FsStorageId storage_id, u64 tid);
+        Result UnregisterAllAddOnContentPath();
+
     public:
-        DEFINE_SERVICE_DISPATCH_TABLE {};
+        DEFINE_SERVICE_DISPATCH_TABLE 
+        {
+            /* 1.0.0- */
+            MakeServiceCommandMeta<LrAocLr_Cmd_ResolveAddOnContentPath, &AddOnContentLocationResolverInterface::ResolveAddOnContentPath>(),
+            MakeServiceCommandMeta<LrAocLr_Cmd_RegisterAddOnContentStorage, &AddOnContentLocationResolverInterface::RegisterAddOnContentStorage>(),
+            MakeServiceCommandMeta<LrAocLr_Cmd_UnregisterAllAddOnContentPath, &AddOnContentLocationResolverInterface::UnregisterAllAddOnContentPath>(),
+        };
 };
