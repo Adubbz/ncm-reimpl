@@ -18,7 +18,7 @@
 #include <switch.h>
 #include <stratosphere.hpp>
 
-class RegisteredLocationResolverInterface : public ISerivceObject
+class RegisteredLocationResolverInterface : public IServiceObject
 {
     public:
         DEFINE_SERVICE_DISPATCH_TABLE {};
