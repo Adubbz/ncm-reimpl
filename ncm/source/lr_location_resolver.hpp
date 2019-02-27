@@ -30,12 +30,12 @@ enum LrLocationResolverCmd : u32
     LrLocationResolver_Cmd_ResolveApplicationLegalInformationPath = 7,
     LrLocationResolver_Cmd_RedirectApplicationLegalInformationPath = 8,
     LrLocationResolver_Cmd_Refresh = 9,
-    LrLocationResolver_Cmd_RedirectProgramPath2 = 10,
-    LrLocationResolver_Cmd_Refresh2 = 11,
-    LrLocationResolver_Cmd_DeleteProgramPath = 12,
-    LrLocationResolver_Cmd_DeleteApplicationControlPath = 13,
-    LrLocationResolver_Cmd_DeleteApplicationHtmlDocumentPath = 14,
-    LrLocationResolver_Cmd_DeleteApplicationLegalInformationPath = 15,
+    LrLocationResolver_Cmd_RedirectApplicationProgramPath = 10,
+    LrLocationResolver_Cmd_ClearApplicationRedirection = 11,
+    LrLocationResolver_Cmd_EraseProgramRedirection = 12,
+    LrLocationResolver_Cmd_EraseApplicationControlRedirection = 13,
+    LrLocationResolver_Cmd_EraseApplicationHtmlDocumentRedirection = 14,
+    LrLocationResolver_Cmd_EraseApplicationLegalInformationRedirection = 15,
 };
 
 class LocationResolverBase : public IServiceObject
@@ -47,7 +47,7 @@ class LocationResolverBase : public IServiceObject
             LocationListEntry* next_entry;
             u64 tid;
             char content_path[0x300];
-            u32 flag;
+            u8 is_application;
         };
 
         struct LocationList
@@ -77,12 +77,12 @@ class LocationResolverBase : public IServiceObject
         virtual Result ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid) = 0;
         virtual Result RedirectApplicationLegalInformationPath(u64 tid, InPointer<const char> path) = 0;
         virtual Result Refresh() = 0;
-        virtual Result RedirectProgramPath2(u64 tid, InPointer<const char> path) = 0;
-        virtual Result Refresh2() = 0;
-        virtual Result DeleteProgramPath(u64 tid) = 0;
-        virtual Result DeleteApplicationControlPath(u64 tid) = 0;
-        virtual Result DeleteApplicationHtmlDocumentPath(u64 tid) = 0;
-        virtual Result DeleteApplicationLegalInformationPath(u64 tid) = 0;
+        virtual Result RedirectApplicationProgramPath(u64 tid, InPointer<const char> path) = 0;
+        virtual Result ClearApplicationRedirection() = 0;
+        virtual Result EraseProgramRedirection(u64 tid) = 0;
+        virtual Result EraseApplicationControlRedirection(u64 tid) = 0;
+        virtual Result EraseApplicationHtmlDocumentRedirection(u64 tid) = 0;
+        virtual Result EraseApplicationLegalInformationRedirection(u64 tid) = 0;
 
     public:
         DEFINE_SERVICE_DISPATCH_TABLE 
@@ -100,12 +100,12 @@ class LocationResolverBase : public IServiceObject
             MakeServiceCommandMeta<LrLocationResolver_Cmd_Refresh, &LocationResolverBase::Refresh>(),
 
             /* 5.0.0- */
-            MakeServiceCommandMeta<LrLocationResolver_Cmd_RedirectProgramPath2, &LocationResolverBase::RedirectProgramPath2, FirmwareVersion_500>(),
-            MakeServiceCommandMeta<LrLocationResolver_Cmd_Refresh2, &LocationResolverBase::Refresh2>(),
-            MakeServiceCommandMeta<LrLocationResolver_Cmd_DeleteProgramPath, &LocationResolverBase::DeleteProgramPath>(),
-            MakeServiceCommandMeta<LrLocationResolver_Cmd_DeleteApplicationControlPath, &LocationResolverBase::DeleteApplicationControlPath>(),
-            MakeServiceCommandMeta<LrLocationResolver_Cmd_DeleteApplicationHtmlDocumentPath, &LocationResolverBase::DeleteApplicationHtmlDocumentPath>(),
-            MakeServiceCommandMeta<LrLocationResolver_Cmd_DeleteApplicationLegalInformationPath, &LocationResolverBase::DeleteApplicationLegalInformationPath>(),
+            MakeServiceCommandMeta<LrLocationResolver_Cmd_RedirectApplicationProgramPath, &LocationResolverBase::RedirectApplicationProgramPath, FirmwareVersion_500>(),
+            MakeServiceCommandMeta<LrLocationResolver_Cmd_ClearApplicationRedirection, &LocationResolverBase::ClearApplicationRedirection>(),
+            MakeServiceCommandMeta<LrLocationResolver_Cmd_EraseProgramRedirection, &LocationResolverBase::EraseProgramRedirection>(),
+            MakeServiceCommandMeta<LrLocationResolver_Cmd_EraseApplicationControlRedirection, &LocationResolverBase::EraseApplicationControlRedirection>(),
+            MakeServiceCommandMeta<LrLocationResolver_Cmd_EraseApplicationHtmlDocumentRedirection, &LocationResolverBase::EraseApplicationHtmlDocumentRedirection>(),
+            MakeServiceCommandMeta<LrLocationResolver_Cmd_EraseApplicationLegalInformationRedirection, &LocationResolverBase::EraseApplicationLegalInformationRedirection>(),
         };
 };
 
@@ -129,12 +129,12 @@ class LocationResolver : public LocationResolverBase
         virtual Result ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid) override;
         virtual Result RedirectApplicationLegalInformationPath(u64 tid, InPointer<const char> path) override;
         virtual Result Refresh() override;
-        virtual Result RedirectProgramPath2(u64 tid, InPointer<const char> path) override;
-        virtual Result Refresh2() override;
-        virtual Result DeleteProgramPath(u64 tid) override;
-        virtual Result DeleteApplicationControlPath(u64 tid) override;
-        virtual Result DeleteApplicationHtmlDocumentPath(u64 tid) override;
-        virtual Result DeleteApplicationLegalInformationPath(u64 tid) override;
+        virtual Result RedirectApplicationProgramPath(u64 tid, InPointer<const char> path) override;
+        virtual Result ClearApplicationRedirection() override;
+        virtual Result EraseProgramRedirection(u64 tid) override;
+        virtual Result EraseApplicationControlRedirection(u64 tid) override;
+        virtual Result EraseApplicationHtmlDocumentRedirection(u64 tid) override;
+        virtual Result EraseApplicationLegalInformationRedirection(u64 tid) override;
 };
 
 class HostLocationResolver : public LocationResolverBase
@@ -153,10 +153,10 @@ class HostLocationResolver : public LocationResolverBase
         virtual Result ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid) override;
         virtual Result RedirectApplicationLegalInformationPath(u64 tid, InPointer<const char> path) override;
         virtual Result Refresh() override;
-        virtual Result RedirectProgramPath2(u64 tid, InPointer<const char> path) override;
-        virtual Result Refresh2() override;
-        virtual Result DeleteProgramPath(u64 tid) override;
-        virtual Result DeleteApplicationControlPath(u64 tid) override;
-        virtual Result DeleteApplicationHtmlDocumentPath(u64 tid) override;
-        virtual Result DeleteApplicationLegalInformationPath(u64 tid) override;
+        virtual Result RedirectApplicationProgramPath(u64 tid, InPointer<const char> path) override;
+        virtual Result ClearApplicationRedirection() override;
+        virtual Result EraseProgramRedirection(u64 tid) override;
+        virtual Result EraseApplicationControlRedirection(u64 tid) override;
+        virtual Result EraseApplicationHtmlDocumentRedirection(u64 tid) override;
+        virtual Result EraseApplicationLegalInformationRedirection(u64 tid) override;
 };

@@ -43,7 +43,7 @@ class LocationResolverManagerService final : public IServiceObject
         HosMutex mutex;
 
     private:
-        std::shared_ptr<LocationResolverBase>* GetFreeLocationResolverPtr(FsStorageId storage_id);
+        std::shared_ptr<LocationResolverBase>* GetLocationResolverPtr(FsStorageId storage_id);
 
         /* Actual commands. */
         Result OpenLocationResolver(Out<std::shared_ptr<LocationResolverBase>> out, FsStorageId storage_id);

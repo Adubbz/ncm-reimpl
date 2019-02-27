@@ -16,8 +16,19 @@
 
 #include "lr_manager_service.hpp"
 
-std::shared_ptr<LocationResolverBase>* LocationResolverManagerService::GetFreeLocationResolverPtr(FsStorageId storage_id)
+std::shared_ptr<LocationResolverBase>* LocationResolverManagerService::GetLocationResolverPtr(FsStorageId storage_id)
 {
+    // If there already is a location resolver, return the address of that
+    for (unsigned int i = 0; i < 5; i++)
+    {
+        auto entry = this->entries[i];
+
+        if (entry.active && entry.storage_id == storage_id)
+        {
+            return &this->location_resolvers[i];
+        }
+    }
+
     return nullptr;
 }
 
@@ -47,7 +58,7 @@ Result LocationResolverManagerService::OpenLocationResolver(Out<std::shared_ptr<
     if (storage_id == FsStorageId_Host)
     {
         auto location_resolver = std::make_shared<HostLocationResolver>(storage_id);
-        auto* lr_ptr = this->GetFreeLocationResolverPtr(storage_id);
+        auto* lr_ptr = this->GetLocationResolverPtr(storage_id);
         *lr_ptr = location_resolver;
         resolver = location_resolver;
     }
@@ -60,7 +71,7 @@ Result LocationResolverManagerService::OpenLocationResolver(Out<std::shared_ptr<
             return rc;
         }
 
-        auto* lr_ptr = this->GetFreeLocationResolverPtr(storage_id);
+        auto* lr_ptr = this->GetLocationResolverPtr(storage_id);
         *lr_ptr = location_resolver;
         resolver = location_resolver;
     }

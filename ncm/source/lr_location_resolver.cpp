@@ -92,32 +92,32 @@ Result LocationResolver::Refresh()
     return 0xF601;
 }
 
-Result LocationResolver::RedirectProgramPath2(u64 tid, InPointer<const char> path)
+Result LocationResolver::RedirectApplicationProgramPath(u64 tid, InPointer<const char> path)
 {
     return 0xF601;
 }
 
-Result LocationResolver::Refresh2()
+Result LocationResolver::ClearApplicationRedirection()
 {
     return 0xF601;
 }
 
-Result LocationResolver::DeleteProgramPath(u64 tid)
+Result LocationResolver::EraseProgramRedirection(u64 tid)
 {
     return 0xF601;
 }
 
-Result LocationResolver::DeleteApplicationControlPath(u64 tid)
+Result LocationResolver::EraseApplicationControlRedirection(u64 tid)
 {
     return 0xF601;
 }
 
-Result LocationResolver::DeleteApplicationHtmlDocumentPath(u64 tid)
+Result LocationResolver::EraseApplicationHtmlDocumentRedirection(u64 tid)
 {
     return 0xF601;
 }
 
-Result LocationResolver::DeleteApplicationLegalInformationPath(u64 tid)
+Result LocationResolver::EraseApplicationLegalInformationRedirection(u64 tid)
 {
     return 0xF601;
 }
@@ -177,32 +177,32 @@ Result HostLocationResolver::Refresh()
     return 0xF601;
 }
 
-Result HostLocationResolver::RedirectProgramPath2(u64 tid, InPointer<const char> path)
+Result HostLocationResolver::RedirectApplicationProgramPath(u64 tid, InPointer<const char> path)
 {
     return 0xF601;
 }
 
-Result HostLocationResolver::Refresh2()
+Result HostLocationResolver::ClearApplicationRedirection()
 {
     return 0xF601;
 }
 
-Result HostLocationResolver::DeleteProgramPath(u64 tid)
+Result HostLocationResolver::EraseProgramRedirection(u64 tid)
 {
     return 0xF601;
 }
 
-Result HostLocationResolver::DeleteApplicationControlPath(u64 tid)
+Result HostLocationResolver::EraseApplicationControlRedirection(u64 tid)
 {
     return 0xF601;
 }
 
-Result HostLocationResolver::DeleteApplicationHtmlDocumentPath(u64 tid)
+Result HostLocationResolver::EraseApplicationHtmlDocumentRedirection(u64 tid)
 {
     return 0xF601;
 }
 
-Result HostLocationResolver::DeleteApplicationLegalInformationPath(u64 tid)
+Result HostLocationResolver::EraseApplicationLegalInformationRedirection(u64 tid)
 {
     return 0xF601;
 }
