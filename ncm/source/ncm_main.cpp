@@ -17,6 +17,8 @@
 #include <switch.h>
 #include <stratosphere.hpp>
 
+#include "lr_manager_service.hpp"
+
 extern "C" {
     extern u32 __start__;
 
@@ -31,7 +33,6 @@ extern "C" {
     void __appExit(void);
 
 }
-
 
 void __libnx_initheap(void) {
     void*  addr = nx_inner_heap;
@@ -75,6 +76,8 @@ int main(int argc, char **argv)
             
     auto server_manager = new WaitableManager(1);
         
+    server_manager->AddWaitable(new ServiceServer<LocationResolverManagerService>("lr", 0x10));
+    
     /* Loop forever, servicing our services. */
     server_manager->Process();
     

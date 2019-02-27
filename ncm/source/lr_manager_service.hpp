@@ -31,9 +31,22 @@ enum LrManagerCmd : u32
 
 class LocationResolverManagerService final : public IServiceObject
 {
+    public:
+        struct LocationResolverEntry
+        {
+            bool active;
+            FsStorageId storage_id;
+        };
+
+        LocationResolverEntry entries[5] = {0};
+        std::shared_ptr<LocationResolverBase> location_resolvers[5] = {0};
+        HosMutex mutex;
+
     private:
+        std::shared_ptr<LocationResolverBase>* GetFreeLocationResolverPtr(FsStorageId storage_id);
+
         /* Actual commands. */
-        Result OpenLocationResolver(Out<std::shared_ptr<ILocationResolverInterface>> out, FsStorageId storage_id);
+        Result OpenLocationResolver(Out<std::shared_ptr<LocationResolverBase>> out, FsStorageId storage_id);
         Result OpenRegisteredLocationResolver(Out<std::shared_ptr<RegisteredLocationResolverInterface>> out);
         Result RefreshLocationResolver(FsStorageId storage_id);
         Result OpenAddOnContentLocationResolver(Out<std::shared_ptr<AddOnContentLocationResolverInterface>> out);
