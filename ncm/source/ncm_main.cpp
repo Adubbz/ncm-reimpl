@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 {
     consoleDebugInit(debugDevice_SVC);
             
-    auto server_manager = new WaitableManager(1);
+    auto server_manager = new WaitableManager(2);
         
     server_manager->AddWaitable(new ServiceServer<LocationResolverManagerService>("lr", 0x10));
     
