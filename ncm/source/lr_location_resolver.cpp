@@ -140,7 +140,7 @@ Result HostLocationResolver::ResolveApplicationHtmlDocumentPath(OutPointerWithCl
 
 Result HostLocationResolver::ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid)
 {
-    return 0xF601;
+    return 0x608; // Unsupported operation for context
 }
 
 Result HostLocationResolver::RedirectApplicationControlPath(u64 tid, InPointer<const char> path)
