@@ -23,6 +23,36 @@ LocationResolverBase::LocationResolverBase(FsStorageId storage_id) :
     // TODO: CreateContentStorage
 }
 
+Result LocationResolverBase::RedirectProgramPath(u64 tid, InPointer<const char> path)
+{
+    Registration::RedirectPath(&this->program_location_list, tid, path.pointer, false);
+    return 0;
+}
+
+Result LocationResolverBase::RedirectApplicationControlPath(u64 tid, InPointer<const char> path)
+{
+    Registration::RedirectPath(&this->app_control_location_list, tid, path.pointer, true);
+    return 0;
+}
+
+Result LocationResolverBase::RedirectApplicationHtmlDocumentPath(u64 tid, InPointer<const char> path)
+{
+    Registration::RedirectPath(&this->html_docs_location_list, tid, path.pointer, true);
+    return 0;
+}
+
+Result LocationResolverBase::RedirectApplicationLegalInformationPath(u64 tid, InPointer<const char> path)
+{
+    Registration::RedirectPath(&this->legal_info_location_list, tid, path.pointer, true);
+    return 0;
+}
+
+Result LocationResolverBase::RedirectApplicationProgramPath(u64 tid, InPointer<const char> path)
+{
+    Registration::RedirectPath(&this->program_location_list, tid, path.pointer, true);
+    return 0;
+}
+
 LocationResolver::LocationResolver(FsStorageId storage_id) :
     LocationResolverBase(storage_id)
 {
@@ -34,11 +64,6 @@ Result LocationResolver::RefreshImpl()
 }
 
 Result LocationResolver::ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid)
-{
-    return 0xF601;
-}
-
-Result LocationResolver::RedirectProgramPath(u64 tid, InPointer<const char> path)
 {
     return 0xF601;
 }
@@ -58,32 +83,12 @@ Result LocationResolver::ResolveDataPath(OutPointerWithClientSize<char> out, u64
     return 0xF601;
 }
 
-Result LocationResolver::RedirectApplicationControlPath(u64 tid, InPointer<const char> path)
-{
-    return 0xF601;
-}
-
-Result LocationResolver::RedirectApplicationHtmlDocumentPath(u64 tid, InPointer<const char> path)
-{
-    return 0xF601;
-}
-
 Result LocationResolver::ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid)
 {
     return 0xF601;
 }
 
-Result LocationResolver::RedirectApplicationLegalInformationPath(u64 tid, InPointer<const char> path)
-{
-    return 0xF601;
-}
-
 Result LocationResolver::Refresh()
-{
-    return 0xF601;
-}
-
-Result LocationResolver::RedirectApplicationProgramPath(u64 tid, InPointer<const char> path)
 {
     return 0xF601;
 }
@@ -123,11 +128,6 @@ Result HostLocationResolver::ResolveProgramPath(OutPointerWithClientSize<char> o
     return 0xF601;
 }
 
-Result HostLocationResolver::RedirectProgramPath(u64 tid, InPointer<const char> path)
-{
-    return 0xF601;
-}
-
 Result HostLocationResolver::ResolveApplicationControlPath(OutPointerWithClientSize<char> out, u64 tid)
 {
     return 0xF601;
@@ -143,32 +143,12 @@ Result HostLocationResolver::ResolveDataPath(OutPointerWithClientSize<char> out,
     return 0x608; // Unsupported operation for context
 }
 
-Result HostLocationResolver::RedirectApplicationControlPath(u64 tid, InPointer<const char> path)
-{
-    return 0xF601;
-}
-
-Result HostLocationResolver::RedirectApplicationHtmlDocumentPath(u64 tid, InPointer<const char> path)
-{
-    return 0xF601;
-}
-
 Result HostLocationResolver::ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid)
 {
     return 0xF601;
 }
 
-Result HostLocationResolver::RedirectApplicationLegalInformationPath(u64 tid, InPointer<const char> path)
-{
-    return 0xF601;
-}
-
 Result HostLocationResolver::Refresh()
-{
-    return 0xF601;
-}
-
-Result HostLocationResolver::RedirectApplicationProgramPath(u64 tid, InPointer<const char> path)
 {
     return 0xF601;
 }

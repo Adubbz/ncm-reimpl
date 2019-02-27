@@ -16,9 +16,9 @@
 
 #pragma once
 #include <list>
-
 #include <switch.h>
 #include <stratosphere.hpp>
+#include "lr_registration.hpp"
 
 enum LrLocationResolverCmd : u32
 {
@@ -43,35 +43,35 @@ enum LrLocationResolverCmd : u32
 class LocationResolverBase : public IServiceObject
 {
     public:
-        struct LocationListEntry
-        {
-            u64 tid;
-            char content_path[0x300];
-            u8 is_application;
-        };
-
-        std::list<LocationListEntry> program_location_list;
-        std::list<LocationListEntry> app_control_location_list;
-        std::list<LocationListEntry> html_docs_location_list;
-        std::list<LocationListEntry> legal_info_location_lost;
+        std::list<std::shared_ptr<Registration::LocationListEntry>> program_location_list;
+        std::list<std::shared_ptr<Registration::LocationListEntry>> app_control_location_list;
+        std::list<std::shared_ptr<Registration::LocationListEntry>> html_docs_location_list;
+        std::list<std::shared_ptr<Registration::LocationListEntry>> legal_info_location_list;
         FsStorageId storage_id;
         u64* content_meta_database;
         u64* content_storage;
 
         LocationResolverBase(FsStorageId storage_id);
 
-    private:
+    public:
+        virtual Result RedirectProgramPath(u64 tid, InPointer<const char> path);
+        virtual Result RedirectApplicationControlPath(u64 tid, InPointer<const char> path);
+        virtual Result RedirectApplicationHtmlDocumentPath(u64 tid, InPointer<const char> path);
+        virtual Result RedirectApplicationLegalInformationPath(u64 tid, InPointer<const char> path);
+        virtual Result RedirectApplicationProgramPath(u64 tid, InPointer<const char> path);
+
+    protected:
         virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) = 0;
-        virtual Result RedirectProgramPath(u64 tid, InPointer<const char> path) = 0;
+
         virtual Result ResolveApplicationControlPath(OutPointerWithClientSize<char> out, u64 tid) = 0;
         virtual Result ResolveApplicationHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid) = 0;
         virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) = 0;
-        virtual Result RedirectApplicationControlPath(u64 tid, InPointer<const char> path) = 0;
-        virtual Result RedirectApplicationHtmlDocumentPath(u64 tid, InPointer<const char> path) = 0;
+
+
         virtual Result ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid) = 0;
-        virtual Result RedirectApplicationLegalInformationPath(u64 tid, InPointer<const char> path) = 0;
+
         virtual Result Refresh() = 0;
-        virtual Result RedirectApplicationProgramPath(u64 tid, InPointer<const char> path) = 0;
+
         virtual Result ClearApplicationRedirection() = 0;
         virtual Result EraseProgramRedirection(u64 tid) = 0;
         virtual Result EraseApplicationControlRedirection(u64 tid) = 0;
@@ -112,18 +112,13 @@ class LocationResolver : public LocationResolverBase
 
         Result RefreshImpl();
         
-    private:
+    protected:
         virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) override;
-        virtual Result RedirectProgramPath(u64 tid, InPointer<const char> path) override;
         virtual Result ResolveApplicationControlPath(OutPointerWithClientSize<char> out, u64 tid) override;
         virtual Result ResolveApplicationHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid) override;
         virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) override;
-        virtual Result RedirectApplicationControlPath(u64 tid, InPointer<const char> path) override;
-        virtual Result RedirectApplicationHtmlDocumentPath(u64 tid, InPointer<const char> path) override;
         virtual Result ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid) override;
-        virtual Result RedirectApplicationLegalInformationPath(u64 tid, InPointer<const char> path) override;
         virtual Result Refresh() override;
-        virtual Result RedirectApplicationProgramPath(u64 tid, InPointer<const char> path) override;
         virtual Result ClearApplicationRedirection() override;
         virtual Result EraseProgramRedirection(u64 tid) override;
         virtual Result EraseApplicationControlRedirection(u64 tid) override;
@@ -136,18 +131,13 @@ class HostLocationResolver : public LocationResolverBase
     public:
         HostLocationResolver(FsStorageId storage_id);
 
-    private:
+    protected:
         virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) override;
-        virtual Result RedirectProgramPath(u64 tid, InPointer<const char> path) override;
         virtual Result ResolveApplicationControlPath(OutPointerWithClientSize<char> out, u64 tid) override;
         virtual Result ResolveApplicationHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid) override;
         virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) override;
-        virtual Result RedirectApplicationControlPath(u64 tid, InPointer<const char> path) override;
-        virtual Result RedirectApplicationHtmlDocumentPath(u64 tid, InPointer<const char> path) override;
         virtual Result ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid) override;
-        virtual Result RedirectApplicationLegalInformationPath(u64 tid, InPointer<const char> path) override;
         virtual Result Refresh() override;
-        virtual Result RedirectApplicationProgramPath(u64 tid, InPointer<const char> path) override;
         virtual Result ClearApplicationRedirection() override;
         virtual Result EraseProgramRedirection(u64 tid) override;
         virtual Result EraseApplicationControlRedirection(u64 tid) override;
