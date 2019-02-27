@@ -19,15 +19,6 @@
 LocationResolverBase::LocationResolverBase(FsStorageId storage_id) :
     storage_id(storage_id)
 {
-    program_location_list.last_entry = reinterpret_cast<LocationListEntry*>(&program_location_list.last_entry);
-    program_location_list.first_entry = reinterpret_cast<LocationListEntry*>(&program_location_list.last_entry);
-    app_control_location_list.last_entry = reinterpret_cast<LocationListEntry*>(&app_control_location_list.last_entry);
-    app_control_location_list.first_entry = reinterpret_cast<LocationListEntry*>(&app_control_location_list.last_entry);
-    html_docs_location_list.last_entry = reinterpret_cast<LocationListEntry*>(&html_docs_location_list.last_entry);
-    html_docs_location_list.first_entry = reinterpret_cast<LocationListEntry*>(&html_docs_location_list.last_entry);
-    legal_info_location_lost.last_entry = reinterpret_cast<LocationListEntry*>(&legal_info_location_lost.last_entry);
-    legal_info_location_lost.first_entry = reinterpret_cast<LocationListEntry*>(&legal_info_location_lost.last_entry);
-
     // TODO: CreateContentMetaDatabase
     // TODO: CreateContentStorage
 }

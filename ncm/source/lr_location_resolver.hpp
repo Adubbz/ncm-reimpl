@@ -15,6 +15,8 @@
  */
 
 #pragma once
+#include <list>
+
 #include <switch.h>
 #include <stratosphere.hpp>
 
@@ -43,23 +45,15 @@ class LocationResolverBase : public IServiceObject
     public:
         struct LocationListEntry
         {
-            LocationListEntry* prev_entry;
-            LocationListEntry* next_entry;
             u64 tid;
             char content_path[0x300];
             u8 is_application;
         };
 
-        struct LocationList
-        {
-            LocationListEntry* last_entry;
-            LocationListEntry* first_entry;
-        };
-
-        LocationList program_location_list;
-        LocationList app_control_location_list;
-        LocationList html_docs_location_list;
-        LocationList legal_info_location_lost;
+        std::list<LocationListEntry> program_location_list;
+        std::list<LocationListEntry> app_control_location_list;
+        std::list<LocationListEntry> html_docs_location_list;
+        std::list<LocationListEntry> legal_info_location_lost;
         FsStorageId storage_id;
         u64* content_meta_database;
         u64* content_storage;
