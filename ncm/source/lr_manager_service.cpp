@@ -18,18 +18,29 @@
 
 std::shared_ptr<LocationResolverBase>* LocationResolverManagerService::GetLocationResolverPtr(FsStorageId storage_id)
 {
-    // If there already is a location resolver, return the address of that
+    int highest_active_index = -1;
+
     for (unsigned int i = 0; i < 5; i++)
     {
         auto entry = this->entries[i];
 
-        if (entry.active && entry.storage_id == storage_id)
+        // If there already is a location resolver, return the address of that
+        if (entry.active)
         {
-            return &this->location_resolvers[i];
+            if (entry.storage_id == storage_id)
+                return &this->location_resolvers[i];
+            else
+                highest_active_index = i;
         }
     }
 
-    return nullptr;
+    if (highest_active_index == 4)
+    {
+        // There are no free entries, and there are no existing ones with this storage id either
+        std::abort();
+    }
+
+    return &this->location_resolvers[highest_active_index + 1];
 }
 
 Result LocationResolverManagerService::OpenLocationResolver(Out<std::shared_ptr<LocationResolverBase>> out, FsStorageId storage_id)
