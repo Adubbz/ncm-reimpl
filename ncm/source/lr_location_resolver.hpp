@@ -55,23 +55,18 @@ class LocationResolverBase : public IServiceObject
 
     public:
         virtual Result RedirectProgramPath(u64 tid, InPointer<const char> path);
+        virtual Result ResolveApplicationControlPath(OutPointerWithClientSize<char> out, u64 tid);
+        virtual Result ResolveApplicationHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid);
         virtual Result RedirectApplicationControlPath(u64 tid, InPointer<const char> path);
         virtual Result RedirectApplicationHtmlDocumentPath(u64 tid, InPointer<const char> path);
+        virtual Result ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid);
         virtual Result RedirectApplicationLegalInformationPath(u64 tid, InPointer<const char> path);
         virtual Result RedirectApplicationProgramPath(u64 tid, InPointer<const char> path);
 
     protected:
         virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) = 0;
-
-        virtual Result ResolveApplicationControlPath(OutPointerWithClientSize<char> out, u64 tid) = 0;
-        virtual Result ResolveApplicationHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid) = 0;
         virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) = 0;
-
-
-        virtual Result ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid) = 0;
-
         virtual Result Refresh() = 0;
-
         virtual Result ClearApplicationRedirection() = 0;
         virtual Result EraseProgramRedirection(u64 tid) = 0;
         virtual Result EraseApplicationControlRedirection(u64 tid) = 0;
@@ -114,10 +109,7 @@ class LocationResolver : public LocationResolverBase
         
     protected:
         virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) override;
-        virtual Result ResolveApplicationControlPath(OutPointerWithClientSize<char> out, u64 tid) override;
-        virtual Result ResolveApplicationHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid) override;
         virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) override;
-        virtual Result ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid) override;
         virtual Result Refresh() override;
         virtual Result ClearApplicationRedirection() override;
         virtual Result EraseProgramRedirection(u64 tid) override;
@@ -133,10 +125,7 @@ class HostLocationResolver : public LocationResolverBase
 
     protected:
         virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) override;
-        virtual Result ResolveApplicationControlPath(OutPointerWithClientSize<char> out, u64 tid) override;
-        virtual Result ResolveApplicationHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid) override;
         virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) override;
-        virtual Result ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid) override;
         virtual Result Refresh() override;
         virtual Result ClearApplicationRedirection() override;
         virtual Result EraseProgramRedirection(u64 tid) override;

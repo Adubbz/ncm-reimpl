@@ -29,6 +29,28 @@ Result LocationResolverBase::RedirectProgramPath(u64 tid, InPointer<const char> 
     return 0;
 }
 
+Result LocationResolverBase::ResolveApplicationControlPath(OutPointerWithClientSize<char> out, u64 tid)
+{
+    char path[FS_MAX_PATH] = {0};
+
+    if (!Registration::ResolvePath(&this->app_control_location_list, path, tid))
+        return 0x1008;
+
+    memcpy(out.pointer, path, FS_MAX_PATH);
+    return 0;
+}
+
+Result LocationResolverBase::ResolveApplicationHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid)
+{
+    char path[FS_MAX_PATH] = {0};
+
+    if (!Registration::ResolvePath(&this->html_docs_location_list, path, tid))
+        return 0xC08;
+
+    memcpy(out.pointer, path, FS_MAX_PATH);
+    return 0;
+}
+
 Result LocationResolverBase::RedirectApplicationControlPath(u64 tid, InPointer<const char> path)
 {
     Registration::RedirectPath(&this->app_control_location_list, tid, path.pointer, true);
@@ -38,6 +60,17 @@ Result LocationResolverBase::RedirectApplicationControlPath(u64 tid, InPointer<c
 Result LocationResolverBase::RedirectApplicationHtmlDocumentPath(u64 tid, InPointer<const char> path)
 {
     Registration::RedirectPath(&this->html_docs_location_list, tid, path.pointer, true);
+    return 0;
+}
+
+Result LocationResolverBase::ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid)
+{
+    char path[FS_MAX_PATH] = {0};
+
+    if (!Registration::ResolvePath(&this->legal_info_location_list, path, tid))
+        return 0x1208;
+
+    memcpy(out.pointer, path, FS_MAX_PATH);
     return 0;
 }
 
@@ -68,22 +101,7 @@ Result LocationResolver::ResolveProgramPath(OutPointerWithClientSize<char> out, 
     return 0xF601;
 }
 
-Result LocationResolver::ResolveApplicationControlPath(OutPointerWithClientSize<char> out, u64 tid)
-{
-    return 0xF601;
-}
-
-Result LocationResolver::ResolveApplicationHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid)
-{
-    return 0xF601;
-}
-
 Result LocationResolver::ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid)
-{
-    return 0xF601;
-}
-
-Result LocationResolver::ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid)
 {
     return 0xF601;
 }
@@ -128,24 +146,9 @@ Result HostLocationResolver::ResolveProgramPath(OutPointerWithClientSize<char> o
     return 0xF601;
 }
 
-Result HostLocationResolver::ResolveApplicationControlPath(OutPointerWithClientSize<char> out, u64 tid)
-{
-    return 0xF601;
-}
-
-Result HostLocationResolver::ResolveApplicationHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid)
-{
-    return 0xF601;
-}
-
 Result HostLocationResolver::ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid)
 {
     return 0x608; // Unsupported operation for context
-}
-
-Result HostLocationResolver::ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid)
-{
-    return 0xF601;
 }
 
 Result HostLocationResolver::Refresh()

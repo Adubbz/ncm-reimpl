@@ -37,3 +37,23 @@ char* Registration::RedirectPath(std::list<std::shared_ptr<LocationListEntry>>* 
     list->push_back(new_entry);
     return out;
 }
+
+bool Registration::ResolvePath(std::list<std::shared_ptr<LocationListEntry>>* list, char* path_out, u64 tid)
+{
+    if (list->empty())
+        return false;
+
+    std::shared_ptr<LocationListEntry> out_entry = nullptr;
+
+    for (auto& entry : *list)
+    {
+        if (entry->tid == tid)
+            out_entry = entry;
+    }
+
+    if (!out_entry)
+        return false;
+
+    memcpy(path_out, out_entry->content_path, FS_MAX_PATH);
+    return true;
+}
