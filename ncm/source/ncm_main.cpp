@@ -18,6 +18,7 @@
 #include <stratosphere.hpp>
 
 #include "lr_manager_service.hpp"
+#include "ncm_content_manager_service.hpp"
 
 extern "C" {
     extern u32 __start__;
@@ -77,6 +78,7 @@ int main(int argc, char **argv)
     auto server_manager = new WaitableManager(2);
         
     server_manager->AddWaitable(new ServiceServer<LocationResolverManagerService>("lr", 0x10));
+    server_manager->AddWaitable(new ServiceServer<ContentManagerService>("ncm", 0x10));
     
     /* Loop forever, servicing our services. */
     server_manager->Process();
