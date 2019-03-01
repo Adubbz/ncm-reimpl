@@ -58,7 +58,7 @@ bool Registration::ResolvePath(std::list<std::shared_ptr<LocationListEntry>>* li
     return true;
 }
 
-void Registration::EraseRedirection(std::list<std::shared_ptr<LocationListEntry>>* list, u64 tid)
+void Registration::EraseRedirectionWithTid(std::list<std::shared_ptr<LocationListEntry>>* list, u64 tid)
 {
     if (list->empty())
         return;
@@ -68,6 +68,23 @@ void Registration::EraseRedirection(std::list<std::shared_ptr<LocationListEntry>
         std::shared_ptr<LocationListEntry> entry = *it;
 
         if (entry->tid == tid)
+            it = list->erase(it);
+        else 
+            it++;
+    }
+}
+
+void Registration::EraseRedirectionWithMask(std::list<std::shared_ptr<LocationListEntry>>* list, int mask)
+{
+    if (list->empty())
+        return;
+
+    for (auto it = list->begin(); it != list->end();) 
+    {
+        std::shared_ptr<LocationListEntry> entry = *it;
+
+        // Remove the entry if there are no bits set that aren't in the mask
+        if (!(entry->is_application & ~mask))
             it = list->erase(it);
         else 
             it++;

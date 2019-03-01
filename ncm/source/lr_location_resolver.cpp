@@ -86,27 +86,36 @@ Result LocationResolverBase::RedirectApplicationProgramPath(u64 tid, InPointer<c
     return 0;
 }
 
+Result LocationResolverBase::ClearApplicationRedirection()
+{
+    Registration::EraseRedirectionWithMask(&this->program_location_list, 1);
+    Registration::EraseRedirectionWithMask(&this->app_control_location_list, 1);
+    Registration::EraseRedirectionWithMask(&this->html_docs_location_list, 1);
+    Registration::EraseRedirectionWithMask(&this->legal_info_location_list, 1);
+    return 0;
+}
+
 Result LocationResolverBase::EraseProgramRedirection(u64 tid)
 {
-    Registration::EraseRedirection(&this->program_location_list, tid);
+    Registration::EraseRedirectionWithTid(&this->program_location_list, tid);
     return 0;
 }
 
 Result LocationResolverBase::EraseApplicationControlRedirection(u64 tid)
 {
-    Registration::EraseRedirection(&this->app_control_location_list, tid);
+    Registration::EraseRedirectionWithTid(&this->app_control_location_list, tid);
     return 0;
 }
 
 Result LocationResolverBase::EraseApplicationHtmlDocumentRedirection(u64 tid)
 {
-    Registration::EraseRedirection(&this->html_docs_location_list, tid);
+    Registration::EraseRedirectionWithTid(&this->html_docs_location_list, tid);
     return 0;
 }
 
 Result LocationResolverBase::EraseApplicationLegalInformationRedirection(u64 tid)
 {
-    Registration::EraseRedirection(&this->legal_info_location_list, tid);
+    Registration::EraseRedirectionWithTid(&this->legal_info_location_list, tid);
     return 0;
 }
 
@@ -135,11 +144,6 @@ Result LocationResolver::Refresh()
     return 0xF601;
 }
 
-Result LocationResolver::ClearApplicationRedirection()
-{
-    return 0xF601;
-}
-
 HostLocationResolver::HostLocationResolver(FsStorageId storage_id) :
     LocationResolverBase(storage_id)
 {
@@ -156,11 +160,6 @@ Result HostLocationResolver::ResolveDataPath(OutPointerWithClientSize<char> out,
 }
 
 Result HostLocationResolver::Refresh()
-{
-    return 0xF601;
-}
-
-Result HostLocationResolver::ClearApplicationRedirection()
 {
     return 0xF601;
 }
