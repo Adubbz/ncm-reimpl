@@ -62,16 +62,16 @@ class LocationResolverBase : public IServiceObject
         virtual Result ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid);
         virtual Result RedirectApplicationLegalInformationPath(u64 tid, InPointer<const char> path);
         virtual Result RedirectApplicationProgramPath(u64 tid, InPointer<const char> path);
+        virtual Result EraseProgramRedirection(u64 tid);
+        virtual Result EraseApplicationControlRedirection(u64 tid);
+        virtual Result EraseApplicationHtmlDocumentRedirection(u64 tid);
+        virtual Result EraseApplicationLegalInformationRedirection(u64 tid);
 
     protected:
         virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) = 0;
         virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) = 0;
         virtual Result Refresh() = 0;
         virtual Result ClearApplicationRedirection() = 0;
-        virtual Result EraseProgramRedirection(u64 tid) = 0;
-        virtual Result EraseApplicationControlRedirection(u64 tid) = 0;
-        virtual Result EraseApplicationHtmlDocumentRedirection(u64 tid) = 0;
-        virtual Result EraseApplicationLegalInformationRedirection(u64 tid) = 0;
 
     public:
         DEFINE_SERVICE_DISPATCH_TABLE 
@@ -112,10 +112,6 @@ class LocationResolver : public LocationResolverBase
         virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) override;
         virtual Result Refresh() override;
         virtual Result ClearApplicationRedirection() override;
-        virtual Result EraseProgramRedirection(u64 tid) override;
-        virtual Result EraseApplicationControlRedirection(u64 tid) override;
-        virtual Result EraseApplicationHtmlDocumentRedirection(u64 tid) override;
-        virtual Result EraseApplicationLegalInformationRedirection(u64 tid) override;
 };
 
 class HostLocationResolver : public LocationResolverBase
@@ -128,8 +124,4 @@ class HostLocationResolver : public LocationResolverBase
         virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) override;
         virtual Result Refresh() override;
         virtual Result ClearApplicationRedirection() override;
-        virtual Result EraseProgramRedirection(u64 tid) override;
-        virtual Result EraseApplicationControlRedirection(u64 tid) override;
-        virtual Result EraseApplicationHtmlDocumentRedirection(u64 tid) override;
-        virtual Result EraseApplicationLegalInformationRedirection(u64 tid) override;
 };

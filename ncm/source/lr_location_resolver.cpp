@@ -86,6 +86,30 @@ Result LocationResolverBase::RedirectApplicationProgramPath(u64 tid, InPointer<c
     return 0;
 }
 
+Result LocationResolverBase::EraseProgramRedirection(u64 tid)
+{
+    Registration::EraseRedirection(&this->program_location_list, tid);
+    return 0;
+}
+
+Result LocationResolverBase::EraseApplicationControlRedirection(u64 tid)
+{
+    Registration::EraseRedirection(&this->app_control_location_list, tid);
+    return 0;
+}
+
+Result LocationResolverBase::EraseApplicationHtmlDocumentRedirection(u64 tid)
+{
+    Registration::EraseRedirection(&this->html_docs_location_list, tid);
+    return 0;
+}
+
+Result LocationResolverBase::EraseApplicationLegalInformationRedirection(u64 tid)
+{
+    Registration::EraseRedirection(&this->legal_info_location_list, tid);
+    return 0;
+}
+
 LocationResolver::LocationResolver(FsStorageId storage_id) :
     LocationResolverBase(storage_id)
 {
@@ -116,26 +140,6 @@ Result LocationResolver::ClearApplicationRedirection()
     return 0xF601;
 }
 
-Result LocationResolver::EraseProgramRedirection(u64 tid)
-{
-    return 0xF601;
-}
-
-Result LocationResolver::EraseApplicationControlRedirection(u64 tid)
-{
-    return 0xF601;
-}
-
-Result LocationResolver::EraseApplicationHtmlDocumentRedirection(u64 tid)
-{
-    return 0xF601;
-}
-
-Result LocationResolver::EraseApplicationLegalInformationRedirection(u64 tid)
-{
-    return 0xF601;
-}
-
 HostLocationResolver::HostLocationResolver(FsStorageId storage_id) :
     LocationResolverBase(storage_id)
 {
@@ -157,26 +161,6 @@ Result HostLocationResolver::Refresh()
 }
 
 Result HostLocationResolver::ClearApplicationRedirection()
-{
-    return 0xF601;
-}
-
-Result HostLocationResolver::EraseProgramRedirection(u64 tid)
-{
-    return 0xF601;
-}
-
-Result HostLocationResolver::EraseApplicationControlRedirection(u64 tid)
-{
-    return 0xF601;
-}
-
-Result HostLocationResolver::EraseApplicationHtmlDocumentRedirection(u64 tid)
-{
-    return 0xF601;
-}
-
-Result HostLocationResolver::EraseApplicationLegalInformationRedirection(u64 tid)
 {
     return 0xF601;
 }

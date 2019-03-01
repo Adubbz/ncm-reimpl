@@ -57,3 +57,19 @@ bool Registration::ResolvePath(std::list<std::shared_ptr<LocationListEntry>>* li
     memcpy(path_out, out_entry->content_path, FS_MAX_PATH);
     return true;
 }
+
+void Registration::EraseRedirection(std::list<std::shared_ptr<LocationListEntry>>* list, u64 tid)
+{
+    if (list->empty())
+        return;
+
+    for (auto it = list->begin(); it != list->end();) 
+    {
+        std::shared_ptr<LocationListEntry> entry = *it;
+
+        if (entry->tid == tid)
+            it = list->erase(it);
+        else 
+            it++;
+    }
+}
