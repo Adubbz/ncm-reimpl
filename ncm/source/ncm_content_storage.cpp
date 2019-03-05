@@ -51,7 +51,7 @@ Result ContentStorageInterface::Delete(NcmNcaId content_id)
     return 0xF601;
 }
 
-Result ContentStorageInterface::Has(NcmNcaId content_id)
+Result ContentStorageInterface::Has(Out<bool> out, NcmNcaId content_id)
 {
     return 0xF601;
 }

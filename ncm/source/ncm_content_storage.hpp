@@ -60,7 +60,7 @@ class ContentStorageInterface : public IServiceObject
         Result WritePlaceHolder(NcmNcaId placeholder_id, u64 offset, InBuffer<u8> data);
         Result Register(NcmNcaId content_id, NcmNcaId placeholder_id);
         Result Delete(NcmNcaId content_id);
-        Result Has(NcmNcaId content_id);
+        Result Has(Out<bool> out, NcmNcaId content_id);
         Result GetPath(OutPointerWithClientSize<char> out, NcmNcaId content_id);
         Result GetPlaceHolderPath(OutPointerWithClientSize<char> out, NcmNcaId placeholder_id);
         Result CleanupAllPlaceHolder();
