@@ -18,135 +18,135 @@
 
 Result ContentStorageInterface::GeneratePlaceHolderId(OutPointerWithServerSize<NcmNcaId, 0x1> out)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::CreatePlaceHolder(NcmNcaId content_id, NcmNcaId placeholder_id, u64 size)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::DeletePlaceHolder(NcmNcaId placeholder_id)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::HasPlaceHolder(NcmNcaId placeholder_id)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::WritePlaceHolder(NcmNcaId placeholder_id, u64 offset, InBuffer<u8> data)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::Register(NcmNcaId content_id, NcmNcaId placeholder_id)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::Delete(NcmNcaId content_id)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::Has(Out<bool> out, NcmNcaId content_id)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::GetPath(OutPointerWithClientSize<char> out, NcmNcaId content_id)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::GetPlaceHolderPath(OutPointerWithClientSize<char> out, NcmNcaId placeholder_id)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::CleanupAllPlaceHolder()
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::ListPlaceHolder(Out<int> entries_read, OutBuffer<NcmNcaId> out_buf)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::GetContentCount(Out<int> count)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::ListContentId(Out<int> entries_read, OutBuffer<NcmNcaId> out_buf, int start_offset)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::GetSizeFromContentId(Out<u64> size, NcmNcaId content_id)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::DisableForcibly()
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::RevertToPlaceHolder(NcmNcaId placeholder_id, NcmNcaId content_id_0, NcmNcaId content_id_1)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::SetPlaceHolderSize(NcmNcaId placeholder_id, u64 size)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::ReadContentIdFile(OutBuffer<u8> buf, NcmNcaId content_id, u64 offset)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::GetRightsIdFromPlaceHolderId(Out<NcmRightsId> out, NcmNcaId placeholder_id)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::GetRightsIdFromContentId(Out<NcmRightsId> out, NcmNcaId content_id)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::WriteContentForDebug(NcmNcaId content_id, u64 offset, InBuffer<u8> data)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::GetFreeSpaceSize(Out<u64> out)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::GetTotalSpaceSize(Out<u64> out)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::FlushPlaceHolder()
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::GetSizeFromPlaceHolderId(Out<u64> out, NcmNcaId placeholder_id)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result ContentStorageInterface::RepairInvalidFileAttribute()
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }

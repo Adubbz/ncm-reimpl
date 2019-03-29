@@ -18,15 +18,15 @@
 
 Result AddOnContentLocationResolverInterface::ResolveAddOnContentPath(OutPointerWithClientSize<char> out, u64 tid)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result AddOnContentLocationResolverInterface::RegisterAddOnContentStorage(FsStorageId storage_id, u64 tid)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result AddOnContentLocationResolverInterface::UnregisterAllAddOnContentPath()
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }

@@ -45,7 +45,7 @@ std::shared_ptr<LocationResolverBase>* LocationResolverManagerService::GetLocati
 
 Result LocationResolverManagerService::OpenLocationResolver(Out<std::shared_ptr<LocationResolverBase>> out, FsStorageId storage_id)
 {
-    Result rc = 0;
+    Result rc = ResultSuccess;
     std::scoped_lock lk{this->mutex};
     std::shared_ptr<LocationResolverBase> resolver = nullptr;
 
@@ -62,7 +62,7 @@ Result LocationResolverManagerService::OpenLocationResolver(Out<std::shared_ptr<
         if (entry.active && entry.storage_id == storage_id)
         {
             resolver = this->location_resolvers[i];
-            return 0;
+            return ResultSuccess;
         }
     }
 
@@ -96,24 +96,24 @@ Result LocationResolverManagerService::OpenLocationResolver(Out<std::shared_ptr<
         if (entry.active && entry.storage_id == storage_id)
         {
             resolver = this->location_resolvers[i];
-            return 0;
+            return ResultSuccess;
         }
     }
 
-    return 0;
+    return ResultSuccess;
 }
 
 Result LocationResolverManagerService::OpenRegisteredLocationResolver(Out<std::shared_ptr<RegisteredLocationResolverInterface>> out)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result LocationResolverManagerService::RefreshLocationResolver(FsStorageId storage_id)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
 
 Result LocationResolverManagerService::OpenAddOnContentLocationResolver(Out<std::shared_ptr<AddOnContentLocationResolverInterface>> out)
 {
-    return 0xF601;
+    return ResultKernelConnectionClosed;
 }
