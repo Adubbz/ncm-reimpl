@@ -18,7 +18,11 @@
 
 Result ContentStorageInterface::GeneratePlaceHolderId(OutPointerWithServerSize<NcmNcaId, 0x1> out)
 {
-    return ResultKernelConnectionClosed;
+    if (this->invalidated)
+        return ResultNcmInvalidContentStorage;
+
+    StratosphereRandomUtils::GetRandomBytes(out.pointer, sizeof(NcmNcaId));
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::CreatePlaceHolder(NcmNcaId content_id, NcmNcaId placeholder_id, u64 size)

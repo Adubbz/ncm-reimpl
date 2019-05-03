@@ -51,6 +51,9 @@ enum CsCmd : u32
 
 class ContentStorageInterface : public IServiceObject
 {
+    public:
+        bool invalidated;
+
     private:
         /* Actual commands. */
         Result GeneratePlaceHolderId(OutPointerWithServerSize<NcmNcaId, 0x1> out);
