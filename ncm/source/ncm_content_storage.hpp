@@ -17,6 +17,7 @@
 #pragma once
 #include <switch.h>
 #include <stratosphere.hpp>
+#include "ncm_content.hpp"
 
 enum CsCmd : u32
 {
@@ -52,7 +53,10 @@ enum CsCmd : u32
 class ContentStorageInterface : public IServiceObject
 {
     public:
+        char root_path[FS_MAX_PATH];
+        std::function<void (char* out, ContentId content_id, const char* root)> make_content_path_func;
         bool invalidated;
+        PlaceHolderAccessor placeholder_accessor;
 
     private:
         /* Actual commands. */
