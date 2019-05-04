@@ -21,4 +21,5 @@
 class FsUtils {
     /* Create all parent directories for a file path */
     static Result EnsureParentDirectoryRecursively(const char* path);
+    static Result ConvertErrnoToResult(int errnum);
 };
