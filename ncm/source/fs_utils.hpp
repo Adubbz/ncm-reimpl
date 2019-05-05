@@ -19,7 +19,10 @@
 #include <stratosphere.hpp>
 
 class FsUtils {
-    /* Create all parent directories for a file path */
-    static Result EnsureParentDirectoryRecursively(const char* path);
-    static Result ConvertErrnoToResult(int errnum);
+    public:
+        /* Create all parent directories for a file path */
+        static Result EnsureParentDirectoryRecursively(const char* path);
+        /* Create a file. Flush immediately is currently unused, but included to maintain consistency with N's impl */
+        static Result CreateFile(const char* path, size_t size, bool flush_immediately);
+        static Result ConvertErrnoToResult(int errnum);
 };

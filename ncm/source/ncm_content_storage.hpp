@@ -55,37 +55,37 @@ class ContentStorageInterface : public IServiceObject
     public:
         char root_path[FS_MAX_PATH];
         std::function<void (char* out, ContentId content_id, const char* root)> make_content_path_func;
-        bool invalidated;
+        bool disabled;
         PlaceHolderAccessor placeholder_accessor;
 
     private:
         /* Actual commands. */
-        Result GeneratePlaceHolderId(OutPointerWithServerSize<NcmNcaId, 0x1> out);
-        Result CreatePlaceHolder(NcmNcaId content_id, NcmNcaId placeholder_id, u64 size);
-        Result DeletePlaceHolder(NcmNcaId placeholder_id);
-        Result HasPlaceHolder(NcmNcaId placeholder_id);
-        Result WritePlaceHolder(NcmNcaId placeholder_id, u64 offset, InBuffer<u8> data);
-        Result Register(NcmNcaId content_id, NcmNcaId placeholder_id);
-        Result Delete(NcmNcaId content_id);
-        Result Has(Out<bool> out, NcmNcaId content_id);
-        Result GetPath(OutPointerWithClientSize<char> out, NcmNcaId content_id);
-        Result GetPlaceHolderPath(OutPointerWithClientSize<char> out, NcmNcaId placeholder_id);
+        Result GeneratePlaceHolderId(OutPointerWithServerSize<PlaceHolderId, 0x1> out);
+        Result CreatePlaceHolder(PlaceHolderId placeholder_id, ContentId content_id, u64 size);
+        Result DeletePlaceHolder(PlaceHolderId placeholder_id);
+        Result HasPlaceHolder(PlaceHolderId placeholder_id);
+        Result WritePlaceHolder(PlaceHolderId placeholder_id, u64 offset, InBuffer<u8> data);
+        Result Register(ContentId content_id, PlaceHolderId placeholder_id);
+        Result Delete(ContentId content_id);
+        Result Has(Out<bool> out, ContentId content_id);
+        Result GetPath(OutPointerWithClientSize<char> out, ContentId content_id);
+        Result GetPlaceHolderPath(OutPointerWithClientSize<char> out, PlaceHolderId placeholder_id);
         Result CleanupAllPlaceHolder();
-        Result ListPlaceHolder(Out<int> entries_read, OutBuffer<NcmNcaId> out_buf);
+        Result ListPlaceHolder(Out<int> entries_read, OutBuffer<PlaceHolderId> out_buf);
         Result GetContentCount(Out<int> count);
-        Result ListContentId(Out<int> entries_read, OutBuffer<NcmNcaId> out_buf, int start_offset);
-        Result GetSizeFromContentId(Out<u64> size, NcmNcaId content_id);
+        Result ListContentId(Out<int> entries_read, OutBuffer<ContentId> out_buf, int start_offset);
+        Result GetSizeFromContentId(Out<u64> size, ContentId content_id);
         Result DisableForcibly();
-        Result RevertToPlaceHolder(NcmNcaId placeholder_id, NcmNcaId content_id_0, NcmNcaId content_id_1);
-        Result SetPlaceHolderSize(NcmNcaId placeholder_id, u64 size);
-        Result ReadContentIdFile(OutBuffer<u8> buf, NcmNcaId content_id, u64 offset);
-        Result GetRightsIdFromPlaceHolderId(Out<NcmRightsId> out, NcmNcaId placeholder_id);
-        Result GetRightsIdFromContentId(Out<NcmRightsId> out, NcmNcaId content_id);
-        Result WriteContentForDebug(NcmNcaId content_id, u64 offset, InBuffer<u8> data);
+        Result RevertToPlaceHolder(PlaceHolderId placeholder_id, ContentId content_id_0, ContentId content_id_1);
+        Result SetPlaceHolderSize(PlaceHolderId placeholder_id, u64 size);
+        Result ReadContentIdFile(OutBuffer<u8> buf, ContentId content_id, u64 offset);
+        Result GetRightsIdFromPlaceHolderId(Out<NcmRightsId> out, PlaceHolderId placeholder_id);
+        Result GetRightsIdFromContentId(Out<NcmRightsId> out, ContentId content_id);
+        Result WriteContentForDebug(ContentId content_id, u64 offset, InBuffer<u8> data);
         Result GetFreeSpaceSize(Out<u64> out);
         Result GetTotalSpaceSize(Out<u64> out);
         Result FlushPlaceHolder();
-        Result GetSizeFromPlaceHolderId(Out<u64> out, NcmNcaId placeholder_id);
+        Result GetSizeFromPlaceHolderId(Out<u64> out, PlaceHolderId placeholder_id);
         Result RepairInvalidFileAttribute();
 
     public:

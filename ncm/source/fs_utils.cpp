@@ -53,6 +53,18 @@ Result FsUtils::EnsureParentDirectoryRecursively(const char* path) {
     return ResultSuccess;
 }
 
+Result FsUtils::CreateFile(const char* path, size_t size, bool flush_immediately) {
+    FILE* f = fopen(path, "w");
+
+    if (f == NULL) {
+        return ConvertErrnoToResult(errno);
+    }
+
+    fseek(f, size, SEEK_SET);
+    fclose(f);
+    return ResultSuccess;
+}
+
 Result FsUtils::ConvertErrnoToResult(int errnum) {
     /* No need to do further processing if successful */
     if (errnum == 0)

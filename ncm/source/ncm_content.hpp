@@ -22,15 +22,13 @@ struct Uuid {
     u8 c[0x10];
 };
 
+static_assert(sizeof(Uuid) == 0x10, "Uuid definition!");
+
 static constexpr Uuid InvalidUuid = { { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
 
-struct ContentId {
-    Uuid uuid;
-};
-
-struct PlaceHolderId {
-    Uuid uuid;
-};
+typedef Uuid ContentId;
+typedef Uuid PlaceHolderId;
+typedef Uuid RightsId;
 
 class PlaceHolderAccessorCache {
     public:
@@ -52,7 +50,13 @@ class PlaceHolderAccessor {
 
         PlaceHolderAccessor() : cur_counter(0), delay_flush(false) {
             for (size_t i = 0; i < MaxCaches; i++) {
-                caches[i].id.uuid = InvalidUuid;
+                caches[i].id = InvalidUuid;
             }
         }
+};
+
+class ContentUtils {
+    public:
+        static void GetPlaceHolderPathUncached(PlaceHolderAccessor* accessor, char* placeholder_path_out, PlaceHolderId placeholder_id);
+        static Result CreatePlaceHolderFile(PlaceHolderAccessor* accessor, PlaceHolderId placeholder_id, size_t size);
 };
