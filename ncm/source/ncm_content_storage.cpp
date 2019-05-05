@@ -30,24 +30,22 @@ Result ContentStorageInterface::CreatePlaceHolder(PlaceHolderId placeholder_id, 
 {
     Result rc = ResultSuccess;
 
-    if (!this->disabled) {
-        char content_root_path[FS_MAX_PATH] = {0};
-        char content_path[FS_MAX_PATH] = {0};
-
-        /* TODO: Replace with BoundedString? */
-        snprintf(content_root_path, FS_MAX_PATH, "%s%s", this->placeholder_accessor.root_path, "/registered");
-        this->make_content_path_func(content_path, content_id, content_root_path);
-    
-        if (R_FAILED(rc = FsUtils::EnsureParentDirectoryRecursively(content_path))) {
-            return rc;
-        }
-
-        if (R_FAILED(rc = ContentUtils::CreatePlaceHolderFile(&this->placeholder_accessor, placeholder_id, size))) {
-            return rc;
-        }
-    }
-    else {
+    if (this->disabled)
         return ResultNcmInvalidContentStorage;
+
+    char content_root_path[FS_MAX_PATH] = {0};
+    char content_path[FS_MAX_PATH] = {0};
+
+    /* TODO: Replace with BoundedString? */
+    snprintf(content_root_path, FS_MAX_PATH, "%s%s", this->placeholder_accessor.root_path, "/registered");
+    this->make_content_path_func(content_path, content_id, content_root_path);
+
+    if (R_FAILED(rc = FsUtils::EnsureParentDirectoryRecursively(content_path))) {
+        return rc;
+    }
+
+    if (R_FAILED(rc = ContentUtils::CreatePlaceHolderFile(&this->placeholder_accessor, placeholder_id, size))) {
+        return rc;
     }
 
     return ResultSuccess;
@@ -55,7 +53,10 @@ Result ContentStorageInterface::CreatePlaceHolder(PlaceHolderId placeholder_id, 
 
 Result ContentStorageInterface::DeletePlaceHolder(PlaceHolderId placeholder_id)
 {
-    return ResultKernelConnectionClosed;
+    if (this->disabled)
+        return ResultNcmInvalidContentStorage;
+
+    return ContentUtils::DeletePlaceHolderDirectory(&this->placeholder_accessor, placeholder_id);
 }
 
 Result ContentStorageInterface::HasPlaceHolder(PlaceHolderId placeholder_id)

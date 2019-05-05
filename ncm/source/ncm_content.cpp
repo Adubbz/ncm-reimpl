@@ -72,3 +72,20 @@ Result ContentUtils::CreatePlaceHolderFile(PlaceHolderAccessor* accessor, PlaceH
 
     return rc;
 }
+
+Result ContentUtils::DeletePlaceHolderDirectory(PlaceHolderAccessor* accessor, PlaceHolderId placeholder_id) {
+    Result rc = ResultSuccess;
+    char placeholder_path[FS_MAX_PATH] = {0};
+
+    GetPlaceHolderPathUncached(accessor, placeholder_path, placeholder_id);
+
+    if (R_FAILED(rc = fsdevDeleteDirectoryRecursively(placeholder_path)) && rc != ResultFsPathNotFound) {
+        return rc;
+    }
+
+    if (rc == ResultFsPathNotFound) {
+        return ResultNcmPlaceHolderNotFound;
+    }
+
+    return rc;
+}
