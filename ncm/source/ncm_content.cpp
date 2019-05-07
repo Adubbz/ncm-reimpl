@@ -17,14 +17,14 @@
 #include "ncm_content.hpp"
 #include "fs_utils.hpp"
 
-void ContentUtils::GetPlaceHolderPathUncached(PlaceHolderAccessor* accessor, char* placeholder_path_out, PlaceHolderId placeholder_id) {
-    std::scoped_lock<HosMutex> lock(accessor->cache_mutex);
+void PlaceHolderAccessor::GetPlaceHolderPathUncached(char* placeholder_path_out, PlaceHolderId placeholder_id) {
+    std::scoped_lock<HosMutex> lock(this->cache_mutex);
 
     if (memcmp(&placeholder_id, &InvalidUuid, sizeof(PlaceHolderId)) != 0) {
         PlaceHolderAccessorCache* found_cache = NULL;
         
         for (size_t i = 0; i < PlaceHolderAccessor::MaxCaches; i++) {
-            PlaceHolderAccessorCache* cache = &accessor->caches[i];
+            PlaceHolderAccessorCache* cache = &this->caches[i];
 
             if (memcmp(&placeholder_id, &cache->id, sizeof(PlaceHolderId)) == 0) {
                 found_cache = cache;
@@ -40,21 +40,21 @@ void ContentUtils::GetPlaceHolderPathUncached(PlaceHolderAccessor* accessor, cha
         }
     }
 
-    GetPlaceHolderPath(accessor, placeholder_path_out, placeholder_id);
+    this->GetPlaceHolderPath(placeholder_path_out, placeholder_id);
 }
 
-Result ContentUtils::CreatePlaceHolderFile(PlaceHolderAccessor* accessor, PlaceHolderId placeholder_id, size_t size) {
+Result PlaceHolderAccessor::CreatePlaceHolderFile(PlaceHolderId placeholder_id, size_t size) {
     Result rc = ResultSuccess;
     char placeholder_path[FS_MAX_PATH] = {0};
 
-    GetPlaceHolderPath(accessor, placeholder_path, placeholder_id);
+    this->GetPlaceHolderPath(placeholder_path, placeholder_id);
 
     if (R_FAILED(rc = FsUtils::EnsureParentDirectoryRecursively(placeholder_path))) {
         return rc;
     }
 
     std::fill(placeholder_path, placeholder_path + FS_MAX_PATH, 0);
-    GetPlaceHolderPathUncached(accessor, placeholder_path, placeholder_id);
+    this->GetPlaceHolderPathUncached(placeholder_path, placeholder_id);
 
     if (R_FAILED(rc = FsUtils::CreateFile(placeholder_path, size, true)) && rc != ResultFsPathAlreadyExists) {
         return rc;
@@ -67,11 +67,11 @@ Result ContentUtils::CreatePlaceHolderFile(PlaceHolderAccessor* accessor, PlaceH
     return rc;
 }
 
-Result ContentUtils::DeletePlaceHolderDirectory(PlaceHolderAccessor* accessor, PlaceHolderId placeholder_id) {
+Result PlaceHolderAccessor::DeletePlaceHolderDirectory(PlaceHolderId placeholder_id) {
     Result rc = ResultSuccess;
     char placeholder_path[FS_MAX_PATH] = {0};
 
-    GetPlaceHolderPathUncached(accessor, placeholder_path, placeholder_id);
+    this->GetPlaceHolderPathUncached(placeholder_path, placeholder_id);
 
     if (R_FAILED(rc = fsdevDeleteDirectoryRecursively(placeholder_path)) && rc != ResultFsPathNotFound) {
         return rc;

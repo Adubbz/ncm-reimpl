@@ -42,7 +42,7 @@ Result ContentStorageInterface::CreatePlaceHolder(PlaceHolderId placeholder_id, 
         return rc;
     }
 
-    if (R_FAILED(rc = ContentUtils::CreatePlaceHolderFile(&this->placeholder_accessor, placeholder_id, size))) {
+    if (R_FAILED(rc = this->placeholder_accessor.CreatePlaceHolderFile(placeholder_id, size))) {
         return rc;
     }
 
@@ -53,7 +53,7 @@ Result ContentStorageInterface::DeletePlaceHolder(PlaceHolderId placeholder_id) 
     if (this->disabled)
         return ResultNcmInvalidContentStorage;
 
-    return ContentUtils::DeletePlaceHolderDirectory(&this->placeholder_accessor, placeholder_id);
+    return this->placeholder_accessor.DeletePlaceHolderDirectory(placeholder_id);
 }
 
 Result ContentStorageInterface::HasPlaceHolder(Out<bool> out, PlaceHolderId placeholder_id) {
@@ -63,7 +63,7 @@ Result ContentStorageInterface::HasPlaceHolder(Out<bool> out, PlaceHolderId plac
         return ResultNcmInvalidContentStorage;
 
     char placeholder_path[FS_MAX_PATH] = {0};
-    ContentUtils::GetPlaceHolderPath(&this->placeholder_accessor, placeholder_path, placeholder_id);
+    this->placeholder_accessor.GetPlaceHolderPath(placeholder_path, placeholder_id);
 
     errno = 0;
     out.SetValue(false);

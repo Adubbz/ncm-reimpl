@@ -53,18 +53,18 @@ class PlaceHolderAccessor {
                 caches[i].id = InvalidUuid;
             }
         }
+
+        inline void GetPlaceHolderPath(char* placeholder_path_out, PlaceHolderId placeholder_id) {
+            char placeholder_root_path[FS_MAX_PATH] = {0};
+            /* TODO: Replace with BoundedString? */
+            snprintf(placeholder_root_path, FS_MAX_PATH, "%s%s", this->root_path, "/placehld");
+            this->make_placeholder_path_func(placeholder_path_out, placeholder_id, placeholder_root_path);
+        }
+
+        void GetPlaceHolderPathUncached(char* placeholder_path_out, PlaceHolderId placeholder_id);
+        Result CreatePlaceHolderFile(PlaceHolderId placeholder_id, size_t size);
+        Result DeletePlaceHolderDirectory(PlaceHolderId placeholder_id);
 };
 
 class ContentUtils {
-    public:
-        static inline void GetPlaceHolderPath(PlaceHolderAccessor* accessor, char* placeholder_path_out, PlaceHolderId placeholder_id) {
-            char placeholder_root_path[FS_MAX_PATH] = {0};
-            /* TODO: Replace with BoundedString? */
-            snprintf(placeholder_root_path, FS_MAX_PATH, "%s%s", accessor->root_path, "/placehld");
-            accessor->make_placeholder_path_func(placeholder_path_out, placeholder_id, placeholder_root_path);
-        }
-
-        static void GetPlaceHolderPathUncached(PlaceHolderAccessor* accessor, char* placeholder_path_out, PlaceHolderId placeholder_id);
-        static Result CreatePlaceHolderFile(PlaceHolderAccessor* accessor, PlaceHolderId placeholder_id, size_t size);
-        static Result DeletePlaceHolderDirectory(PlaceHolderAccessor* accessor, PlaceHolderId placeholder_id);
 };
