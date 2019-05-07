@@ -40,20 +40,14 @@ void ContentUtils::GetPlaceHolderPathUncached(PlaceHolderAccessor* accessor, cha
         }
     }
 
-    char placeholder_root_path[FS_MAX_PATH] = {0};
-    /* TODO: Replace with BoundedString? */
-    snprintf(placeholder_root_path, FS_MAX_PATH, "%s%s", accessor->root_path, "/placehld");
-    accessor->make_placeholder_path_func(placeholder_path_out, placeholder_id, placeholder_root_path);
+    GetPlaceHolderPath(accessor, placeholder_path_out, placeholder_id);
 }
 
 Result ContentUtils::CreatePlaceHolderFile(PlaceHolderAccessor* accessor, PlaceHolderId placeholder_id, size_t size) {
     Result rc = ResultSuccess;
-    char placeholder_root_path[FS_MAX_PATH] = {0};
     char placeholder_path[FS_MAX_PATH] = {0};
 
-    /* TODO: Replace with BoundedString? */
-    snprintf(placeholder_root_path, FS_MAX_PATH, "%s%s", accessor->root_path, "/placehld");
-    accessor->make_placeholder_path_func(placeholder_path, placeholder_id, placeholder_root_path);
+    GetPlaceHolderPath(accessor, placeholder_path, placeholder_id);
 
     if (R_FAILED(rc = FsUtils::EnsureParentDirectoryRecursively(placeholder_path))) {
         return rc;

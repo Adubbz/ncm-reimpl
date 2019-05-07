@@ -17,8 +17,7 @@
 #include "ncm_content_storage.hpp"
 #include "fs_utils.hpp"
 
-Result ContentStorageInterface::GeneratePlaceHolderId(OutPointerWithServerSize<PlaceHolderId, 0x1> out)
-{
+Result ContentStorageInterface::GeneratePlaceHolderId(OutPointerWithServerSize<PlaceHolderId, 0x1> out) {
     if (this->disabled)
         return ResultNcmInvalidContentStorage;
 
@@ -26,8 +25,7 @@ Result ContentStorageInterface::GeneratePlaceHolderId(OutPointerWithServerSize<P
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::CreatePlaceHolder(PlaceHolderId placeholder_id, ContentId content_id, u64 size)
-{
+Result ContentStorageInterface::CreatePlaceHolder(PlaceHolderId placeholder_id, ContentId content_id, u64 size) {
     Result rc = ResultSuccess;
 
     if (this->disabled)
@@ -51,17 +49,33 @@ Result ContentStorageInterface::CreatePlaceHolder(PlaceHolderId placeholder_id, 
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::DeletePlaceHolder(PlaceHolderId placeholder_id)
-{
+Result ContentStorageInterface::DeletePlaceHolder(PlaceHolderId placeholder_id) {
     if (this->disabled)
         return ResultNcmInvalidContentStorage;
 
     return ContentUtils::DeletePlaceHolderDirectory(&this->placeholder_accessor, placeholder_id);
 }
 
-Result ContentStorageInterface::HasPlaceHolder(PlaceHolderId placeholder_id)
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::HasPlaceHolder(Out<bool> out, PlaceHolderId placeholder_id) {
+    Result rc = ResultSuccess;
+
+    if (this->disabled)
+        return ResultNcmInvalidContentStorage;
+
+    char placeholder_path[FS_MAX_PATH] = {0};
+    ContentUtils::GetPlaceHolderPath(&this->placeholder_accessor, placeholder_path, placeholder_id);
+
+    errno = 0;
+    out.SetValue(false);
+
+    if (access(placeholder_path, F_OK) != -1) {
+        out.SetValue(true);
+    }
+    else if (errno != ENOENT && errno != ENOTDIR) {
+        rc = FsUtils::ConvertErrnoToResult(errno);
+    }
+
+    return rc;
 }
 
 Result ContentStorageInterface::WritePlaceHolder(PlaceHolderId placeholder_id, u64 offset, InBuffer<u8> data)

@@ -63,7 +63,7 @@ class ContentStorageInterface : public IServiceObject
         Result GeneratePlaceHolderId(OutPointerWithServerSize<PlaceHolderId, 0x1> out);
         Result CreatePlaceHolder(PlaceHolderId placeholder_id, ContentId content_id, u64 size);
         Result DeletePlaceHolder(PlaceHolderId placeholder_id);
-        Result HasPlaceHolder(PlaceHolderId placeholder_id);
+        Result HasPlaceHolder(Out<bool> out, PlaceHolderId placeholder_id);
         Result WritePlaceHolder(PlaceHolderId placeholder_id, u64 offset, InBuffer<u8> data);
         Result Register(ContentId content_id, PlaceHolderId placeholder_id);
         Result Delete(ContentId content_id);
