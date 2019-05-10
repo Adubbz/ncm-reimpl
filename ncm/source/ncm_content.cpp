@@ -43,7 +43,7 @@ void PlaceHolderAccessor::GetPlaceHolderPathUncached(char* placeholder_path_out,
     this->GetPlaceHolderPath(placeholder_path_out, placeholder_id);
 }
 
-Result PlaceHolderAccessor::CreatePlaceHolderFile(PlaceHolderId placeholder_id, size_t size) {
+Result PlaceHolderAccessor::Create(PlaceHolderId placeholder_id, size_t size) {
     Result rc = ResultSuccess;
     char placeholder_path[FS_MAX_PATH] = {0};
 
@@ -67,7 +67,7 @@ Result PlaceHolderAccessor::CreatePlaceHolderFile(PlaceHolderId placeholder_id, 
     return rc;
 }
 
-Result PlaceHolderAccessor::DeletePlaceHolderDirectory(PlaceHolderId placeholder_id) {
+Result PlaceHolderAccessor::Delete(PlaceHolderId placeholder_id) {
     Result rc = ResultSuccess;
     char placeholder_path[FS_MAX_PATH] = {0};
 

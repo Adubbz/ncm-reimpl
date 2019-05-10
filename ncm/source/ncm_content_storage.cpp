@@ -42,7 +42,7 @@ Result ContentStorageInterface::CreatePlaceHolder(PlaceHolderId placeholder_id, 
         return rc;
     }
 
-    if (R_FAILED(rc = this->placeholder_accessor.CreatePlaceHolderFile(placeholder_id, size))) {
+    if (R_FAILED(rc = this->placeholder_accessor.Create(placeholder_id, size))) {
         return rc;
     }
 
@@ -53,7 +53,7 @@ Result ContentStorageInterface::DeletePlaceHolder(PlaceHolderId placeholder_id) 
     if (this->disabled)
         return ResultNcmInvalidContentStorage;
 
-    return this->placeholder_accessor.DeletePlaceHolderDirectory(placeholder_id);
+    return this->placeholder_accessor.Delete(placeholder_id);
 }
 
 Result ContentStorageInterface::HasPlaceHolder(Out<bool> out, PlaceHolderId placeholder_id) {

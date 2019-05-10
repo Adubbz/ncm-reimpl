@@ -62,8 +62,8 @@ class PlaceHolderAccessor {
         }
 
         void GetPlaceHolderPathUncached(char* placeholder_path_out, PlaceHolderId placeholder_id);
-        Result CreatePlaceHolderFile(PlaceHolderId placeholder_id, size_t size);
-        Result DeletePlaceHolderDirectory(PlaceHolderId placeholder_id);
+        Result Create(PlaceHolderId placeholder_id, size_t size);
+        Result Delete(PlaceHolderId placeholder_id);
 };
 
 class ContentUtils {
