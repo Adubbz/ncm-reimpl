@@ -72,7 +72,7 @@ Result ContentStorageInterface::HasPlaceHolder(Out<bool> out, PlaceHolderId plac
         out.SetValue(true);
     }
     else if (errno != ENOENT && errno != ENOTDIR) {
-        rc = FsUtils::ConvertErrnoToResult(errno);
+        rc = fsdevGetLastResult();
     }
 
     return rc;
