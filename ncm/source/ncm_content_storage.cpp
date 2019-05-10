@@ -18,8 +18,9 @@
 #include "fs_utils.hpp"
 
 Result ContentStorageInterface::GeneratePlaceHolderId(OutPointerWithServerSize<PlaceHolderId, 0x1> out) {
-    if (this->disabled)
+    if (this->disabled) {
         return ResultNcmInvalidContentStorage;
+    }
 
     StratosphereRandomUtils::GetRandomBytes(out.pointer, sizeof(NcmNcaId));
     return ResultSuccess;
@@ -28,8 +29,9 @@ Result ContentStorageInterface::GeneratePlaceHolderId(OutPointerWithServerSize<P
 Result ContentStorageInterface::CreatePlaceHolder(PlaceHolderId placeholder_id, ContentId content_id, u64 size) {
     Result rc = ResultSuccess;
 
-    if (this->disabled)
+    if (this->disabled) {
         return ResultNcmInvalidContentStorage;
+    }
 
     char content_root_path[FS_MAX_PATH] = {0};
     char content_path[FS_MAX_PATH] = {0};
@@ -50,8 +52,9 @@ Result ContentStorageInterface::CreatePlaceHolder(PlaceHolderId placeholder_id, 
 }
 
 Result ContentStorageInterface::DeletePlaceHolder(PlaceHolderId placeholder_id) {
-    if (this->disabled)
+    if (this->disabled) {
         return ResultNcmInvalidContentStorage;
+    }
 
     return this->placeholder_accessor.Delete(placeholder_id);
 }
@@ -80,7 +83,30 @@ Result ContentStorageInterface::HasPlaceHolder(Out<bool> out, PlaceHolderId plac
 
 Result ContentStorageInterface::WritePlaceHolder(PlaceHolderId placeholder_id, u64 offset, InBuffer<u8> data)
 {
-    return ResultKernelConnectionClosed;
+    /* Offset is too large */
+    if (offset >> 0x3f != 0) {
+        return ResultNcmInvalidOffset;
+    }
+
+    if (this->disabled) {
+        return ResultNcmInvalidContentStorage;
+    }
+
+    Result rc = ResultSuccess;
+    FILE* f = nullptr;
+
+    if (R_FAILED(rc = this->placeholder_accessor.Open(&f, placeholder_id))) {
+        if (rc == ResultFsPathNotFound) {
+            return ResultNcmPlaceHolderNotFound;
+        }
+        return rc;
+    }
+
+    fseek(f, offset, SEEK_SET);
+    fwrite(data.buffer, sizeof(u8), data.num_elements, f);
+    this->placeholder_accessor.StoreToCache(f, placeholder_id);
+
+    return fsdevGetLastResult();
 }
 
 Result ContentStorageInterface::Register(ContentId content_id, PlaceHolderId placeholder_id)

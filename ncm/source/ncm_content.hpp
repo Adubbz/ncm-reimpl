@@ -19,7 +19,7 @@
 #include <stratosphere.hpp>
 
 struct Uuid {
-    u8 c[0x10];
+    u8 uuid[0x10];
 };
 
 static_assert(sizeof(Uuid) == 0x10, "Uuid definition!");
@@ -30,18 +30,21 @@ typedef Uuid ContentId;
 typedef Uuid PlaceHolderId;
 typedef Uuid RightsId;
 
-class PlaceHolderAccessorCache {
-    public:
-        PlaceHolderId id;
-        FILE* handle;
-        u64 counter;
-};
+
 
 class PlaceHolderAccessor {
     public:
+        class CacheEntry {
+            public:
+                PlaceHolderId id;
+                FILE* handle;
+                u64 counter;
+        };
+
+    public:
         static constexpr size_t MaxCaches = 0x2;
 
-        PlaceHolderAccessorCache caches[MaxCaches];
+        CacheEntry caches[MaxCaches];
         char* root_path;
         u64 cur_counter;
         HosMutex cache_mutex;
@@ -64,6 +67,11 @@ class PlaceHolderAccessor {
         void GetPlaceHolderPathUncached(char* placeholder_path_out, PlaceHolderId placeholder_id);
         Result Create(PlaceHolderId placeholder_id, size_t size);
         Result Delete(PlaceHolderId placeholder_id);
+        Result Open(FILE** out_handle, PlaceHolderId id);
+
+        CacheEntry *FindInCache(PlaceHolderId placeholder_id);
+        bool LoadFromCache(FILE** out_handle, PlaceHolderId placeholder_id);
+        void StoreToCache(FILE* handle, PlaceHolderId placeholder_id);
 };
 
 class ContentUtils {

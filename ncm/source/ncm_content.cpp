@@ -20,13 +20,13 @@
 void PlaceHolderAccessor::GetPlaceHolderPathUncached(char* placeholder_path_out, PlaceHolderId placeholder_id) {
     std::scoped_lock<HosMutex> lock(this->cache_mutex);
 
-    if (memcmp(&placeholder_id, &InvalidUuid, sizeof(PlaceHolderId)) != 0) {
-        PlaceHolderAccessorCache* found_cache = NULL;
+    if (memcmp(&placeholder_id.uuid, &InvalidUuid.uuid, sizeof(PlaceHolderId)) != 0) {
+        CacheEntry* found_cache = NULL;
         
         for (size_t i = 0; i < PlaceHolderAccessor::MaxCaches; i++) {
-            PlaceHolderAccessorCache* cache = &this->caches[i];
+            CacheEntry* cache = &this->caches[i];
 
-            if (memcmp(&placeholder_id, &cache->id, sizeof(PlaceHolderId)) == 0) {
+            if (memcmp(&placeholder_id.uuid, &cache->id.uuid, sizeof(PlaceHolderId)) == 0) {
                 found_cache = cache;
                 break;
             }
@@ -36,7 +36,7 @@ void PlaceHolderAccessor::GetPlaceHolderPathUncached(char* placeholder_path_out,
             /* Flush and close */
             fsync(fileno(found_cache->handle));
             fclose(found_cache->handle);
-            std::fill(found_cache->id.c, found_cache->id.c + sizeof(PlaceHolderId), 0);
+            std::fill(found_cache->id.uuid, found_cache->id.uuid + sizeof(PlaceHolderId), 0);
         }
     }
 
@@ -82,4 +82,66 @@ Result PlaceHolderAccessor::Delete(PlaceHolderId placeholder_id) {
     }
 
     return rc;
+}
+
+Result PlaceHolderAccessor::Open(FILE** out_handle, PlaceHolderId placeholder_id) {
+    if (this->LoadFromCache(out_handle, placeholder_id)) {
+        return ResultSuccess;
+    }
+    char placeholder_path[FS_MAX_PATH] = {0};
+
+    this->GetPlaceHolderPath(placeholder_path, placeholder_id);
+    *out_handle = fopen(placeholder_path, "w+");
+    return fsdevGetLastResult();
+}
+
+bool PlaceHolderAccessor::LoadFromCache(FILE** out_handle, PlaceHolderId placeholder_id) {
+    std::scoped_lock<HosMutex> lk(this->cache_mutex);
+    CacheEntry *entry = this->FindInCache(placeholder_id);
+    if (entry == nullptr) {
+        return false;
+    }
+    entry->id = InvalidUuid;
+    *out_handle = entry->handle;
+    return true;
+}
+
+PlaceHolderAccessor::CacheEntry *PlaceHolderAccessor::FindInCache(PlaceHolderId placeholder_id) {
+    if (memcmp(&placeholder_id.uuid, &InvalidUuid.uuid, sizeof(PlaceHolderId)) == 0) {
+        return nullptr;
+    }
+    for (size_t i = 0; i < MaxCaches; i++) {
+        if (memcmp(&placeholder_id.uuid, &this->caches[i].id.uuid, sizeof(PlaceHolderId)) == 0) {
+            return &this->caches[i];
+        }
+    }
+    return nullptr;
+}
+
+void PlaceHolderAccessor::StoreToCache(FILE* handle, PlaceHolderId placeholder_id) {
+    std::scoped_lock<HosMutex> lk(this->cache_mutex);
+    CacheEntry* cache = nullptr;
+
+    /* Find an empty cache */
+    for (size_t i = 0; i < MaxCaches; i++) {
+        if (memcmp(&placeholder_id.uuid, &InvalidUuid.uuid, sizeof(PlaceHolderId)) != 0) {
+            cache = &this->caches[i];
+            break;
+        }
+    }
+
+    /* No empty caches found. Let's clear cache 0. */
+    if (cache == nullptr) {
+        cache = &this->caches[0];
+
+        /* Flush and close */
+        fsync(fileno(cache->handle));
+        fclose(cache->handle);
+        cache->id = InvalidUuid;
+    }
+
+    cache->id = placeholder_id;
+    cache->handle = handle;
+    cache->counter = this->cur_counter;
+    this->cur_counter++;
 }
