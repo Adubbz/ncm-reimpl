@@ -24,7 +24,7 @@ Result FsUtils::EnsureParentDirectoryRecursively(const char* path) {
     char working_path_buf[FS_MAX_PATH] = {0};
 
     if (path_len + 1 < FS_MAX_PATH) {
-        strncpy(working_path_buf + 1, path, FS_MAX_PATH - 1);
+        strncpy(working_path_buf + 1, path, FS_MAX_PATH-1);
 
         if (path_len != 0) {
             for (size_t i = 0; i < path_len; i++) {

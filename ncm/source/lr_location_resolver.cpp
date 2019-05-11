@@ -36,7 +36,7 @@ Result LocationResolverBase::ResolveApplicationControlPath(OutPointerWithClientS
     if (!Registration::ResolvePath(&this->app_control_location_list, path, tid))
         return ResultLrControlNotFound;
 
-    memcpy(out.pointer, path, FS_MAX_PATH);
+    memcpy(out.pointer, path, FS_MAX_PATH-1);
     return ResultSuccess;
 }
 
@@ -47,7 +47,7 @@ Result LocationResolverBase::ResolveApplicationHtmlDocumentPath(OutPointerWithCl
     if (!Registration::ResolvePath(&this->html_docs_location_list, path, tid))
         return ResultLrHtmlDocumentNotFound;
 
-    memcpy(out.pointer, path, FS_MAX_PATH);
+    memcpy(out.pointer, path, FS_MAX_PATH-1);
     return ResultSuccess;
 }
 
@@ -70,7 +70,7 @@ Result LocationResolverBase::ResolveApplicationLegalInformationPath(OutPointerWi
     if (!Registration::ResolvePath(&this->legal_info_location_list, path, tid))
         return ResultLrLegalInformationNotFound;
 
-    memcpy(out.pointer, path, FS_MAX_PATH);
+    memcpy(out.pointer, path, FS_MAX_PATH-1);
     return ResultSuccess;
 }
 
