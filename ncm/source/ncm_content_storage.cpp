@@ -17,6 +17,13 @@
 #include "ncm_content_storage.hpp"
 #include "fs_utils.hpp"
 
+void ContentStorageInterface::ClearContentCache() {
+    if (memcmp(&this->cached_content_id.uuid, &InvalidUuid.uuid, sizeof(ContentId)) != 0) {
+        fclose(this->content_cache_file_handle);
+        this->cached_content_id = InvalidUuid;
+    }
+}
+
 Result ContentStorageInterface::GeneratePlaceHolderId(OutPointerWithServerSize<PlaceHolderId, 0x1> out) {
     if (this->disabled) {
         return ResultNcmInvalidContentStorage;
@@ -60,8 +67,6 @@ Result ContentStorageInterface::DeletePlaceHolder(PlaceHolderId placeholder_id) 
 }
 
 Result ContentStorageInterface::HasPlaceHolder(Out<bool> out, PlaceHolderId placeholder_id) {
-    Result rc = ResultSuccess;
-
     if (this->disabled)
         return ResultNcmInvalidContentStorage;
 
@@ -74,11 +79,11 @@ Result ContentStorageInterface::HasPlaceHolder(Out<bool> out, PlaceHolderId plac
     if (access(placeholder_path, F_OK) != -1) {
         out.SetValue(true);
     }
-    else if (errno != ENOENT && errno != ENOTDIR) {
-        rc = fsdevGetLastResult();
+    else if (errno != 0 && errno != ENOENT && errno != ENOTDIR) {
+        return fsdevGetLastResult();
     }
 
-    return rc;
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::WritePlaceHolder(PlaceHolderId placeholder_id, u64 offset, InBuffer<u8> data)
@@ -102,16 +107,45 @@ Result ContentStorageInterface::WritePlaceHolder(PlaceHolderId placeholder_id, u
         return rc;
     }
 
+    errno = 0;
     fseek(f, offset, SEEK_SET);
     fwrite(data.buffer, sizeof(u8), data.num_elements, f);
     this->placeholder_accessor.StoreToCache(f, placeholder_id);
 
-    return fsdevGetLastResult();
+    if (errno != 0) {
+        return fsdevGetLastResult();
+    }
+
+    return ResultSuccess;
 }
 
-Result ContentStorageInterface::Register(ContentId content_id, PlaceHolderId placeholder_id)
+Result ContentStorageInterface::Register(PlaceHolderId placeholder_id, ContentId content_id)
 {
-    return ResultKernelConnectionClosed;
+    if (this->disabled) {
+        return ResultNcmInvalidContentStorage;
+    }
+
+    char placeholder_path[FS_MAX_PATH] = {0};
+    char content_path[FS_MAX_PATH] = {0};
+
+    this->placeholder_accessor.GetPlaceHolderPath(placeholder_path, placeholder_id);
+    this->GetContentPath(content_path, content_id);
+
+    errno = 0;
+    rename(placeholder_path, content_path);
+
+    if (errno != 0) {
+        Result rc = fsdevGetLastResult();
+
+        if (rc == ResultFsPathNotFound) {
+            return ResultNcmPlaceHolderNotFound;
+        }
+        else if (rc == ResultFsPathAlreadyExists) {
+            return ResultNcmContentAlreadyExists;
+        }
+    }
+
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::Delete(ContentId content_id)

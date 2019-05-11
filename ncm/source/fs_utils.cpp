@@ -36,7 +36,7 @@ Result FsUtils::EnsureParentDirectoryRecursively(const char* path) {
                     mkdir(working_path_buf + 1, S_IRWXU);
                     Result mkdir_rc = fsdevGetLastResult();
 
-                    if (mkdir_rc != ResultSuccess && mkdir_rc != ResultFsPathAlreadyExists) {
+                    if (errno != 0 && mkdir_rc != ResultSuccess && mkdir_rc != ResultFsPathAlreadyExists) {
                         return mkdir_rc;
                     }
 
@@ -54,6 +54,7 @@ Result FsUtils::EnsureParentDirectoryRecursively(const char* path) {
 }
 
 Result FsUtils::CreateFile(const char* path, size_t size, bool flush_immediately) {
+    errno = 0;
     FILE* f = fopen(path, "w");
 
     if (f == NULL) {

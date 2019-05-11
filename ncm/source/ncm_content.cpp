@@ -91,8 +91,14 @@ Result PlaceHolderAccessor::Open(FILE** out_handle, PlaceHolderId placeholder_id
     char placeholder_path[FS_MAX_PATH] = {0};
 
     this->GetPlaceHolderPath(placeholder_path, placeholder_id);
+    errno = 0;
     *out_handle = fopen(placeholder_path, "w+");
-    return fsdevGetLastResult();
+
+    if (errno != 0) {
+        return fsdevGetLastResult();
+    }
+
+    return ResultSuccess;
 }
 
 bool PlaceHolderAccessor::LoadFromCache(FILE** out_handle, PlaceHolderId placeholder_id) {

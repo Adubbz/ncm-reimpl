@@ -57,6 +57,18 @@ class ContentStorageInterface : public IServiceObject
         std::function<void (char* out, ContentId content_id, const char* root)> make_content_path_func;
         bool disabled;
         PlaceHolderAccessor placeholder_accessor;
+        ContentId cached_content_id;
+        FILE* content_cache_file_handle;
+
+    private:
+        void ClearContentCache();
+
+        inline void GetContentPath(char* content_path_out, ContentId content_id) {
+            char content_root_path[FS_MAX_PATH] = {0};
+            /* TODO: Replace with BoundedString? */
+            snprintf(content_root_path, FS_MAX_PATH, "%s%s", this->root_path, "/registered");
+            this->make_content_path_func(content_path_out, content_id, content_root_path);
+        }
 
     private:
         /* Actual commands. */
@@ -65,7 +77,7 @@ class ContentStorageInterface : public IServiceObject
         Result DeletePlaceHolder(PlaceHolderId placeholder_id);
         Result HasPlaceHolder(Out<bool> out, PlaceHolderId placeholder_id);
         Result WritePlaceHolder(PlaceHolderId placeholder_id, u64 offset, InBuffer<u8> data);
-        Result Register(ContentId content_id, PlaceHolderId placeholder_id);
+        Result Register(PlaceHolderId placeholder_id, ContentId content_id);
         Result Delete(ContentId content_id);
         Result Has(Out<bool> out, ContentId content_id);
         Result GetPath(OutPointerWithClientSize<char> out, ContentId content_id);
