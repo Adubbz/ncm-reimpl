@@ -173,9 +173,24 @@ Result ContentStorageInterface::Delete(ContentId content_id) {
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::Has(Out<bool> out, ContentId content_id)
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::Has(Out<bool> out, ContentId content_id) {
+    if (this->disabled)
+        return ResultNcmInvalidContentStorage;
+
+    char content_path[FS_MAX_PATH] = {0};
+    this->GetContentPath(content_path, content_id);
+
+    errno = 0;
+    out.SetValue(false);
+
+    if (access(content_path, F_OK) != -1) {
+        out.SetValue(true);
+    }
+    else if (errno != 0 && errno != ENOENT && errno != ENOTDIR) {
+        return fsdevGetLastResult();
+    }
+
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::GetPath(OutPointerWithClientSize<char> out, ContentId content_id)
