@@ -66,7 +66,7 @@ class ContentStorageInterface : public IServiceObject
 
         inline void GetContentRootPath(char* content_root_out) {
             /* TODO: Replace with BoundedString? */
-            snprintf(content_root_out, FS_MAX_PATH, "%s%s", this->root_path, "/registered");
+            snprintf(content_root_out, FS_MAX_PATH, "%.48s%s", this->root_path, "/registered");
         }
 
         inline void GetContentPath(char* content_path_out, ContentId content_id) {

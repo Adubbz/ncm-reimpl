@@ -59,7 +59,7 @@ class PlaceHolderAccessor {
 
         inline void GetPlaceHolderRootPath(char* placeholder_root_out) {
             /* TODO: Replace with BoundedString? */
-            snprintf(placeholder_root_out, FS_MAX_PATH, "%s%s", this->root_path, "/placehld");
+            snprintf(placeholder_root_out, FS_MAX_PATH, "%.48s%s", this->root_path, "/placehld");
         }
 
         inline void GetPlaceHolderPath(char* placeholder_path_out, PlaceHolderId placeholder_id) {
