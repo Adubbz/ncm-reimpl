@@ -119,6 +119,8 @@ Result ContentStorageInterface::WritePlaceHolder(PlaceHolderId placeholder_id, u
 }
 
 Result ContentStorageInterface::Register(PlaceHolderId placeholder_id, ContentId content_id) {
+    this->ClearContentCache();
+    
     if (this->disabled) {
         return ResultNcmInvalidContentStorage;
     }
@@ -146,9 +148,29 @@ Result ContentStorageInterface::Register(PlaceHolderId placeholder_id, ContentId
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::Delete(ContentId content_id)
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::Delete(ContentId content_id) {
+    if (this->disabled) {
+        return ResultNcmInvalidContentStorage;
+    }
+
+    this->ClearContentCache();
+
+    Result rc = ResultSuccess;
+    char content_path[FS_MAX_PATH] = {0};
+
+    this->GetContentPath(content_path, content_id);
+
+    if (R_FAILED(rc = fsdevDeleteDirectoryRecursively(content_path)) && rc != ResultFsPathNotFound) {
+        return rc;
+    }
+
+    if (rc == ResultFsPathNotFound) {
+        return ResultNcmContentNotFound;
+    }
+
+    return rc;
+
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::Has(Out<bool> out, ContentId content_id)
