@@ -48,6 +48,7 @@ enum CsCmd : u32
     Cs_Cmd_FlushPlaceHolder = 24,
     Cs_Cmd_GetSizeFromPlaceHolderId = 25,
     Cs_Cmd_RepairInvalidFileAttribute = 26,
+    Cs_Cmd_GetRightsIdFromPlaceHolderIdWithCache = 27,
 };
 
 class ContentStorageInterface : public IServiceObject
@@ -91,14 +92,15 @@ class ContentStorageInterface : public IServiceObject
         Result RevertToPlaceHolder(PlaceHolderId placeholder_id, ContentId content_id_0, ContentId content_id_1);
         Result SetPlaceHolderSize(PlaceHolderId placeholder_id, u64 size);
         Result ReadContentIdFile(OutBuffer<u8> buf, ContentId content_id, u64 offset);
-        Result GetRightsIdFromPlaceHolderId(Out<NcmRightsId> out, PlaceHolderId placeholder_id);
-        Result GetRightsIdFromContentId(Out<NcmRightsId> out, ContentId content_id);
+        Result GetRightsIdFromPlaceHolderId(Out<RightsId> out, PlaceHolderId placeholder_id);
+        Result GetRightsIdFromContentId(Out<RightsId> out, ContentId content_id);
         Result WriteContentForDebug(ContentId content_id, u64 offset, InBuffer<u8> data);
         Result GetFreeSpaceSize(Out<u64> out);
         Result GetTotalSpaceSize(Out<u64> out);
         Result FlushPlaceHolder();
         Result GetSizeFromPlaceHolderId(Out<u64> out, PlaceHolderId placeholder_id);
         Result RepairInvalidFileAttribute();
+        Result GetRightsIdFromPlaceHolderIdWithCache(Out<RightsId> out, PlaceHolderId placeholder_id, ContentId content_id);
 
     public:
         DEFINE_SERVICE_DISPATCH_TABLE
@@ -137,5 +139,8 @@ class ContentStorageInterface : public IServiceObject
             /* 4.0.0- */
             MakeServiceCommandMeta<Cs_Cmd_GetSizeFromPlaceHolderId, &ContentStorageInterface::GetSizeFromPlaceHolderId, FirmwareVersion_400>(),
             MakeServiceCommandMeta<Cs_Cmd_RepairInvalidFileAttribute, &ContentStorageInterface::RepairInvalidFileAttribute, FirmwareVersion_400>(),
+
+            /* 8.0.0- */
+            MakeServiceCommandMeta<Cs_Cmd_GetRightsIdFromPlaceHolderIdWithCache, &ContentStorageInterface::GetRightsIdFromPlaceHolderIdWithCache, FirmwareVersion_800>(),
         };
 };

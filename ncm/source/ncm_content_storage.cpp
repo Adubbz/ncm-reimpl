@@ -86,8 +86,7 @@ Result ContentStorageInterface::HasPlaceHolder(Out<bool> out, PlaceHolderId plac
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::WritePlaceHolder(PlaceHolderId placeholder_id, u64 offset, InBuffer<u8> data)
-{
+Result ContentStorageInterface::WritePlaceHolder(PlaceHolderId placeholder_id, u64 offset, InBuffer<u8> data) {
     /* Offset is too large */
     if (offset >> 0x3f != 0) {
         return ResultNcmInvalidOffset;
@@ -119,8 +118,7 @@ Result ContentStorageInterface::WritePlaceHolder(PlaceHolderId placeholder_id, u
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::Register(PlaceHolderId placeholder_id, ContentId content_id)
-{
+Result ContentStorageInterface::Register(PlaceHolderId placeholder_id, ContentId content_id) {
     if (this->disabled) {
         return ResultNcmInvalidContentStorage;
     }
@@ -213,12 +211,12 @@ Result ContentStorageInterface::ReadContentIdFile(OutBuffer<u8> buf, ContentId c
     return ResultKernelConnectionClosed;
 }
 
-Result ContentStorageInterface::GetRightsIdFromPlaceHolderId(Out<NcmRightsId> out, PlaceHolderId placeholder_id)
+Result ContentStorageInterface::GetRightsIdFromPlaceHolderId(Out<RightsId> out, PlaceHolderId placeholder_id)
 {
     return ResultKernelConnectionClosed;
 }
 
-Result ContentStorageInterface::GetRightsIdFromContentId(Out<NcmRightsId> out, ContentId content_id)
+Result ContentStorageInterface::GetRightsIdFromContentId(Out<RightsId> out, ContentId content_id)
 {
     return ResultKernelConnectionClosed;
 }
@@ -250,5 +248,9 @@ Result ContentStorageInterface::GetSizeFromPlaceHolderId(Out<u64> out, PlaceHold
 
 Result ContentStorageInterface::RepairInvalidFileAttribute()
 {
+    return ResultKernelConnectionClosed;
+}
+
+Result ContentStorageInterface::GetRightsIdFromPlaceHolderIdWithCache(Out<RightsId> out, PlaceHolderId placeholder_id, ContentId content_id) {
     return ResultKernelConnectionClosed;
 }
