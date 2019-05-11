@@ -128,7 +128,7 @@ Result ContentStorageInterface::Register(PlaceHolderId placeholder_id, ContentId
     char placeholder_path[FS_MAX_PATH] = {0};
     char content_path[FS_MAX_PATH] = {0};
 
-    this->placeholder_accessor.GetPlaceHolderPath(placeholder_path, placeholder_id);
+    this->placeholder_accessor.GetPlaceHolderPathUncached(placeholder_path, placeholder_id);
     this->GetContentPath(content_path, content_id);
 
     errno = 0;
@@ -174,8 +174,9 @@ Result ContentStorageInterface::Delete(ContentId content_id) {
 }
 
 Result ContentStorageInterface::Has(Out<bool> out, ContentId content_id) {
-    if (this->disabled)
+    if (this->disabled) {
         return ResultNcmInvalidContentStorage;
+    }
 
     char content_path[FS_MAX_PATH] = {0};
     this->GetContentPath(content_path, content_id);
@@ -193,14 +194,30 @@ Result ContentStorageInterface::Has(Out<bool> out, ContentId content_id) {
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::GetPath(OutPointerWithClientSize<char> out, ContentId content_id)
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::GetPath(OutPointerWithClientSize<char> out, ContentId content_id) {
+    if (this->disabled) {
+        return ResultNcmInvalidContentStorage;
+    }
+
+    char content_path[FS_MAX_PATH] = {0};
+
+    this->GetContentPath(content_path, content_id);
+    memcpy(out.pointer, content_path, FS_MAX_PATH-1);
+
+    return ResultSuccess;
 }
 
-Result ContentStorageInterface::GetPlaceHolderPath(OutPointerWithClientSize<char> out, PlaceHolderId placeholder_id)
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::GetPlaceHolderPath(OutPointerWithClientSize<char> out, PlaceHolderId placeholder_id) {
+    if (this->disabled) {
+        return ResultNcmInvalidContentStorage;
+    }
+
+    char placeholder_path[FS_MAX_PATH] = {0};
+
+    this->placeholder_accessor.GetPlaceHolderPathUncached(placeholder_path, placeholder_id);
+    memcpy(out.pointer, placeholder_path, FS_MAX_PATH-1);
+
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::CleanupAllPlaceHolder()

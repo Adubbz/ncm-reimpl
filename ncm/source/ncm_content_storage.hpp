@@ -64,10 +64,15 @@ class ContentStorageInterface : public IServiceObject
     private:
         void ClearContentCache();
 
+        inline void GetContentRootPath(char* content_root_out) {
+            /* TODO: Replace with BoundedString? */
+            snprintf(content_root_out, FS_MAX_PATH, "%s%s", this->root_path, "/registered");
+        }
+
         inline void GetContentPath(char* content_path_out, ContentId content_id) {
             char content_root_path[FS_MAX_PATH] = {0};
-            /* TODO: Replace with BoundedString? */
-            snprintf(content_root_path, FS_MAX_PATH, "%s%s", this->root_path, "/registered");
+
+            this->GetContentRootPath(content_root_path);
             this->make_content_path_func(content_path_out, content_id, content_root_path);
         }
 
