@@ -151,3 +151,15 @@ void PlaceHolderAccessor::StoreToCache(FILE* handle, PlaceHolderId placeholder_i
     cache->counter = this->cur_counter;
     this->cur_counter++;
 }
+
+void PlaceHolderAccessor::ClearAllCaches() {
+    for (size_t i = 0; i < MaxCaches; i++) {
+        CacheEntry* cache = &this->caches[i];
+
+        if (memcmp(&cache->id.uuid, &InvalidUuid.uuid, sizeof(PlaceHolderId)) != 0) {
+            fsync(fileno(cache->handle));
+            fclose(cache->handle);
+            cache->id = InvalidUuid;
+        }
+    }
+}

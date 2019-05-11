@@ -57,10 +57,14 @@ class PlaceHolderAccessor {
             }
         }
 
+        inline void GetPlaceHolderRootPath(char* placeholder_root_out) {
+            /* TODO: Replace with BoundedString? */
+            snprintf(placeholder_root_out, FS_MAX_PATH, "%s%s", this->root_path, "/placehld");
+        }
+
         inline void GetPlaceHolderPath(char* placeholder_path_out, PlaceHolderId placeholder_id) {
             char placeholder_root_path[FS_MAX_PATH] = {0};
-            /* TODO: Replace with BoundedString? */
-            snprintf(placeholder_root_path, FS_MAX_PATH, "%s%s", this->root_path, "/placehld");
+            this->GetPlaceHolderRootPath(placeholder_root_path);
             this->make_placeholder_path_func(placeholder_path_out, placeholder_id, placeholder_root_path);
         }
 
@@ -72,6 +76,7 @@ class PlaceHolderAccessor {
         CacheEntry *FindInCache(PlaceHolderId placeholder_id);
         bool LoadFromCache(FILE** out_handle, PlaceHolderId placeholder_id);
         void StoreToCache(FILE* handle, PlaceHolderId placeholder_id);
+        void ClearAllCaches();
 };
 
 class ContentUtils {

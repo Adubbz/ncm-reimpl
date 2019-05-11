@@ -40,12 +40,8 @@ Result ContentStorageInterface::CreatePlaceHolder(PlaceHolderId placeholder_id, 
         return ResultNcmInvalidContentStorage;
     }
 
-    char content_root_path[FS_MAX_PATH] = {0};
     char content_path[FS_MAX_PATH] = {0};
-
-    /* TODO: Replace with BoundedString? */
-    snprintf(content_root_path, FS_MAX_PATH, "%s%s", this->placeholder_accessor.root_path, "/registered");
-    this->make_content_path_func(content_path, content_id, content_root_path);
+    this->GetContentPath(content_path, content_id);
 
     if (R_FAILED(rc = FsUtils::EnsureParentDirectoryRecursively(content_path))) {
         return rc;
@@ -200,7 +196,6 @@ Result ContentStorageInterface::GetPath(OutPointerWithClientSize<char> out, Cont
     }
 
     char content_path[FS_MAX_PATH] = {0};
-
     this->GetContentPath(content_path, content_id);
     memcpy(out.pointer, content_path, FS_MAX_PATH-1);
 
@@ -213,16 +208,27 @@ Result ContentStorageInterface::GetPlaceHolderPath(OutPointerWithClientSize<char
     }
 
     char placeholder_path[FS_MAX_PATH] = {0};
-
     this->placeholder_accessor.GetPlaceHolderPathUncached(placeholder_path, placeholder_id);
     memcpy(out.pointer, placeholder_path, FS_MAX_PATH-1);
 
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::CleanupAllPlaceHolder()
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::CleanupAllPlaceHolder() {
+    if (this->disabled) {
+        return ResultNcmInvalidContentStorage;
+    }
+
+    char placeholder_root_path[FS_MAX_PATH] = {0};
+    this->placeholder_accessor.ClearAllCaches();
+    this->placeholder_accessor.GetPlaceHolderRootPath(placeholder_root_path);
+
+    Result rc = ResultSuccess;
+    if (R_FAILED(rc = fsdevDeleteDirectoryRecursively(placeholder_root_path))) {
+        return rc;
+    }
+
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::ListPlaceHolder(Out<int> entries_read, OutBuffer<PlaceHolderId> out_buf)
