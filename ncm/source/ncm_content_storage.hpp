@@ -55,7 +55,7 @@ class ContentStorageInterface : public IServiceObject
 {
     public:
         char root_path[FS_MAX_PATH-1];
-        std::function<void (char* out, ContentId content_id, const char* root)> make_content_path_func;
+        MakeContentPathFunc make_content_path_func;
         bool disabled;
         PlaceHolderAccessor placeholder_accessor;
         ContentId cached_content_id;

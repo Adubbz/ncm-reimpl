@@ -30,7 +30,8 @@ typedef Uuid ContentId;
 typedef Uuid PlaceHolderId;
 typedef Uuid RightsId;
 
-
+typedef std::function<void (char* out, ContentId content_id, const char* root)> MakeContentPathFunc;
+typedef std::function<void (char* out, PlaceHolderId placeholder_id, const char* root)> MakePlaceHolderPathFunc;
 
 class PlaceHolderAccessor {
     public:
@@ -48,7 +49,7 @@ class PlaceHolderAccessor {
         char* root_path;
         u64 cur_counter;
         HosMutex cache_mutex;
-        std::function<void (char* out, PlaceHolderId placeholder_id, const char* root)> make_placeholder_path_func;
+        MakePlaceHolderPathFunc make_placeholder_path_func;
         bool delay_flush;
 
         PlaceHolderAccessor() : cur_counter(0), delay_flush(false) {
@@ -79,5 +80,20 @@ class PlaceHolderAccessor {
         void ClearAllCaches();
 };
 
-class ContentUtils {
+class PathBuilder {
+    static void MakeContentPathUnlayered(char* path_out, ContentId content_id, const char* root);
+    static void MakeContentPathHashByteLayered(char* path_out, ContentId content_id, const char* root);
+    static void MakeContentPath10BitLayered(char* path_out, ContentId content_id, const char* root);
+    static void MakeContentPathDualLayered(char* path_out, ContentId content_id, const char* root);
+
+    static void MakePlaceHolderPathUnlayered(char* path_out, PlaceHolderId placeholder_id, const char* root);
+    static void MakePlaceHolderPathHashByteLayered(char* path_out, PlaceHolderId placeholder_id, const char* root);
+
+    static void GetStringFromContentId(char* out, ContentId content_id);
+    static void GetContentFileName(char* out, ContentId content_id);
+    static void GetStringFromPlaceHolderId(char* out, PlaceHolderId placeholder_id);
+    static void GetPlaceHolderFileName(char* out, PlaceHolderId placeholder_id);
+
+    static unsigned int GetDirLevelForContentPathFunc(MakeContentPathFunc* content_path_func);
+    static unsigned int GetDirLevelForPlaceHolderPathFunc(MakePlaceHolderPathFunc* placeholder_path_func);
 };
