@@ -233,6 +233,8 @@ Result ContentStorageInterface::CleanupAllPlaceHolder() {
 }
 
 Result ContentStorageInterface::ListPlaceHolder(Out<int> entries_read, OutBuffer<PlaceHolderId> out_buf) {
+    Result rc = ResultSuccess;
+
     if (this->disabled) {
         return ResultNcmInvalidContentStorage;
     }
@@ -242,6 +244,9 @@ Result ContentStorageInterface::ListPlaceHolder(Out<int> entries_read, OutBuffer
     unsigned int dir_level = PathUtils::GetDirLevelForPlaceHolderPathFunc(this->placeholder_accessor.make_placeholder_path_func);
     u64 entry_count = 0;
 
+    u64 cur_entry_index = 0;
+    PlaceHolderId cur_entry_placeholder_id = {0};
+
     FsUtils::TraverseDirectory(placeholder_root_path, dir_level, [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
         if (dir_entry->d_type == DT_REG) {
             if (entry_count > out_buf.num_elements) {
@@ -249,7 +254,13 @@ Result ContentStorageInterface::ListPlaceHolder(Out<int> entries_read, OutBuffer
             }
         }
 
-        // TODO
+        if (R_FAILED(rc = PathUtils::GetPlaceHolderIdFromDirEntry(&cur_entry_placeholder_id, dir_entry))) {
+            return rc;
+        }
+        
+        cur_entry_index = entry_count;
+        entry_count++;
+        out_buf.buffer[cur_entry_index] = cur_entry_placeholder_id;
         
         return ResultSuccess;
     });

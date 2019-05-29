@@ -17,6 +17,7 @@
 #pragma once
 #include <switch.h>
 #include <stratosphere.hpp>
+#include <sys/dirent.h>
 #include "ncm_types.hpp"
 
 class PathUtils {

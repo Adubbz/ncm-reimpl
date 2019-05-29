@@ -32,3 +32,6 @@ typedef Uuid RightsId;
 
 typedef void (*MakeContentPathFunc)(char* out, ContentId content_id, const char* root);
 typedef void (*MakePlaceHolderPathFunc)(char* out, PlaceHolderId placeholder_id, const char* root);
+
+// TODO: Remove this
+static constexpr Result ResultNcmInvalidPlaceHolderDirectoryEntry = MAKERESULT(Module_Ncm, 170);

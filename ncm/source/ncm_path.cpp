@@ -139,6 +139,25 @@ unsigned int PathUtils::GetDirLevelForPlaceHolderPathFunc(MakePlaceHolderPathFun
 }
 
 Result PathUtils::GetPlaceHolderIdFromDirEntry(PlaceHolderId* out, struct dirent* dir_entry) {
-    //TODO:
-    return ResultKernelConnectionClosed;
+    if (strnlen(dir_entry->d_name, 0x30) != 0x24 || strncmp(dir_entry->d_name + 0x20, ".nca", 4) != 0) {
+        return ResultNcmInvalidPlaceHolderDirectoryEntry;
+    }
+
+    PlaceHolderId placeholder_id = {0};
+    char byte_string[2];
+    char* end_ptr;
+    u64 converted_val;
+
+    for (size_t i = 0; i < sizeof(PlaceHolderId); i++) {
+        char* name_char_pair = dir_entry->d_name + i * 2;         
+    
+        byte_string[0] = name_char_pair[0];
+        byte_string[1] = name_char_pair[1];
+
+        converted_val = strtoull(byte_string, &end_ptr, 0x10);
+        placeholder_id.uuid[i] = (u8)converted_val;
+    }
+
+    *out = placeholder_id;
+    return ResultSuccess;
 }
