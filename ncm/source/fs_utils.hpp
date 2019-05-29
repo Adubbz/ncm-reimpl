@@ -27,7 +27,13 @@ class FsUtils {
         static Result CreateFile(const char* path, size_t size, bool flush_immediately);
 
         template<typename F>
-        Result TraverseDirectory(bool* out_should_continue, const char* root_path, int max_level, F f) {
+        static Result TraverseDirectory(const char* root_path, int max_level, F f) {
+            bool should_continue = false;
+            return TraverseDirectory(&should_continue, root_path, max_level, f);
+        }
+
+        template<typename F>
+        static Result TraverseDirectory(bool* out_should_continue, const char* root_path, int max_level, F f) {
             Result rc;
             DIR *dir;
             struct dirent* dir_entry = nullptr;
@@ -46,7 +52,9 @@ class FsUtils {
                 }
 
                 char current_path[FS_MAX_PATH];
-                snprintf(current_path, sizeof(current_path), "%s/%s", root_path, dir_entry->d_name);
+                if (snprintf(current_path, FS_MAX_PATH-1, "%s/%s", root_path, dir_entry->d_name) < 0) {
+                    std::abort();
+                }
 
                 bool should_continue = true;
                 if (R_FAILED((rc = f(&should_continue, current_path, dir_entry)))) {

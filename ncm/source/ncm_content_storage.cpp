@@ -16,6 +16,7 @@
 
 #include "ncm_content_storage.hpp"
 #include "fs_utils.hpp"
+#include "ncm_path.hpp"
 
 void ContentStorageInterface::ClearContentCache() {
     if (memcmp(&this->cached_content_id.uuid, &InvalidUuid.uuid, sizeof(ContentId)) != 0) {
@@ -231,9 +232,29 @@ Result ContentStorageInterface::CleanupAllPlaceHolder() {
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::ListPlaceHolder(Out<int> entries_read, OutBuffer<PlaceHolderId> out_buf)
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::ListPlaceHolder(Out<int> entries_read, OutBuffer<PlaceHolderId> out_buf) {
+    if (this->disabled) {
+        return ResultNcmInvalidContentStorage;
+    }
+
+    char placeholder_root_path[FS_MAX_PATH] = {0};
+    this->placeholder_accessor.GetPlaceHolderRootPath(placeholder_root_path);
+    unsigned int dir_level = PathUtils::GetDirLevelForPlaceHolderPathFunc(this->placeholder_accessor.make_placeholder_path_func);
+    u64 entry_count = 0;
+
+    FsUtils::TraverseDirectory(placeholder_root_path, dir_level, [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
+        if (dir_entry->d_type == DT_REG) {
+            if (entry_count > out_buf.num_elements) {
+                return ResultNcmBufferInsufficient;
+            }
+        }
+
+        // TODO
+        
+        return ResultSuccess;
+    });
+
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::GetContentCount(Out<int> count)

@@ -17,7 +17,8 @@
 #pragma once
 #include <switch.h>
 #include <stratosphere.hpp>
-#include "ncm_content.hpp"
+#include "ncm_placeholder_accessor.hpp"
+#include "ncm_types.hpp"
 
 enum CsCmd : u32
 {

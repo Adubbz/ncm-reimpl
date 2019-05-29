@@ -17,21 +17,7 @@
 #pragma once
 #include <switch.h>
 #include <stratosphere.hpp>
-
-struct Uuid {
-    u8 uuid[0x10];
-};
-
-static_assert(sizeof(Uuid) == 0x10, "Uuid definition!");
-
-static constexpr Uuid InvalidUuid = { { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
-
-typedef Uuid ContentId;
-typedef Uuid PlaceHolderId;
-typedef Uuid RightsId;
-
-typedef std::function<void (char* out, ContentId content_id, const char* root)> MakeContentPathFunc;
-typedef std::function<void (char* out, PlaceHolderId placeholder_id, const char* root)> MakePlaceHolderPathFunc;
+#include "ncm_types.hpp"
 
 class PlaceHolderAccessor {
     public:
@@ -60,7 +46,9 @@ class PlaceHolderAccessor {
 
         inline void GetPlaceHolderRootPath(char* placeholder_root_out) {
             /* TODO: Replace with BoundedString? */
-            snprintf(placeholder_root_out, FS_MAX_PATH, "%.48s%s", this->root_path, "/placehld");
+            if (snprintf(placeholder_root_out, FS_MAX_PATH, "%s%s", this->root_path, "/placehld") < 0) {
+                std::abort();
+            }
         }
 
         inline void GetPlaceHolderPath(char* placeholder_path_out, PlaceHolderId placeholder_id) {
@@ -78,22 +66,4 @@ class PlaceHolderAccessor {
         bool LoadFromCache(FILE** out_handle, PlaceHolderId placeholder_id);
         void StoreToCache(FILE* handle, PlaceHolderId placeholder_id);
         void ClearAllCaches();
-};
-
-class PathBuilder {
-    static void MakeContentPathUnlayered(char* path_out, ContentId content_id, const char* root);
-    static void MakeContentPathHashByteLayered(char* path_out, ContentId content_id, const char* root);
-    static void MakeContentPath10BitLayered(char* path_out, ContentId content_id, const char* root);
-    static void MakeContentPathDualLayered(char* path_out, ContentId content_id, const char* root);
-
-    static void MakePlaceHolderPathUnlayered(char* path_out, PlaceHolderId placeholder_id, const char* root);
-    static void MakePlaceHolderPathHashByteLayered(char* path_out, PlaceHolderId placeholder_id, const char* root);
-
-    static void GetStringFromContentId(char* out, ContentId content_id);
-    static void GetContentFileName(char* out, ContentId content_id);
-    static void GetStringFromPlaceHolderId(char* out, PlaceHolderId placeholder_id);
-    static void GetPlaceHolderFileName(char* out, PlaceHolderId placeholder_id);
-
-    static unsigned int GetDirLevelForContentPathFunc(MakeContentPathFunc* content_path_func);
-    static unsigned int GetDirLevelForPlaceHolderPathFunc(MakePlaceHolderPathFunc* placeholder_path_func);
 };
