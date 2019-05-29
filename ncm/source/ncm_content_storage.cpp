@@ -330,9 +330,9 @@ Result ContentStorageInterface::GetTotalSpaceSize(Out<u64> out)
     return ResultKernelConnectionClosed;
 }
 
-Result ContentStorageInterface::FlushPlaceHolder()
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::FlushPlaceHolder() {
+    this->placeholder_accessor.ClearAllCaches();
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::GetSizeFromPlaceHolderId(Out<u64> out, PlaceHolderId placeholder_id)
