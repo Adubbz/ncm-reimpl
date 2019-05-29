@@ -283,9 +283,11 @@ Result ContentStorageInterface::GetSizeFromContentId(Out<u64> size, ContentId co
     return ResultKernelConnectionClosed;
 }
 
-Result ContentStorageInterface::DisableForcibly()
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::DisableForcibly() {
+    this->disabled = true;
+    this->ClearContentCache();
+    this->placeholder_accessor.ClearAllCaches();
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::RevertToPlaceHolder(PlaceHolderId placeholder_id, ContentId content_id_0, ContentId content_id_1)
