@@ -268,9 +268,26 @@ Result ContentStorageInterface::ListPlaceHolder(Out<int> entries_read, OutBuffer
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::GetContentCount(Out<int> count)
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::GetContentCount(Out<int> count_out) {
+    if (this->disabled) {
+        return ResultNcmInvalidContentStorage;
+    }
+
+    char content_root_path[FS_MAX_PATH] = {0};
+    this->GetContentRootPath(content_root_path);
+    unsigned int dir_level = PathUtils::GetDirLevelForContentPathFunc(this->make_content_path_func);
+    u32 content_count = 0;
+
+    FsUtils::TraverseDirectory(content_root_path, dir_level, [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
+        if (dir_entry->d_type == DT_REG) {
+            content_count++;
+        }
+
+        return ResultSuccess;
+    });
+
+    count_out.SetValue(content_count);
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::ListContentId(Out<int> entries_read, OutBuffer<ContentId> out_buf, int start_offset)

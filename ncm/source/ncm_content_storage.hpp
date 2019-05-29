@@ -67,7 +67,9 @@ class ContentStorageInterface : public IServiceObject
 
         inline void GetContentRootPath(char* content_root_out) {
             /* TODO: Replace with BoundedString? */
-            snprintf(content_root_out, FS_MAX_PATH, "%.48s%s", this->root_path, "/registered");
+            if (snprintf(content_root_out, FS_MAX_PATH-1, "%s%s", this->root_path, "/registered") < 0) {
+                std::abort();
+            }
         }
 
         inline void GetContentPath(char* content_path_out, ContentId content_id) {
@@ -91,7 +93,7 @@ class ContentStorageInterface : public IServiceObject
         Result GetPlaceHolderPath(OutPointerWithClientSize<char> out, PlaceHolderId placeholder_id);
         Result CleanupAllPlaceHolder();
         Result ListPlaceHolder(Out<int> entries_read, OutBuffer<PlaceHolderId> out_buf);
-        Result GetContentCount(Out<int> count);
+        Result GetContentCount(Out<int> count_out);
         Result ListContentId(Out<int> entries_read, OutBuffer<ContentId> out_buf, int start_offset);
         Result GetSizeFromContentId(Out<u64> size, ContentId content_id);
         Result DisableForcibly();
