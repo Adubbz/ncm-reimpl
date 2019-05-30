@@ -22,13 +22,13 @@
 
 class PathUtils {
     public:
-        static void MakeContentPathUnlayered(char* path_out, ContentId content_id, const char* root);
-        static void MakeContentPathHashByteLayered(char* path_out, ContentId content_id, const char* root);
-        static void MakeContentPath10BitLayered(char* path_out, ContentId content_id, const char* root);
-        static void MakeContentPathDualLayered(char* path_out, ContentId content_id, const char* root);
+        static void MakeContentPathUnlayered(char* out_path, ContentId content_id, const char* root);
+        static void MakeContentPathHashByteLayered(char* out_path, ContentId content_id, const char* root);
+        static void MakeContentPath10BitLayered(char* out_path, ContentId content_id, const char* root);
+        static void MakeContentPathDualLayered(char* out_path, ContentId content_id, const char* root);
 
-        static void MakePlaceHolderPathUnlayered(char* path_out, PlaceHolderId placeholder_id, const char* root);
-        static void MakePlaceHolderPathHashByteLayered(char* path_out, PlaceHolderId placeholder_id, const char* root);
+        static void MakePlaceHolderPathUnlayered(char* out_path, PlaceHolderId placeholder_id, const char* root);
+        static void MakePlaceHolderPathHashByteLayered(char* out_path, PlaceHolderId placeholder_id, const char* root);
 
         static void GetStringFromContentId(char* out, ContentId content_id);
         static void GetContentFileName(char* out, ContentId content_id);

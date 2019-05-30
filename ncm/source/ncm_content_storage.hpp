@@ -65,18 +65,18 @@ class ContentStorageInterface : public IServiceObject
     private:
         void ClearContentCache();
 
-        inline void GetContentRootPath(char* content_root_out) {
+        inline void GetContentRootPath(char* out_content_root) {
             /* TODO: Replace with BoundedString? */
-            if (snprintf(content_root_out, FS_MAX_PATH-1, "%s%s", this->root_path, "/registered") < 0) {
+            if (snprintf(out_content_root, FS_MAX_PATH-1, "%s%s", this->root_path, "/registered") < 0) {
                 std::abort();
             }
         }
 
-        inline void GetContentPath(char* content_path_out, ContentId content_id) {
+        inline void GetContentPath(char* out_content_root, ContentId content_id) {
             char content_root_path[FS_MAX_PATH] = {0};
 
             this->GetContentRootPath(content_root_path);
-            this->make_content_path_func(content_path_out, content_id, content_root_path);
+            this->make_content_path_func(out_content_root, content_id, content_root_path);
         }
 
     private:
@@ -92,9 +92,9 @@ class ContentStorageInterface : public IServiceObject
         Result GetPath(OutPointerWithClientSize<char> out, ContentId content_id);
         Result GetPlaceHolderPath(OutPointerWithClientSize<char> out, PlaceHolderId placeholder_id);
         Result CleanupAllPlaceHolder();
-        Result ListPlaceHolder(Out<int> entries_read, OutBuffer<PlaceHolderId> out_buf);
-        Result GetContentCount(Out<int> count_out);
-        Result ListContentId(Out<int> entries_read, OutBuffer<ContentId> out_buf, int start_offset);
+        Result ListPlaceHolder(Out<u32> out_count, OutBuffer<PlaceHolderId> out_buf);
+        Result GetContentCount(Out<u32> out_count);
+        Result ListContentId(Out<u32> out_count, OutBuffer<ContentId> out_buf, u32 start_offset);
         Result GetSizeFromContentId(Out<u64> size, ContentId content_id);
         Result DisableForcibly();
         Result RevertToPlaceHolder(PlaceHolderId placeholder_id, ContentId content_id_0, ContentId content_id_1);

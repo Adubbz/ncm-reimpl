@@ -232,8 +232,8 @@ Result ContentStorageInterface::CleanupAllPlaceHolder() {
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::ListPlaceHolder(Out<int> entries_read, OutBuffer<PlaceHolderId> out_buf) {
-    Result rc = ResultSuccess;
+Result ContentStorageInterface::ListPlaceHolder(Out<u32> entries_read, OutBuffer<PlaceHolderId> out_buf) {
+    Result traverse_rc = ResultSuccess;
 
     if (this->disabled) {
         return ResultNcmInvalidContentStorage;
@@ -242,33 +242,39 @@ Result ContentStorageInterface::ListPlaceHolder(Out<int> entries_read, OutBuffer
     char placeholder_root_path[FS_MAX_PATH] = {0};
     this->placeholder_accessor.GetPlaceHolderRootPath(placeholder_root_path);
     unsigned int dir_level = PathUtils::GetDirLevelForPlaceHolderPathFunc(this->placeholder_accessor.make_placeholder_path_func);
-    u64 entry_count = 0;
+    size_t entry_count = 0;
 
-    u64 cur_entry_index = 0;
-    PlaceHolderId cur_entry_placeholder_id = {0};
-
-    FsUtils::TraverseDirectory(placeholder_root_path, dir_level, [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
+    traverse_rc = FsUtils::TraverseDirectory(placeholder_root_path, dir_level, [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
+        Result rc = ResultSuccess;
+        *should_continue = true;
+        
         if (dir_entry->d_type == DT_REG) {
             if (entry_count > out_buf.num_elements) {
                 return ResultNcmBufferInsufficient;
             }
+            
+            PlaceHolderId cur_entry_placeholder_id = {0};
+            if (R_FAILED((rc = PathUtils::GetPlaceHolderIdFromDirEntry(&cur_entry_placeholder_id, dir_entry)))) {
+                return rc;
+            }
+            
+            out_buf.buffer[entry_count++] = cur_entry_placeholder_id;
         }
-
-        if (R_FAILED(rc = PathUtils::GetPlaceHolderIdFromDirEntry(&cur_entry_placeholder_id, dir_entry))) {
-            return rc;
-        }
-        
-        cur_entry_index = entry_count;
-        entry_count++;
-        out_buf.buffer[cur_entry_index] = cur_entry_placeholder_id;
         
         return ResultSuccess;
     });
+    
+    if (R_FAILED(traverse_rc)) {
+        return traverse_rc;
+    }
 
+    entries_read.SetValue(static_cast<u32>(entry_count));
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::GetContentCount(Out<int> count_out) {
+Result ContentStorageInterface::GetContentCount(Out<u32> out_count) {
+    Result rc = ResultSuccess;
+    
     if (this->disabled) {
         return ResultNcmInvalidContentStorage;
     }
@@ -278,7 +284,9 @@ Result ContentStorageInterface::GetContentCount(Out<int> count_out) {
     unsigned int dir_level = PathUtils::GetDirLevelForContentPathFunc(this->make_content_path_func);
     u32 content_count = 0;
 
-    FsUtils::TraverseDirectory(content_root_path, dir_level, [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
+    rc = FsUtils::TraverseDirectory(content_root_path, dir_level, [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
+        *should_continue = true;
+        
         if (dir_entry->d_type == DT_REG) {
             content_count++;
         }
@@ -286,11 +294,15 @@ Result ContentStorageInterface::GetContentCount(Out<int> count_out) {
         return ResultSuccess;
     });
 
-    count_out.SetValue(content_count);
+    if (R_FAILED(rc)) {
+        return rc;
+    }
+
+    out_count.SetValue(content_count);
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::ListContentId(Out<int> entries_read, OutBuffer<ContentId> out_buf, int start_offset)
+Result ContentStorageInterface::ListContentId(Out<u32> entries_read, OutBuffer<ContentId> out_buf, u32 start_offset)
 {
     return ResultKernelConnectionClosed;
 }

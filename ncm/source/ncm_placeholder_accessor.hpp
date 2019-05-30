@@ -44,20 +44,20 @@ class PlaceHolderAccessor {
             }
         }
 
-        inline void GetPlaceHolderRootPath(char* placeholder_root_out) {
+        inline void GetPlaceHolderRootPath(char* out_placeholder_root) {
             /* TODO: Replace with BoundedString? */
-            if (snprintf(placeholder_root_out, FS_MAX_PATH, "%s%s", this->root_path, "/placehld") < 0) {
+            if (snprintf(out_placeholder_root, FS_MAX_PATH, "%s%s", this->root_path, "/placehld") < 0) {
                 std::abort();
             }
         }
 
-        inline void GetPlaceHolderPath(char* placeholder_path_out, PlaceHolderId placeholder_id) {
+        inline void GetPlaceHolderPath(char* out_placeholder_path, PlaceHolderId placeholder_id) {
             char placeholder_root_path[FS_MAX_PATH] = {0};
             this->GetPlaceHolderRootPath(placeholder_root_path);
-            this->make_placeholder_path_func(placeholder_path_out, placeholder_id, placeholder_root_path);
+            this->make_placeholder_path_func(out_placeholder_path, placeholder_id, placeholder_root_path);
         }
 
-        void GetPlaceHolderPathUncached(char* placeholder_path_out, PlaceHolderId placeholder_id);
+        void GetPlaceHolderPathUncached(char* out_placeholder_path, PlaceHolderId placeholder_id);
         Result Create(PlaceHolderId placeholder_id, size_t size);
         Result Delete(PlaceHolderId placeholder_id);
         Result Open(FILE** out_handle, PlaceHolderId id);
