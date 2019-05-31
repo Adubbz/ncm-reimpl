@@ -34,7 +34,6 @@ class FsUtils {
 
         template<typename F>
         static Result TraverseDirectory(bool* out_should_continue, const char* root_path, int max_level, F f) {
-            Result rc;
             DIR *dir;
             struct dirent* dir_entry = nullptr;
             if (max_level < 1) {
@@ -57,9 +56,7 @@ class FsUtils {
                 }
 
                 bool should_continue = true;
-                if (R_FAILED((rc = f(&should_continue, current_path, dir_entry)))) {
-                    return rc;
-                }
+                R_TRY(f(&should_continue, current_path, dir_entry));
 
                 /* If the provided function wishes to terminate immediately, we should respect it. */
                 if (!should_continue) {
@@ -68,9 +65,7 @@ class FsUtils {
                 }
 
                 if (dir_entry->d_type == DT_DIR) {
-                    if (R_FAILED((rc = TraverseDirectory(&should_continue, current_path, max_level-1, f)))) {
-                        return rc;
-                    }
+                    R_TRY(TraverseDirectory(&should_continue, current_path, max_level-1, f));
 
                     if (!should_continue) {
                         *out_should_continue = false;

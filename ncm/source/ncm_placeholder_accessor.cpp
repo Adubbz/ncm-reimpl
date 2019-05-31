@@ -48,11 +48,7 @@ Result PlaceHolderAccessor::Create(PlaceHolderId placeholder_id, size_t size) {
     char placeholder_path[FS_MAX_PATH] = {0};
 
     this->GetPlaceHolderPath(placeholder_path, placeholder_id);
-
-    if (R_FAILED(rc = FsUtils::EnsureParentDirectoryRecursively(placeholder_path))) {
-        return rc;
-    }
-
+    R_TRY(FsUtils::EnsureParentDirectoryRecursively(placeholder_path));
     std::fill(placeholder_path, placeholder_path + FS_MAX_PATH, 0);
     this->GetPlaceHolderPathUncached(placeholder_path, placeholder_id);
 

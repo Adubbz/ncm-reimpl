@@ -35,8 +35,6 @@ Result ContentStorageInterface::GeneratePlaceHolderId(OutPointerWithServerSize<P
 }
 
 Result ContentStorageInterface::CreatePlaceHolder(PlaceHolderId placeholder_id, ContentId content_id, u64 size) {
-    Result rc = ResultSuccess;
-
     if (this->disabled) {
         return ResultNcmInvalidContentStorage;
     }
@@ -44,13 +42,8 @@ Result ContentStorageInterface::CreatePlaceHolder(PlaceHolderId placeholder_id, 
     char content_path[FS_MAX_PATH] = {0};
     this->GetContentPath(content_path, content_id);
 
-    if (R_FAILED(rc = FsUtils::EnsureParentDirectoryRecursively(content_path))) {
-        return rc;
-    }
-
-    if (R_FAILED(rc = this->placeholder_accessor.Create(placeholder_id, size))) {
-        return rc;
-    }
+    R_TRY(FsUtils::EnsureParentDirectoryRecursively(content_path));
+    R_TRY(this->placeholder_accessor.Create(placeholder_id, size));
 
     return ResultSuccess;
 }
@@ -225,16 +218,12 @@ Result ContentStorageInterface::CleanupAllPlaceHolder() {
     this->placeholder_accessor.GetPlaceHolderRootPath(placeholder_root_path);
 
     Result rc = ResultSuccess;
-    if (R_FAILED(rc = fsdevDeleteDirectoryRecursively(placeholder_root_path))) {
-        return rc;
-    }
+    R_TRY(fsdevDeleteDirectoryRecursively(placeholder_root_path));
 
     return ResultSuccess;
 }
 
 Result ContentStorageInterface::ListPlaceHolder(Out<u32> entries_read, OutBuffer<PlaceHolderId> out_buf) {
-    Result traverse_rc = ResultSuccess;
-
     if (this->disabled) {
         return ResultNcmInvalidContentStorage;
     }
@@ -244,7 +233,7 @@ Result ContentStorageInterface::ListPlaceHolder(Out<u32> entries_read, OutBuffer
     unsigned int dir_level = PathUtils::GetDirLevelForPlaceHolderPathFunc(this->placeholder_accessor.make_placeholder_path_func);
     size_t entry_count = 0;
 
-    traverse_rc = FsUtils::TraverseDirectory(placeholder_root_path, dir_level, [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
+    R_TRY(FsUtils::TraverseDirectory(placeholder_root_path, dir_level, [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
         Result rc = ResultSuccess;
         *should_continue = true;
         
@@ -254,27 +243,18 @@ Result ContentStorageInterface::ListPlaceHolder(Out<u32> entries_read, OutBuffer
             }
             
             PlaceHolderId cur_entry_placeholder_id = {0};
-            if (R_FAILED((rc = PathUtils::GetPlaceHolderIdFromDirEntry(&cur_entry_placeholder_id, dir_entry)))) {
-                return rc;
-            }
-            
+            R_TRY(PathUtils::GetPlaceHolderIdFromDirEntry(&cur_entry_placeholder_id, dir_entry));
             out_buf.buffer[entry_count++] = cur_entry_placeholder_id;
         }
         
         return ResultSuccess;
-    });
-    
-    if (R_FAILED(traverse_rc)) {
-        return traverse_rc;
-    }
+    }));
 
     entries_read.SetValue(static_cast<u32>(entry_count));
     return ResultSuccess;
 }
 
 Result ContentStorageInterface::GetContentCount(Out<u32> out_count) {
-    Result rc = ResultSuccess;
-    
     if (this->disabled) {
         return ResultNcmInvalidContentStorage;
     }
@@ -284,7 +264,7 @@ Result ContentStorageInterface::GetContentCount(Out<u32> out_count) {
     unsigned int dir_level = PathUtils::GetDirLevelForContentPathFunc(this->make_content_path_func);
     u32 content_count = 0;
 
-    rc = FsUtils::TraverseDirectory(content_root_path, dir_level, [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
+    R_TRY(FsUtils::TraverseDirectory(content_root_path, dir_level, [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
         *should_continue = true;
         
         if (dir_entry->d_type == DT_REG) {
@@ -292,11 +272,7 @@ Result ContentStorageInterface::GetContentCount(Out<u32> out_count) {
         }
 
         return ResultSuccess;
-    });
-
-    if (R_FAILED(rc)) {
-        return rc;
-    }
+    }));
 
     out_count.SetValue(content_count);
     return ResultSuccess;
