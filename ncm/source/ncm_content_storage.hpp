@@ -101,7 +101,7 @@ class ContentStorageInterface : public IServiceObject
         Result ListPlaceHolder(Out<u32> out_count, OutBuffer<PlaceHolderId> out_buf);
         Result GetContentCount(Out<u32> out_count);
         Result ListContentId(Out<u32> out_count, OutBuffer<ContentId> out_buf, u32 start_offset);
-        Result GetSizeFromContentId(Out<u64> size, ContentId content_id);
+        Result GetSizeFromContentId(Out<u64> out_size, ContentId content_id);
         Result DisableForcibly();
         Result RevertToPlaceHolder(PlaceHolderId placeholder_id, ContentId content_id_0, ContentId content_id_1);
         Result SetPlaceHolderSize(PlaceHolderId placeholder_id, u64 size);

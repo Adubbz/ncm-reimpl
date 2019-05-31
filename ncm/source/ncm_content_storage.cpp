@@ -224,8 +224,6 @@ Result ContentStorageInterface::Delete(ContentId content_id) {
         return ResultNcmContentNotFound;
     }
 
-    return rc;
-
     return ResultSuccess;
 }
 
@@ -342,9 +340,13 @@ Result ContentStorageInterface::GetContentCount(Out<u32> out_count) {
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::ListContentId(Out<u32> out_count, OutBuffer<ContentId> out_buf, u32 start_offset) {
+Result ContentStorageInterface::ListContentId(Out<u32> out_count, OutBuffer<ContentId> out_buf, u32 start_offset) {    
     if (start_offset >> 0x1f != 0) {
         return ResultNcmInvalidOffset;
+    }
+
+    if (this->disabled) {
+        return ResultNcmInvalidContentStorage;
     }
 
     char content_root_path[FS_MAX_PATH] = {0};
@@ -387,9 +389,24 @@ Result ContentStorageInterface::ListContentId(Out<u32> out_count, OutBuffer<Cont
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::GetSizeFromContentId(Out<u64> size, ContentId content_id)
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::GetSizeFromContentId(Out<u64> out_size, ContentId content_id) {
+    if (this->disabled) {
+        return ResultNcmInvalidContentStorage;
+    }
+
+    char content_path[FS_MAX_PATH] = {0};
+    this->GetContentPath(content_path, content_id);
+    struct stat st;
+
+    errno = 0;
+    stat(content_path, &st);
+
+    if (errno != 0) {
+        return fsdevGetLastResult();
+    }
+
+    out_size.SetValue(st.st_size);
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::DisableForcibly() {
