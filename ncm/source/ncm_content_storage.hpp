@@ -109,8 +109,8 @@ class ContentStorageInterface : public IServiceObject
         Result GetRightsIdFromPlaceHolderId(Out<RightsId> out, PlaceHolderId placeholder_id);
         Result GetRightsIdFromContentId(Out<RightsId> out, ContentId content_id);
         Result WriteContentForDebug(ContentId content_id, u64 offset, InBuffer<u8> data);
-        Result GetFreeSpaceSize(Out<u64> out);
-        Result GetTotalSpaceSize(Out<u64> out);
+        Result GetFreeSpaceSize(Out<u64> out_size);
+        Result GetTotalSpaceSize(Out<u64> out_size);
         Result FlushPlaceHolder();
         Result GetSizeFromPlaceHolderId(Out<u64> out, PlaceHolderId placeholder_id);
         Result RepairInvalidFileAttribute();

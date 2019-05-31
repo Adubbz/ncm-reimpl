@@ -446,12 +446,20 @@ Result ContentStorageInterface::WriteContentForDebug(ContentId content_id, u64 o
     return ResultKernelConnectionClosed;
 }
 
-Result ContentStorageInterface::GetFreeSpaceSize(Out<u64> out)
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::GetFreeSpaceSize(Out<u64> out_size) {
+    struct statvfs st = {0};
+    errno = 0;
+    statvfs(this->root_path, &st);
+
+    if (errno != 0) {
+        return fsdevGetLastResult();
+    }
+
+    out_size.SetValue(st.f_bfree);
+    return ResultSuccess;
 }
 
-Result ContentStorageInterface::GetTotalSpaceSize(Out<u64> out)
+Result ContentStorageInterface::GetTotalSpaceSize(Out<u64> out_size)
 {
     return ResultKernelConnectionClosed;
 }
