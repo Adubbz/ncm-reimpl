@@ -14,33 +14,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ncm_path.hpp"
+#include "ncm_utils.hpp"
 
-void PathUtils::GetStringFromContentId(char* out, ContentId content_id) {
+void NcmUtils::GetStringFromContentId(char* out, ContentId content_id) {
     for (size_t i = 0; i < sizeof(ContentId); i++) {
         snprintf(out+i, 3, "%02x", content_id.uuid[i]);
     }
 }
 
-void PathUtils::GetContentFileName(char* out, ContentId content_id) {
+void NcmUtils::GetContentFileName(char* out, ContentId content_id) {
     char content_name[sizeof(ContentId)*2+1] = {0};
     GetStringFromContentId(content_name, content_id);
     snprintf(out, FS_MAX_PATH-1, "%s%s", content_name, ".nca");
 }
 
-void PathUtils::GetStringFromPlaceHolderId(char* out, PlaceHolderId placeholder_id) {
+void NcmUtils::GetStringFromPlaceHolderId(char* out, PlaceHolderId placeholder_id) {
     for (size_t i = 0; i < sizeof(PlaceHolderId); i++) {
         snprintf(out+i, 3, "%02x", placeholder_id.uuid[i]);
     }
 }
 
-void PathUtils::GetPlaceHolderFileName(char* out, PlaceHolderId placeholder_id) {
+void NcmUtils::GetPlaceHolderFileName(char* out, PlaceHolderId placeholder_id) {
     char placeholder_name[sizeof(PlaceHolderId)*2+1] = {0};
     GetStringFromPlaceHolderId(placeholder_name, placeholder_id);
     snprintf(out, FS_MAX_PATH-1, "%s%s", placeholder_name, ".nca");
 }
 
-Result PathUtils::GetPlaceHolderIdFromDirEntry(PlaceHolderId* out, struct dirent* dir_entry) {
+Result NcmUtils::GetPlaceHolderIdFromDirEntry(PlaceHolderId* out, struct dirent* dir_entry) {
     if (strnlen(dir_entry->d_name, 0x30) != 0x24 || strncmp(dir_entry->d_name + 0x20, ".nca", 4) != 0) {
         return ResultNcmInvalidPlaceHolderDirectoryEntry;
     }
@@ -62,4 +62,29 @@ Result PathUtils::GetPlaceHolderIdFromDirEntry(PlaceHolderId* out, struct dirent
 
     *out = placeholder_id;
     return ResultSuccess;
+}
+
+void NcmUtils::GetContentIdFromString(const char* str, size_t len, std::optional<ContentId>* out) {
+    ContentId content_id = {0};
+
+    if (len < 0x20) {
+        *out = std::nullopt;
+        return;
+    }
+
+    char byte_string[2];
+    char* end_ptr;
+    u64 converted_val;
+
+    for (size_t i = 0; i < sizeof(ContentId); i++) {
+        const char* char_par = str + i * 2;         
+    
+        byte_string[0] = char_par[0];
+        byte_string[1] = char_par[1];
+
+        converted_val = strtoull(byte_string, &end_ptr, 0x10);
+        content_id.uuid[i] = (u8)converted_val;
+    }
+
+    *out = std::optional<ContentId>(content_id);
 }

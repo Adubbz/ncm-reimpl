@@ -16,11 +16,11 @@
 
 #include "ncm_placeholder_accessor.hpp"
 #include "fs_utils.hpp"
-#include "ncm_path.hpp"
+#include "ncm_utils.hpp"
 
 void PlaceHolderAccessor::MakePlaceHolderPathUnlayered(char* path_out, PlaceHolderId placeholder_id, const char* root) {
     char placeholder_name[FS_MAX_PATH] = {0};
-    PathUtils::GetPlaceHolderFileName(placeholder_name, placeholder_id);
+    NcmUtils::GetPlaceHolderFileName(placeholder_name, placeholder_id);
     if (snprintf(path_out, FS_MAX_PATH-1, "%s/%.36s", root, placeholder_name) < 0) {
         std::abort();
     }
@@ -33,7 +33,7 @@ void PlaceHolderAccessor::MakePlaceHolderPathHashByteLayered(char* path_out, Pla
 
     sha256CalculateHash(hash, placeholder_id.uuid, sizeof(PlaceHolderId));
     hash_byte = hash[0];
-    PathUtils::GetPlaceHolderFileName(placeholder_name, placeholder_id);
+    NcmUtils::GetPlaceHolderFileName(placeholder_name, placeholder_id);
     if (snprintf(path_out, FS_MAX_PATH-1, "%s/%08X/%s", root, hash_byte, placeholder_name) < 0) {
         std::abort();
     }

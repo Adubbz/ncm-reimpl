@@ -20,7 +20,7 @@
 #include <sys/dirent.h>
 #include "ncm_types.hpp"
 
-class PathUtils {
+class NcmUtils {
     public:
         static void GetStringFromContentId(char* out, ContentId content_id);
         static void GetContentFileName(char* out, ContentId content_id);
@@ -28,4 +28,5 @@ class PathUtils {
         static void GetPlaceHolderFileName(char* out, PlaceHolderId placeholder_id);
 
         static Result GetPlaceHolderIdFromDirEntry(PlaceHolderId* out, struct dirent* dir_entry);
+        static void GetContentIdFromString(const char* str, size_t len, std::optional<ContentId>* out);
 };

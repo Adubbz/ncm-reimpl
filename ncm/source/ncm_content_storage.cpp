@@ -16,11 +16,11 @@
 
 #include "ncm_content_storage.hpp"
 #include "fs_utils.hpp"
-#include "ncm_path.hpp"
+#include "ncm_utils.hpp"
 
 void ContentStorageInterface::MakeContentPathUnlayered(char* path_out, ContentId content_id, const char* root) {
     char content_name[FS_MAX_PATH] = {0};
-    PathUtils::GetContentFileName(content_name, content_id);
+    NcmUtils::GetContentFileName(content_name, content_id);
     if (snprintf(path_out, FS_MAX_PATH-1, "%s/%s", root, content_name) < 0) {
         std::abort();
     }
@@ -33,7 +33,7 @@ void ContentStorageInterface::MakeContentPathHashByteLayered(char* path_out, Con
 
     sha256CalculateHash(hash, content_id.uuid, sizeof(ContentId));
     hash_byte = hash[0];
-    PathUtils::GetContentFileName(content_name, content_id);
+    NcmUtils::GetContentFileName(content_name, content_id);
     if (snprintf(path_out, FS_MAX_PATH-1, "%s/%08X/%s", root, hash_byte, content_name) < 0) {
         std::abort();
     }
@@ -46,7 +46,7 @@ void ContentStorageInterface::MakeContentPath10BitLayered(char* path_out, Conten
 
     sha256CalculateHash(hash, content_id.uuid, sizeof(ContentId));
     hash_bytes = (*((u16*)hash) & 0xff00) >> 6;
-    PathUtils::GetContentFileName(content_name, content_id);
+    NcmUtils::GetContentFileName(content_name, content_id);
     if (snprintf(path_out, FS_MAX_PATH-1, "%s/%08X/%s", root, hash_bytes, content_name) < 0) {
         std::abort();
     }
@@ -61,7 +61,7 @@ void ContentStorageInterface::MakeContentPathDualLayered(char* path_out, Content
     sha256CalculateHash(hash, content_id.uuid, sizeof(ContentId));
     hash_lower = (*((u16*)hash) >> 4) & 0x3f;
     hash_upper = (*((u16*)hash) & 0xff00) >> 10;
-    PathUtils::GetContentFileName(content_name, content_id);
+    NcmUtils::GetContentFileName(content_name, content_id);
     if (snprintf(path_out, FS_MAX_PATH-1, "%s/%08X/%08X/%s", root, hash_upper, hash_lower, content_name) < 0) {
         std::abort();
     }
@@ -288,7 +288,7 @@ Result ContentStorageInterface::CleanupAllPlaceHolder() {
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::ListPlaceHolder(Out<u32> entries_read, OutBuffer<PlaceHolderId> out_buf) {
+Result ContentStorageInterface::ListPlaceHolder(Out<u32> out_count, OutBuffer<PlaceHolderId> out_buf) {
     if (this->disabled) {
         return ResultNcmInvalidContentStorage;
     }
@@ -307,14 +307,14 @@ Result ContentStorageInterface::ListPlaceHolder(Out<u32> entries_read, OutBuffer
             }
             
             PlaceHolderId cur_entry_placeholder_id = {0};
-            R_TRY(PathUtils::GetPlaceHolderIdFromDirEntry(&cur_entry_placeholder_id, dir_entry));
-            out_buf.buffer[entry_count++] = cur_entry_placeholder_id;
+            R_TRY(NcmUtils::GetPlaceHolderIdFromDirEntry(&cur_entry_placeholder_id, dir_entry));
+            out_buf[entry_count++] = cur_entry_placeholder_id;
         }
         
         return ResultSuccess;
     }));
 
-    entries_read.SetValue(static_cast<u32>(entry_count));
+    out_count.SetValue(static_cast<u32>(entry_count));
     return ResultSuccess;
 }
 
@@ -342,9 +342,49 @@ Result ContentStorageInterface::GetContentCount(Out<u32> out_count) {
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::ListContentId(Out<u32> entries_read, OutBuffer<ContentId> out_buf, u32 start_offset)
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::ListContentId(Out<u32> out_count, OutBuffer<ContentId> out_buf, u32 start_offset) {
+    if (start_offset >> 0x1f != 0) {
+        return ResultNcmInvalidOffset;
+    }
+
+    char content_root_path[FS_MAX_PATH] = {0};
+    this->GetContentRootPath(content_root_path);
+    unsigned int dir_depth = this->GetContentDirectoryDepth();
+    size_t entry_count = 0;
+
+    R_TRY(FsUtils::TraverseDirectory(content_root_path, dir_depth, [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
+        *should_continue = true;
+
+        if (dir_entry->d_type == DT_REG) {
+            /* Skip entries until we reach the start offset. */
+            if (start_offset > 0) {
+                start_offset--;
+                return ResultSuccess;
+            }
+
+            /* We don't necessarily expect to be able to completely fill the output buffer. */
+            if (entry_count > out_buf.num_elements) {
+                *should_continue = false;
+                return ResultSuccess;
+            }
+
+            size_t name_len = strlen(dir_entry->d_name);
+            std::optional<ContentId> content_id = std::nullopt;
+            NcmUtils::GetContentIdFromString(dir_entry->d_name, name_len, &content_id);
+
+            /* Skip to the next entry if the id was invalid. */
+            if (!content_id) {
+                return ResultSuccess;
+            }
+
+            out_buf[entry_count++] = *content_id;
+        }
+
+        return ResultSuccess;
+    }));
+
+    out_count.SetValue(static_cast<u32>(entry_count));
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::GetSizeFromContentId(Out<u64> size, ContentId content_id)
