@@ -28,6 +28,9 @@ class PlaceHolderAccessor {
                 u64 counter;
         };
 
+        static void MakePlaceHolderPathUnlayered(char* out_path, PlaceHolderId placeholder_id, const char* root);
+        static void MakePlaceHolderPathHashByteLayered(char* out_path, PlaceHolderId placeholder_id, const char* root);
+
     public:
         static constexpr size_t MaxCaches = 0x2;
 
@@ -57,6 +60,7 @@ class PlaceHolderAccessor {
             this->make_placeholder_path_func(out_placeholder_path, placeholder_id, placeholder_root_path);
         }
 
+        unsigned int GetDirectoryDepth();
         void GetPlaceHolderPathUncached(char* out_placeholder_path, PlaceHolderId placeholder_id);
         Result Create(PlaceHolderId placeholder_id, size_t size);
         Result Delete(PlaceHolderId placeholder_id);
