@@ -68,7 +68,7 @@ void ContentStorageInterface::MakeContentPathDualLayered(char* path_out, Content
 }
 
 void ContentStorageInterface::ClearContentCache() {
-    if (memcmp(&this->cached_content_id.uuid, &InvalidUuid.uuid, sizeof(ContentId)) != 0) {
+    if (memcmp(this->cached_content_id.uuid, InvalidUuid.uuid, sizeof(ContentId)) != 0) {
         fclose(this->content_cache_file_handle);
         this->cached_content_id = InvalidUuid;
     }
@@ -89,6 +89,31 @@ unsigned int ContentStorageInterface::GetContentDirectoryDepth() {
     }
 
     std::abort();
+}
+
+Result ContentStorageInterface::OpenContentFile(ContentId content_id) {
+    if (memcmp(this->cached_content_id.uuid, content_id.uuid, sizeof(ContentId)) == 0) {
+        return ResultSuccess;
+    }
+
+    this->ClearContentCache();
+    char content_path[FS_MAX_PATH] = {0};
+    this->GetContentPath(content_path, content_id);
+    errno = 0;
+    this->content_cache_file_handle = fopen(content_path, "rb");
+
+    if (this->content_cache_file_handle == NULL || errno != 0) {
+        Result rc = fsdevGetLastResult();
+
+        if (rc == ResultFsPathNotFound) {
+            return ResultNcmContentNotFound;
+        }
+
+        return rc;
+    }
+
+    this->cached_content_id = content_id;
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::GeneratePlaceHolderId(OutPointerWithServerSize<PlaceHolderId, 0x1> out) {
@@ -446,7 +471,7 @@ Result ContentStorageInterface::RevertToPlaceHolder(PlaceHolderId placeholder_id
         return ResultNcmPlaceHolderNotFound;
     }
     else if (rc == ResultFsPathAlreadyExists) {
-        return ResultNcmContentAlreadyExists;
+        return ResultNcmPlaceHolderAlreadyExists;
     }
 
     return rc;
@@ -461,9 +486,29 @@ Result ContentStorageInterface::SetPlaceHolderSize(PlaceHolderId placeholder_id,
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::ReadContentIdFile(OutBuffer<u8> buf, ContentId content_id, u64 offset)
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::ReadContentIdFile(OutBuffer<u8> buf, ContentId content_id, u64 offset) {
+    /* Offset is too large */
+    if (offset >> 0x3f != 0) {
+        return ResultNcmInvalidOffset;
+    }
+
+    if (this->disabled) {
+        return ResultNcmInvalidContentStorage;
+    }
+
+    char content_path[FS_MAX_PATH] = {0};
+    this->GetContentPath(content_path, content_id);
+    R_TRY(this->OpenContentFile(content_id));
+
+    errno = 0;    
+    fseek(this->content_cache_file_handle, offset, SEEK_SET);
+    fread(buf.buffer, buf.num_elements, 1, this->content_cache_file_handle);
+
+    if (errno != 0) {
+        return fsdevGetLastResult();
+    }
+
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::GetRightsIdFromPlaceHolderId(Out<RightsId> out, PlaceHolderId placeholder_id)

@@ -53,13 +53,13 @@ unsigned int PlaceHolderAccessor::GetDirectoryDepth() {
 void PlaceHolderAccessor::GetPlaceHolderPathUncached(char* placeholder_path_out, PlaceHolderId placeholder_id) {
     std::scoped_lock<HosMutex> lock(this->cache_mutex);
 
-    if (memcmp(&placeholder_id.uuid, &InvalidUuid.uuid, sizeof(PlaceHolderId)) != 0) {
+    if (memcmp(placeholder_id.uuid, InvalidUuid.uuid, sizeof(PlaceHolderId)) != 0) {
         CacheEntry* found_cache = NULL;
         
         for (size_t i = 0; i < PlaceHolderAccessor::MaxCaches; i++) {
             CacheEntry* cache = &this->caches[i];
 
-            if (memcmp(&placeholder_id.uuid, &cache->id.uuid, sizeof(PlaceHolderId)) == 0) {
+            if (memcmp(placeholder_id.uuid, cache->id.uuid, sizeof(PlaceHolderId)) == 0) {
                 found_cache = cache;
                 break;
             }
@@ -165,11 +165,11 @@ bool PlaceHolderAccessor::LoadFromCache(FILE** out_handle, PlaceHolderId placeho
 }
 
 PlaceHolderAccessor::CacheEntry *PlaceHolderAccessor::FindInCache(PlaceHolderId placeholder_id) {
-    if (memcmp(&placeholder_id.uuid, &InvalidUuid.uuid, sizeof(PlaceHolderId)) == 0) {
+    if (memcmp(placeholder_id.uuid, InvalidUuid.uuid, sizeof(PlaceHolderId)) == 0) {
         return nullptr;
     }
     for (size_t i = 0; i < MaxCaches; i++) {
-        if (memcmp(&placeholder_id.uuid, &this->caches[i].id.uuid, sizeof(PlaceHolderId)) == 0) {
+        if (memcmp(placeholder_id.uuid, this->caches[i].id.uuid, sizeof(PlaceHolderId)) == 0) {
             return &this->caches[i];
         }
     }
@@ -182,7 +182,7 @@ void PlaceHolderAccessor::FlushCache(FILE* handle, PlaceHolderId placeholder_id)
 
     /* Find an empty cache */
     for (size_t i = 0; i < MaxCaches; i++) {
-        if (memcmp(&placeholder_id.uuid, &InvalidUuid.uuid, sizeof(PlaceHolderId)) != 0) {
+        if (memcmp(placeholder_id.uuid, InvalidUuid.uuid, sizeof(PlaceHolderId)) != 0) {
             cache = &this->caches[i];
             break;
         }
@@ -208,7 +208,7 @@ void PlaceHolderAccessor::ClearAllCaches() {
     for (size_t i = 0; i < MaxCaches; i++) {
         CacheEntry* cache = &this->caches[i];
 
-        if (memcmp(&cache->id.uuid, &InvalidUuid.uuid, sizeof(PlaceHolderId)) != 0) {
+        if (memcmp(cache->id.uuid, InvalidUuid.uuid, sizeof(PlaceHolderId)) != 0) {
             fsync(fileno(cache->handle));
             fclose(cache->handle);
             cache->id = InvalidUuid;
