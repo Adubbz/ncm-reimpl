@@ -146,6 +146,45 @@ Result PlaceHolderAccessor::SetSize(PlaceHolderId placeholder_id, size_t size) {
     return rc;
 }
 
+Result PlaceHolderAccessor::GetSize(bool* found_in_cache, size_t* out_size, PlaceHolderId placeholder_id) {
+    FILE* f = NULL;
+    
+    /* Set the scope for the scoped_lock. */
+    {
+        std::scoped_lock<HosMutex> lock(this->cache_mutex);
+        
+        if (memcmp(placeholder_id.uuid, InvalidUuid.uuid, sizeof(PlaceHolderId)) == 0) {
+            *found_in_cache = false;
+            return ResultSuccess;
+        }
+
+        CacheEntry* cache_entry = this->FindInCache(placeholder_id);
+
+        if (cache_entry == nullptr) {
+            *found_in_cache = false;
+            return ResultSuccess;
+        }
+
+        cache_entry->id = InvalidUuid;
+        f = cache_entry->handle;
+    }
+
+    this->FlushCache(f, placeholder_id);
+    
+    errno = 0;
+    fseek(f, 0L, SEEK_END);
+    size_t size = ftell(f);
+    fseek(f, 0L, SEEK_SET);
+
+    if (errno != 0) {
+        return fsdevGetLastResult();
+    }
+
+    *found_in_cache = true;
+    *out_size = size;
+    return ResultSuccess;
+}
+
 Result PlaceHolderAccessor::EnsureRecursively(PlaceHolderId placeholder_id) {
     char placeholder_path[FS_MAX_PATH] = {0};
     this->GetPlaceHolderPath(placeholder_path, placeholder_id);

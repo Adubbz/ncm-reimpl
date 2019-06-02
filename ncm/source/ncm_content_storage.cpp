@@ -557,9 +557,35 @@ Result ContentStorageInterface::FlushPlaceHolder() {
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::GetSizeFromPlaceHolderId(Out<u64> out, PlaceHolderId placeholder_id)
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::GetSizeFromPlaceHolderId(Out<u64> out_size, PlaceHolderId placeholder_id) {
+    if (this->disabled) {
+        return ResultNcmInvalidContentStorage;
+    }
+
+    bool found_in_cache = false;
+    size_t size = 0;
+
+    R_TRY(this->placeholder_accessor.GetSize(&found_in_cache, &size, placeholder_id));
+
+    if (found_in_cache) {
+        out_size.SetValue(size);
+        return ResultSuccess;
+    }
+
+    char placeholder_path[FS_MAX_PATH] = {0};
+    struct stat st;
+
+    this->placeholder_accessor.GetPlaceHolderPathUncached(placeholder_path, placeholder_id);
+    errno = 0;
+    stat(placeholder_path, &st);
+
+    if (errno != 0) {
+        return fsdevGetLastResult();
+    }
+
+    out_size.SetValue(st.st_size);
+
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::RepairInvalidFileAttribute()
