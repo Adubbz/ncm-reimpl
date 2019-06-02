@@ -523,10 +523,6 @@ Result ContentStorageInterface::GetRightsIdFromContentId(Out<RightsId> out, Cont
 
 Result ContentStorageInterface::WriteContentForDebug(ContentId content_id, u64 offset, InBuffer<u8> data) {
     FILE* f = nullptr;
-
-    ON_SCOPE_EXIT {
-        fclose(f);
-    };
     
     /* Offset is too large */
     if (offset >> 0x3f != 0) {
@@ -546,6 +542,10 @@ Result ContentStorageInterface::WriteContentForDebug(ContentId content_id, u64 o
 
     errno = 0;
     f = fopen(content_path, "w+b");
+
+    ON_SCOPE_EXIT {
+        fclose(f);
+    };
 
     if (f == NULL || errno != 0) {
         return fsdevGetLastResult();
