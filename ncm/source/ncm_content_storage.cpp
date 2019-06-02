@@ -533,7 +533,11 @@ Result ContentStorageInterface::WriteContentForDebug(ContentId content_id, u64 o
         return ResultNcmInvalidContentStorage;
     }
 
-    /* N aborts here if splIsDevelopment returns false. We're not going to. */
+    bool is_development = false;
+
+    if (R_FAILED(splIsDevelopment(&is_development)) || !is_development) {
+        std::abort();
+    }
 
     this->ClearContentCache();
 
