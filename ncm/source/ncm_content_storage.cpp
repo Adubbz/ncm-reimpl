@@ -17,10 +17,11 @@
 #include "ncm_content_storage.hpp"
 #include "fs_utils.hpp"
 #include "ncm_utils.hpp"
+#include "ncm_path_utils.hpp"
 
 void ContentStorageInterface::MakeContentPathUnlayered(char* path_out, ContentId content_id, const char* root) {
     char content_name[FS_MAX_PATH] = {0};
-    NcmUtils::GetContentFileName(content_name, content_id);
+    PathUtils::GetContentFileName(content_name, content_id);
     if (snprintf(path_out, FS_MAX_PATH-1, "%s/%s", root, content_name) < 0) {
         std::abort();
     }
@@ -33,7 +34,7 @@ void ContentStorageInterface::MakeContentPathHashByteLayered(char* path_out, Con
 
     sha256CalculateHash(hash, content_id.uuid, sizeof(ContentId));
     hash_byte = hash[0];
-    NcmUtils::GetContentFileName(content_name, content_id);
+    PathUtils::GetContentFileName(content_name, content_id);
     if (snprintf(path_out, FS_MAX_PATH-1, "%s/%08X/%s", root, hash_byte, content_name) < 0) {
         std::abort();
     }
@@ -46,7 +47,7 @@ void ContentStorageInterface::MakeContentPath10BitLayered(char* path_out, Conten
 
     sha256CalculateHash(hash, content_id.uuid, sizeof(ContentId));
     hash_bytes = (*((u16*)hash) & 0xff00) >> 6;
-    NcmUtils::GetContentFileName(content_name, content_id);
+    PathUtils::GetContentFileName(content_name, content_id);
     if (snprintf(path_out, FS_MAX_PATH-1, "%s/%08X/%s", root, hash_bytes, content_name) < 0) {
         std::abort();
     }
@@ -61,7 +62,7 @@ void ContentStorageInterface::MakeContentPathDualLayered(char* path_out, Content
     sha256CalculateHash(hash, content_id.uuid, sizeof(ContentId));
     hash_lower = (*((u16*)hash) >> 4) & 0x3f;
     hash_upper = (*((u16*)hash) & 0xff00) >> 10;
-    NcmUtils::GetContentFileName(content_name, content_id);
+    PathUtils::GetContentFileName(content_name, content_id);
     if (snprintf(path_out, FS_MAX_PATH-1, "%s/%08X/%08X/%s", root, hash_upper, hash_lower, content_name) < 0) {
         std::abort();
     }
@@ -575,13 +576,44 @@ Result ContentStorageInterface::GetSizeFromPlaceHolderId(Out<u64> out_size, Plac
     }
 
     out_size.SetValue(st.st_size);
-
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::RepairInvalidFileAttribute()
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::RepairInvalidFileAttribute() {
+    char content_root_path[FS_MAX_PATH] = {0};
+    this->GetContentRootPath(content_root_path);
+    unsigned int dir_depth = this->GetContentDirectoryDepth();
+
+    R_TRY(FsUtils::TraverseDirectory(content_root_path, dir_depth, [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
+        *should_continue = true;
+
+        if (dir_entry->d_type == DT_DIR) {
+            if (PathUtils::IsNcaPath(current_path)) {
+                fsdevSetArchiveBit(current_path);
+            }
+        }
+
+        return ResultSuccess;
+    }));
+
+    char placeholder_root_path[FS_MAX_PATH] = {0};
+    this->placeholder_accessor.ClearAllCaches();
+    this->placeholder_accessor.GetPlaceHolderRootPath(placeholder_root_path);
+    dir_depth = this->placeholder_accessor.GetDirectoryDepth();
+
+    R_TRY(FsUtils::TraverseDirectory(placeholder_root_path, dir_depth, [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
+        *should_continue = true;
+
+        if (dir_entry->d_type == DT_DIR) {
+            if (PathUtils::IsNcaPath(current_path)) {
+                fsdevSetArchiveBit(current_path);
+            }
+        }
+
+        return ResultSuccess;
+    }));
+
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::GetRightsIdFromPlaceHolderIdWithCache(Out<RightsId> out, PlaceHolderId placeholder_id, ContentId content_id) {

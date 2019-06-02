@@ -22,22 +22,10 @@ void NcmUtils::GetStringFromContentId(char* out, ContentId content_id) {
     }
 }
 
-void NcmUtils::GetContentFileName(char* out, ContentId content_id) {
-    char content_name[sizeof(ContentId)*2+1] = {0};
-    GetStringFromContentId(content_name, content_id);
-    snprintf(out, FS_MAX_PATH-1, "%s%s", content_name, ".nca");
-}
-
 void NcmUtils::GetStringFromPlaceHolderId(char* out, PlaceHolderId placeholder_id) {
     for (size_t i = 0; i < sizeof(PlaceHolderId); i++) {
         snprintf(out+i, 3, "%02x", placeholder_id.uuid[i]);
     }
-}
-
-void NcmUtils::GetPlaceHolderFileName(char* out, PlaceHolderId placeholder_id) {
-    char placeholder_name[sizeof(PlaceHolderId)*2+1] = {0};
-    GetStringFromPlaceHolderId(placeholder_name, placeholder_id);
-    snprintf(out, FS_MAX_PATH-1, "%s%s", placeholder_name, ".nca");
 }
 
 Result NcmUtils::GetPlaceHolderIdFromDirEntry(PlaceHolderId* out, struct dirent* dir_entry) {

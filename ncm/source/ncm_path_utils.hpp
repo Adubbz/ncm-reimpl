@@ -17,14 +17,22 @@
 #pragma once
 #include <switch.h>
 #include <stratosphere.hpp>
-#include <sys/dirent.h>
 #include "ncm_types.hpp"
 
-class NcmUtils {
+class PathUtils {
     public:
-        static void GetStringFromContentId(char* out, ContentId content_id);
-        static void GetStringFromPlaceHolderId(char* out, PlaceHolderId placeholder_id);
+        static void GetContentFileName(char* out, ContentId content_id);
+        static void GetPlaceHolderFileName(char* out, PlaceHolderId placeholder_id);
+        static bool IsHexChar(char c);
+        static bool IsNcaPath(const char* path);
+};
 
-        static Result GetPlaceHolderIdFromDirEntry(PlaceHolderId* out, struct dirent* dir_entry);
-        static void GetContentIdFromString(const char* str, size_t len, std::optional<ContentId>* out);
+class PathView {
+    private:
+        std::string_view path; /* Nintendo uses nn::util::string_view here. */    
+    public:
+        PathView(std::string_view p) : path(p) { /* ...*/ }
+        bool HasPrefix(std::string_view prefix) const;
+        bool HasSuffix(std::string_view suffix) const;
+        std::string_view GetFileName() const;
 };
