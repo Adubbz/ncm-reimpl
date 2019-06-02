@@ -29,18 +29,6 @@ void PathUtils::GetPlaceHolderFileName(char* out, PlaceHolderId placeholder_id) 
     snprintf(out, FS_MAX_PATH-1, "%s%s", placeholder_name, ".nca");
 }
 
-bool PathUtils::IsHexChar(char c) {
-    /* This character is numerical. */
-    if ((c - '0') < 9) {
-        return true;
-    }
-
-    char lowercase_char = c | 0x20;
-    
-    /* Only a-f are valid hex. */
-    return (lowercase_char - 'a') < 6;
-}
-
 bool PathUtils::IsNcaPath(const char* path) {
     PathView path_view(path);
 
@@ -55,7 +43,7 @@ bool PathUtils::IsNcaPath(const char* path) {
     }
 
     for (size_t i = 0; i < sizeof(Uuid)*2; i++) {
-        if (!IsHexChar(file_name.at(i))) {
+        if (!std::isxdigit(file_name.at(i))) {
             return false;
         }
     }

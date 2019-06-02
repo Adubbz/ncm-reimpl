@@ -23,7 +23,6 @@ class PathUtils {
     public:
         static void GetContentFileName(char* out, ContentId content_id);
         static void GetPlaceHolderFileName(char* out, PlaceHolderId placeholder_id);
-        static bool IsHexChar(char c);
         static bool IsNcaPath(const char* path);
 };
 
