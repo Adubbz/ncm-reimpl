@@ -92,7 +92,7 @@ unsigned int ContentStorageInterface::GetContentDirectoryDepth() {
     std::abort();
 }
 
-Result ContentStorageInterface::OpenContentFile(ContentId content_id) {
+Result ContentStorageInterface::OpenCachedContentFile(ContentId content_id) {
     if (memcmp(this->cached_content_id.uuid, content_id.uuid, sizeof(ContentId)) == 0) {
         return ResultSuccess;
     }
@@ -187,6 +187,11 @@ Result ContentStorageInterface::WritePlaceHolder(PlaceHolderId placeholder_id, u
     errno = 0;
     fseek(f, offset, SEEK_SET);
     fwrite(data.buffer, sizeof(u8), data.num_elements, f);
+
+    if (this->placeholder_accessor.delay_flush ^ 1) {
+        fsync(fileno(f));
+    }
+
     this->placeholder_accessor.FlushCache(f, placeholder_id);
 
     if (errno != 0) {
@@ -490,7 +495,7 @@ Result ContentStorageInterface::ReadContentIdFile(OutBuffer<u8> buf, ContentId c
 
     char content_path[FS_MAX_PATH] = {0};
     this->GetContentPath(content_path, content_id);
-    R_TRY(this->OpenContentFile(content_id));
+    R_TRY(this->OpenCachedContentFile(content_id));
 
     errno = 0;    
     fseek(this->content_cache_file_handle, offset, SEEK_SET);
@@ -513,9 +518,45 @@ Result ContentStorageInterface::GetRightsIdFromContentId(Out<RightsId> out, Cont
     return ResultKernelConnectionClosed;
 }
 
-Result ContentStorageInterface::WriteContentForDebug(ContentId content_id, u64 offset, InBuffer<u8> data)
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::WriteContentForDebug(ContentId content_id, u64 offset, InBuffer<u8> data) {
+    FILE* f = nullptr;
+
+    ON_SCOPE_EXIT {
+        fclose(f);
+    };
+    
+    /* Offset is too large */
+    if (offset >> 0x3f != 0) {
+        return ResultNcmInvalidOffset;
+    }
+
+    if (this->disabled) {
+        return ResultNcmInvalidContentStorage;
+    }
+
+    /* N aborts here if splIsDevelopment returns false. We're not going to. */
+
+    this->ClearContentCache();
+
+    char content_path[FS_MAX_PATH] = {0};
+    this->GetContentPath(content_path, content_id);
+
+    errno = 0;
+    f = fopen(content_path, "w+b");
+
+    if (f == NULL || errno != 0) {
+        return fsdevGetLastResult();
+    }
+
+    fseek(f, offset, SEEK_SET);
+    fwrite(data.buffer, sizeof(u8), data.num_elements, f);
+    fsync(fileno(f));
+
+    if (errno != 0) {
+        return fsdevGetLastResult();
+    }
+
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::GetFreeSpaceSize(Out<u64> out_size) {

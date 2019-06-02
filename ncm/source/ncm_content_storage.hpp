@@ -70,7 +70,7 @@ class ContentStorageInterface : public IServiceObject
     private:
         void ClearContentCache();
         unsigned int GetContentDirectoryDepth();
-        Result OpenContentFile(ContentId content_id);
+        Result OpenCachedContentFile(ContentId content_id);
 
         inline void GetContentRootPath(char* out_content_root) {
             /* TODO: Replace with BoundedString? */

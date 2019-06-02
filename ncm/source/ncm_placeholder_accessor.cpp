@@ -114,7 +114,7 @@ Result PlaceHolderAccessor::Open(FILE** out_handle, PlaceHolderId placeholder_id
 
     this->GetPlaceHolderPath(placeholder_path, placeholder_id);
     errno = 0;
-    *out_handle = fopen(placeholder_path, "w+");
+    *out_handle = fopen(placeholder_path, "w+b");
 
     if (errno != 0) {
         return fsdevGetLastResult();
