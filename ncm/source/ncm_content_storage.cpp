@@ -449,12 +449,16 @@ Result ContentStorageInterface::RevertToPlaceHolder(PlaceHolderId placeholder_id
         return ResultNcmContentAlreadyExists;
     }
 
-    return ResultSuccess;
+    return rc;
 }
 
-Result ContentStorageInterface::SetPlaceHolderSize(PlaceHolderId placeholder_id, u64 size)
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::SetPlaceHolderSize(PlaceHolderId placeholder_id, u64 size) {
+    if (this->disabled) {
+        return ResultNcmInvalidContentStorage;
+    }
+
+    R_TRY(this->placeholder_accessor.SetSize(placeholder_id, size));
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::ReadContentIdFile(OutBuffer<u8> buf, ContentId content_id, u64 offset)

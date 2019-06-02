@@ -128,6 +128,24 @@ Result PlaceHolderAccessor::Open(FILE** out_handle, PlaceHolderId placeholder_id
     return ResultSuccess;
 }
 
+Result PlaceHolderAccessor::SetSize(PlaceHolderId placeholder_id, size_t size) {
+    Result rc = ResultSuccess;
+    char placeholder_path[FS_MAX_PATH] = {0};
+    errno = 0;
+    this->GetPlaceHolderPath(placeholder_path, placeholder_id);
+    truncate(placeholder_path, size);
+
+    if (errno != 0) {
+        rc = fsdevGetLastResult();
+    }
+
+    if (rc == ResultFsPathNotFound) {
+        return ResultNcmPlaceHolderNotFound;
+    }
+
+    return rc;
+}
+
 Result PlaceHolderAccessor::EnsureRecursively(PlaceHolderId placeholder_id) {
     char placeholder_path[FS_MAX_PATH] = {0};
     this->GetPlaceHolderPath(placeholder_path, placeholder_id);

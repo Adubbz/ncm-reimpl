@@ -65,6 +65,7 @@ class PlaceHolderAccessor {
         Result Create(PlaceHolderId placeholder_id, size_t size);
         Result Delete(PlaceHolderId placeholder_id);
         Result Open(FILE** out_handle, PlaceHolderId placeholder_id);
+        Result SetSize(PlaceHolderId placeholder_id, size_t size);
         Result EnsureRecursively(PlaceHolderId placeholder_id);
 
         CacheEntry *FindInCache(PlaceHolderId placeholder_id);
