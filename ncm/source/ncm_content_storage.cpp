@@ -633,8 +633,9 @@ Result ContentStorageInterface::RepairInvalidFileAttribute() {
 
         if (dir_entry->d_type == DT_DIR) {
             if (PathUtils::IsNcaPath(current_path)) {
-                fsdevSetArchiveBit(current_path);
-                *should_retry_dir_read = true;
+                if (R_SUCCEEDED(fsdevSetArchiveBit(current_path))) {
+                    *should_retry_dir_read = true;
+                }
             }
         }
 
