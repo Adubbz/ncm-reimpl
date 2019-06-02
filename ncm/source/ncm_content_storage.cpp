@@ -165,7 +165,7 @@ Result ContentStorageInterface::WritePlaceHolder(PlaceHolderId placeholder_id, u
     errno = 0;
     fseek(f, offset, SEEK_SET);
     fwrite(data.buffer, sizeof(u8), data.num_elements, f);
-    this->placeholder_accessor.StoreToCache(f, placeholder_id);
+    this->placeholder_accessor.FlushCache(f, placeholder_id);
 
     if (errno != 0) {
         return fsdevGetLastResult();
@@ -416,9 +416,40 @@ Result ContentStorageInterface::DisableForcibly() {
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::RevertToPlaceHolder(PlaceHolderId placeholder_id, ContentId content_id_0, ContentId content_id_1)
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::RevertToPlaceHolder(PlaceHolderId placeholder_id, ContentId old_content_id, ContentId new_content_id) {
+    Result rc = ResultSuccess;
+    
+    if (this->disabled) {
+        return ResultNcmInvalidContentStorage;
+    }
+    
+    char old_content_path[FS_MAX_PATH] = {0};
+    char new_content_path[FS_MAX_PATH] = {0};
+    char placeholder_path[FS_MAX_PATH] = {0};
+
+    this->ClearContentCache();
+
+    /* Ensure the new content path is ready. */
+    this->GetContentPath(new_content_path, new_content_id);
+    R_TRY(FsUtils::EnsureParentDirectoryRecursively(new_content_path));
+
+    R_TRY(this->placeholder_accessor.EnsureRecursively(placeholder_id));
+    this->placeholder_accessor.GetPlaceHolderPathUncached(placeholder_path, placeholder_id);
+    errno = 0;
+    rename(old_content_path, placeholder_path);
+
+    if (errno != 0) {
+        rc = fsdevGetLastResult();
+    }
+
+    if (rc == ResultFsPathNotFound) {
+        return ResultNcmPlaceHolderNotFound;
+    }
+    else if (rc == ResultFsPathAlreadyExists) {
+        return ResultNcmContentAlreadyExists;
+    }
+
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::SetPlaceHolderSize(PlaceHolderId placeholder_id, u64 size)

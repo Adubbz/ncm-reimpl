@@ -80,9 +80,7 @@ Result PlaceHolderAccessor::Create(PlaceHolderId placeholder_id, size_t size) {
     Result rc = ResultSuccess;
     char placeholder_path[FS_MAX_PATH] = {0};
 
-    this->GetPlaceHolderPath(placeholder_path, placeholder_id);
-    R_TRY(FsUtils::EnsureParentDirectoryRecursively(placeholder_path));
-    std::fill(placeholder_path, placeholder_path + FS_MAX_PATH, 0);
+    this->EnsureRecursively(placeholder_id);
     this->GetPlaceHolderPathUncached(placeholder_path, placeholder_id);
 
     if (R_FAILED(rc = FsUtils::CreateFile(placeholder_path, size, true)) && rc != ResultFsPathAlreadyExists) {
@@ -130,6 +128,13 @@ Result PlaceHolderAccessor::Open(FILE** out_handle, PlaceHolderId placeholder_id
     return ResultSuccess;
 }
 
+Result PlaceHolderAccessor::EnsureRecursively(PlaceHolderId placeholder_id) {
+    char placeholder_path[FS_MAX_PATH] = {0};
+    this->GetPlaceHolderPath(placeholder_path, placeholder_id);
+    R_TRY(FsUtils::EnsureParentDirectoryRecursively(placeholder_path));
+    return ResultSuccess;
+}
+
 bool PlaceHolderAccessor::LoadFromCache(FILE** out_handle, PlaceHolderId placeholder_id) {
     std::scoped_lock<HosMutex> lk(this->cache_mutex);
     CacheEntry *entry = this->FindInCache(placeholder_id);
@@ -153,7 +158,7 @@ PlaceHolderAccessor::CacheEntry *PlaceHolderAccessor::FindInCache(PlaceHolderId 
     return nullptr;
 }
 
-void PlaceHolderAccessor::StoreToCache(FILE* handle, PlaceHolderId placeholder_id) {
+void PlaceHolderAccessor::FlushCache(FILE* handle, PlaceHolderId placeholder_id) {
     std::scoped_lock<HosMutex> lk(this->cache_mutex);
     CacheEntry* cache = nullptr;
 

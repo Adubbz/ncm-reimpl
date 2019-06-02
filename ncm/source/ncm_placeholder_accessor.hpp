@@ -64,10 +64,11 @@ class PlaceHolderAccessor {
         void GetPlaceHolderPathUncached(char* out_placeholder_path, PlaceHolderId placeholder_id);
         Result Create(PlaceHolderId placeholder_id, size_t size);
         Result Delete(PlaceHolderId placeholder_id);
-        Result Open(FILE** out_handle, PlaceHolderId id);
+        Result Open(FILE** out_handle, PlaceHolderId placeholder_id);
+        Result EnsureRecursively(PlaceHolderId placeholder_id);
 
         CacheEntry *FindInCache(PlaceHolderId placeholder_id);
         bool LoadFromCache(FILE** out_handle, PlaceHolderId placeholder_id);
-        void StoreToCache(FILE* handle, PlaceHolderId placeholder_id);
+        void FlushCache(FILE* handle, PlaceHolderId placeholder_id);
         void ClearAllCaches();
 };

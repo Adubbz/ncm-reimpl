@@ -103,7 +103,7 @@ class ContentStorageInterface : public IServiceObject
         Result ListContentId(Out<u32> out_count, OutBuffer<ContentId> out_buf, u32 start_offset);
         Result GetSizeFromContentId(Out<u64> out_size, ContentId content_id);
         Result DisableForcibly();
-        Result RevertToPlaceHolder(PlaceHolderId placeholder_id, ContentId content_id_0, ContentId content_id_1);
+        Result RevertToPlaceHolder(PlaceHolderId placeholder_id, ContentId old_content_id, ContentId new_content_id);
         Result SetPlaceHolderSize(PlaceHolderId placeholder_id, u64 size);
         Result ReadContentIdFile(OutBuffer<u8> buf, ContentId content_id, u64 offset);
         Result GetRightsIdFromPlaceHolderId(Out<RightsId> out, PlaceHolderId placeholder_id);
