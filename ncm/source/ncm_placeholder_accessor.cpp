@@ -77,38 +77,32 @@ void PlaceHolderAccessor::GetPlaceHolderPathUncached(char* placeholder_path_out,
 }
 
 Result PlaceHolderAccessor::Create(PlaceHolderId placeholder_id, size_t size) {
-    Result rc = ResultSuccess;
     char placeholder_path[FS_MAX_PATH] = {0};
 
     this->EnsureRecursively(placeholder_id);
     this->GetPlaceHolderPathUncached(placeholder_path, placeholder_id);
 
-    if (R_FAILED(rc = FsUtils::CreateFile(placeholder_path, size, true)) && rc != ResultFsPathAlreadyExists) {
-        return rc;
-    }
+    R_TRY_CATCH(FsUtils::CreateFile(placeholder_path, size, true)) {
+        R_CATCH(ResultFsPathAlreadyExists) {
+            return ResultNcmPlaceHolderAlreadyExists;
+        }
+    } R_END_TRY_CATCH;
 
-    if (rc == ResultFsPathAlreadyExists) {
-        return ResultNcmPlaceHolderAlreadyExists;
-    }
-
-    return rc;
+    return ResultSuccess;
 }
 
 Result PlaceHolderAccessor::Delete(PlaceHolderId placeholder_id) {
-    Result rc = ResultSuccess;
     char placeholder_path[FS_MAX_PATH] = {0};
 
     this->GetPlaceHolderPathUncached(placeholder_path, placeholder_id);
 
-    if (R_FAILED(rc = fsdevDeleteDirectoryRecursively(placeholder_path)) && rc != ResultFsPathNotFound) {
-        return rc;
-    }
+    R_TRY_CATCH(fsdevDeleteDirectoryRecursively(placeholder_path)) {
+        R_CATCH(ResultFsPathNotFound) {
+            return ResultNcmPlaceHolderNotFound;
+        }
+    } R_END_TRY_CATCH;
 
-    if (rc == ResultFsPathNotFound) {
-        return ResultNcmPlaceHolderNotFound;
-    }
-
-    return rc;
+    return ResultSuccess;
 }
 
 Result PlaceHolderAccessor::Open(FILE** out_handle, PlaceHolderId placeholder_id) {
@@ -129,21 +123,20 @@ Result PlaceHolderAccessor::Open(FILE** out_handle, PlaceHolderId placeholder_id
 }
 
 Result PlaceHolderAccessor::SetSize(PlaceHolderId placeholder_id, size_t size) {
-    Result rc = ResultSuccess;
     char placeholder_path[FS_MAX_PATH] = {0};
     errno = 0;
     this->GetPlaceHolderPath(placeholder_path, placeholder_id);
     truncate(placeholder_path, size);
 
     if (errno != 0) {
-        rc = fsdevGetLastResult();
+        R_TRY_CATCH(fsdevGetLastResult()) {
+            R_CATCH(ResultFsPathNotFound) {
+                return ResultNcmPlaceHolderNotFound;
+            }
+        } R_END_TRY_CATCH;
     }
 
-    if (rc == ResultFsPathNotFound) {
-        return ResultNcmPlaceHolderNotFound;
-    }
-
-    return rc;
+    return ResultSuccess;
 }
 
 Result PlaceHolderAccessor::GetSize(bool* found_in_cache, size_t* out_size, PlaceHolderId placeholder_id) {

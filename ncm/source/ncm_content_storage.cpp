@@ -103,13 +103,11 @@ Result ContentStorageInterface::OpenContentFile(ContentId content_id) {
     this->content_cache_file_handle = fopen(content_path, "rb");
 
     if (this->content_cache_file_handle == NULL || errno != 0) {
-        Result rc = fsdevGetLastResult();
-
-        if (rc == ResultFsPathNotFound) {
-            return ResultNcmContentNotFound;
-        }
-
-        return rc;
+        R_TRY_CATCH(fsdevGetLastResult()) {
+            R_CATCH(ResultFsPathNotFound) {
+                return ResultNcmContentNotFound;
+            }
+        } R_END_TRY_CATCH;
     }
 
     this->cached_content_id = content_id;
@@ -177,15 +175,13 @@ Result ContentStorageInterface::WritePlaceHolder(PlaceHolderId placeholder_id, u
         return ResultNcmInvalidContentStorage;
     }
 
-    Result rc = ResultSuccess;
     FILE* f = nullptr;
 
-    if (R_FAILED(rc = this->placeholder_accessor.Open(&f, placeholder_id))) {
-        if (rc == ResultFsPathNotFound) {
+    R_TRY_CATCH(this->placeholder_accessor.Open(&f, placeholder_id)) {
+        R_CATCH(ResultFsPathNotFound) {
             return ResultNcmPlaceHolderNotFound;
         }
-        return rc;
-    }
+    } R_END_TRY_CATCH;
 
     errno = 0;
     fseek(f, offset, SEEK_SET);
@@ -216,14 +212,14 @@ Result ContentStorageInterface::Register(PlaceHolderId placeholder_id, ContentId
     rename(placeholder_path, content_path);
 
     if (errno != 0) {
-        Result rc = fsdevGetLastResult();
-
-        if (rc == ResultFsPathNotFound) {
-            return ResultNcmPlaceHolderNotFound;
-        }
-        else if (rc == ResultFsPathAlreadyExists) {
-            return ResultNcmContentAlreadyExists;
-        }
+        R_TRY_CATCH(fsdevGetLastResult()) {
+            R_CATCH(ResultFsPathNotFound) {
+                return ResultNcmPlaceHolderNotFound;
+            }
+            R_CATCH(ResultFsPathAlreadyExists) {
+                return ResultNcmContentAlreadyExists;
+            }
+        } R_END_TRY_CATCH;
     }
 
     return ResultSuccess;
@@ -236,18 +232,15 @@ Result ContentStorageInterface::Delete(ContentId content_id) {
 
     this->ClearContentCache();
 
-    Result rc = ResultSuccess;
     char content_path[FS_MAX_PATH] = {0};
 
     this->GetContentPath(content_path, content_id);
 
-    if (R_FAILED(rc = fsdevDeleteDirectoryRecursively(content_path)) && rc != ResultFsPathNotFound) {
-        return rc;
-    }
-
-    if (rc == ResultFsPathNotFound) {
-        return ResultNcmContentNotFound;
-    }
+    R_TRY_CATCH(fsdevDeleteDirectoryRecursively(content_path)) {
+        R_CATCH(ResultFsPathNotFound) {
+            return ResultNcmContentNotFound;
+        }
+    } R_END_TRY_CATCH;
 
     return ResultSuccess;
 }
@@ -442,8 +435,6 @@ Result ContentStorageInterface::DisableForcibly() {
 }
 
 Result ContentStorageInterface::RevertToPlaceHolder(PlaceHolderId placeholder_id, ContentId old_content_id, ContentId new_content_id) {
-    Result rc = ResultSuccess;
-    
     if (this->disabled) {
         return ResultNcmInvalidContentStorage;
     }
@@ -464,17 +455,17 @@ Result ContentStorageInterface::RevertToPlaceHolder(PlaceHolderId placeholder_id
     rename(old_content_path, placeholder_path);
 
     if (errno != 0) {
-        rc = fsdevGetLastResult();
-    }
+        R_TRY_CATCH(fsdevGetLastResult()) {
+            R_CATCH(ResultFsPathNotFound) {
+                return ResultNcmPlaceHolderNotFound;
+            }
+            R_CATCH(ResultFsPathAlreadyExists) {
+                return ResultNcmPlaceHolderAlreadyExists;
+            }
+        } R_END_TRY_CATCH;
+    } 
 
-    if (rc == ResultFsPathNotFound) {
-        return ResultNcmPlaceHolderNotFound;
-    }
-    else if (rc == ResultFsPathAlreadyExists) {
-        return ResultNcmPlaceHolderAlreadyExists;
-    }
-
-    return rc;
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::SetPlaceHolderSize(PlaceHolderId placeholder_id, u64 size) {
