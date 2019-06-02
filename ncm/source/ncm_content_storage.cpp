@@ -320,8 +320,9 @@ Result ContentStorageInterface::ListPlaceHolder(Out<u32> out_count, OutBuffer<Pl
     unsigned int dir_depth = this->placeholder_accessor.GetDirectoryDepth();
     size_t entry_count = 0;
 
-    R_TRY(FsUtils::TraverseDirectory(placeholder_root_path, dir_depth, [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
+    R_TRY(FsUtils::TraverseDirectory(placeholder_root_path, dir_depth, [&](bool* should_continue, bool* should_retry_dir_read, const char* current_path, struct dirent* dir_entry) {
         *should_continue = true;
+        *should_retry_dir_read = false;
         
         if (dir_entry->d_type == DT_REG) {
             if (entry_count > out_buf.num_elements) {
@@ -350,9 +351,10 @@ Result ContentStorageInterface::GetContentCount(Out<u32> out_count) {
     unsigned int dir_depth = this->GetContentDirectoryDepth();
     u32 content_count = 0;
 
-    R_TRY(FsUtils::TraverseDirectory(content_root_path, dir_depth, [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
+    R_TRY(FsUtils::TraverseDirectory(content_root_path, dir_depth, [&](bool* should_continue, bool* should_retry_dir_read, const char* current_path, struct dirent* dir_entry) {
         *should_continue = true;
-        
+        *should_retry_dir_read = false;
+
         if (dir_entry->d_type == DT_REG) {
             content_count++;
         }
@@ -378,7 +380,8 @@ Result ContentStorageInterface::ListContentId(Out<u32> out_count, OutBuffer<Cont
     unsigned int dir_depth = this->GetContentDirectoryDepth();
     size_t entry_count = 0;
 
-    R_TRY(FsUtils::TraverseDirectory(content_root_path, dir_depth, [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
+    R_TRY(FsUtils::TraverseDirectory(content_root_path, dir_depth, [&](bool* should_continue,  bool* should_retry_dir_read, const char* current_path, struct dirent* dir_entry) {
+        *should_retry_dir_read = false;
         *should_continue = true;
 
         if (dir_entry->d_type == DT_REG) {
@@ -624,12 +627,14 @@ Result ContentStorageInterface::RepairInvalidFileAttribute() {
     char content_root_path[FS_MAX_PATH] = {0};
     this->GetContentRootPath(content_root_path);
     unsigned int dir_depth = this->GetContentDirectoryDepth();
-    auto fix_file_attributes = [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
+    auto fix_file_attributes = [&](bool* should_continue, bool* should_retry_dir_read, const char* current_path, struct dirent* dir_entry) {
+        *should_retry_dir_read = false;
         *should_continue = true;
 
         if (dir_entry->d_type == DT_DIR) {
             if (PathUtils::IsNcaPath(current_path)) {
                 fsdevSetArchiveBit(current_path);
+                *should_retry_dir_read = true;
             }
         }
 
