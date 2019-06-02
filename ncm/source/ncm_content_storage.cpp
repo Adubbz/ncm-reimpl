@@ -583,8 +583,7 @@ Result ContentStorageInterface::RepairInvalidFileAttribute() {
     char content_root_path[FS_MAX_PATH] = {0};
     this->GetContentRootPath(content_root_path);
     unsigned int dir_depth = this->GetContentDirectoryDepth();
-
-    R_TRY(FsUtils::TraverseDirectory(content_root_path, dir_depth, [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
+    auto fix_file_attributes = [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
         *should_continue = true;
 
         if (dir_entry->d_type == DT_DIR) {
@@ -594,24 +593,16 @@ Result ContentStorageInterface::RepairInvalidFileAttribute() {
         }
 
         return ResultSuccess;
-    }));
+    };
+
+    R_TRY(FsUtils::TraverseDirectory(content_root_path, dir_depth, fix_file_attributes));
 
     char placeholder_root_path[FS_MAX_PATH] = {0};
     this->placeholder_accessor.ClearAllCaches();
     this->placeholder_accessor.GetPlaceHolderRootPath(placeholder_root_path);
     dir_depth = this->placeholder_accessor.GetDirectoryDepth();
 
-    R_TRY(FsUtils::TraverseDirectory(placeholder_root_path, dir_depth, [&](bool* should_continue, const char* current_path, struct dirent* dir_entry) {
-        *should_continue = true;
-
-        if (dir_entry->d_type == DT_DIR) {
-            if (PathUtils::IsNcaPath(current_path)) {
-                fsdevSetArchiveBit(current_path);
-            }
-        }
-
-        return ResultSuccess;
-    }));
+    R_TRY(FsUtils::TraverseDirectory(placeholder_root_path, dir_depth, fix_file_attributes));
 
     return ResultSuccess;
 }
