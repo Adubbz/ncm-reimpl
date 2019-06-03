@@ -45,8 +45,7 @@ Result FsUtils::EnsureParentDirectoryRecursively(const char* path) {
                 }
             }
         }
-    }
-    else {
+    } else {
         return ResultNcmAllocationFailed;
     }
 

@@ -17,34 +17,13 @@
 #include "ncm_placeholder_accessor.hpp"
 #include "fs_utils.hpp"
 #include "ncm_utils.hpp"
+#include "ncm_make_path.hpp"
 #include "ncm_path_utils.hpp"
 
-void PlaceHolderAccessor::MakePlaceHolderPathUnlayered(char* path_out, PlaceHolderId placeholder_id, const char* root) {
-    char placeholder_name[FS_MAX_PATH] = {0};
-    PathUtils::GetPlaceHolderFileName(placeholder_name, placeholder_id);
-    if (snprintf(path_out, FS_MAX_PATH-1, "%s/%.36s", root, placeholder_name) < 0) {
-        std::abort();
-    }
-}
-
-void PlaceHolderAccessor::MakePlaceHolderPathHashByteLayered(char* path_out, PlaceHolderId placeholder_id, const char* root) {
-    char placeholder_name[FS_MAX_PATH] = {0};
-    u8 hash[0x20] = {0};
-    u32 hash_byte = 0;
-
-    sha256CalculateHash(hash, placeholder_id.uuid, sizeof(PlaceHolderId));
-    hash_byte = hash[0];
-    PathUtils::GetPlaceHolderFileName(placeholder_name, placeholder_id);
-    if (snprintf(path_out, FS_MAX_PATH-1, "%s/%08X/%s", root, hash_byte, placeholder_name) < 0) {
-        std::abort();
-    }
-}
-
 unsigned int PlaceHolderAccessor::GetDirectoryDepth() {
-    if (this->make_placeholder_path_func == reinterpret_cast<MakePlaceHolderPathFunc>(MakePlaceHolderPathUnlayered)) {
+    if (this->make_placeholder_path_func == static_cast<MakePlaceHolderPathFunc>(PlaceHolderPathBuilder::MakePlaceHolderPathUnlayered)) {
         return 1;
-    }
-    else if (this->make_placeholder_path_func == reinterpret_cast<MakePlaceHolderPathFunc>(MakePlaceHolderPathHashByteLayered)) {
+    } else if (this->make_placeholder_path_func == static_cast<MakePlaceHolderPathFunc>(PlaceHolderPathBuilder::MakePlaceHolderPathHashByteLayered)) {
         return 2;
     }
 

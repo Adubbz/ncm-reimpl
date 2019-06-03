@@ -17,57 +17,9 @@
 #include "ncm_content_storage.hpp"
 #include "fs_utils.hpp"
 #include "ncm_utils.hpp"
+#include "ncm_make_path.hpp"
 #include "ncm_path_utils.hpp"
 #include "ncm_rights_cache.hpp"
-
-void ContentStorageInterface::MakeContentPathUnlayered(char* path_out, ContentId content_id, const char* root) {
-    char content_name[FS_MAX_PATH] = {0};
-    PathUtils::GetContentFileName(content_name, content_id);
-    if (snprintf(path_out, FS_MAX_PATH-1, "%s/%s", root, content_name) < 0) {
-        std::abort();
-    }
-}
-
-void ContentStorageInterface::MakeContentPathHashByteLayered(char* path_out, ContentId content_id, const char* root) {
-    char content_name[FS_MAX_PATH] = {0};
-    u8 hash[0x20] = {0};
-    u32 hash_byte = 0;
-
-    sha256CalculateHash(hash, content_id.uuid, sizeof(ContentId));
-    hash_byte = hash[0];
-    PathUtils::GetContentFileName(content_name, content_id);
-    if (snprintf(path_out, FS_MAX_PATH-1, "%s/%08X/%s", root, hash_byte, content_name) < 0) {
-        std::abort();
-    }
-}
-
-void ContentStorageInterface::MakeContentPath10BitLayered(char* path_out, ContentId content_id, const char* root) {
-    char content_name[FS_MAX_PATH] = {0};
-    u8 hash[0x20] = {0};
-    u32 hash_bytes = 0;
-
-    sha256CalculateHash(hash, content_id.uuid, sizeof(ContentId));
-    hash_bytes = (*((u16*)hash) & 0xff00) >> 6;
-    PathUtils::GetContentFileName(content_name, content_id);
-    if (snprintf(path_out, FS_MAX_PATH-1, "%s/%08X/%s", root, hash_bytes, content_name) < 0) {
-        std::abort();
-    }
-}
-
-void ContentStorageInterface::MakeContentPathDualLayered(char* path_out, ContentId content_id, const char* root) {
-    char content_name[FS_MAX_PATH] = {0};
-    u8 hash[0x20] = {0};
-    u32 hash_lower = 0;
-    u32 hash_upper = 0;
-
-    sha256CalculateHash(hash, content_id.uuid, sizeof(ContentId));
-    hash_lower = (*((u16*)hash) >> 4) & 0x3f;
-    hash_upper = (*((u16*)hash) & 0xff00) >> 10;
-    PathUtils::GetContentFileName(content_name, content_id);
-    if (snprintf(path_out, FS_MAX_PATH-1, "%s/%08X/%08X/%s", root, hash_upper, hash_lower, content_name) < 0) {
-        std::abort();
-    }
-}
 
 void ContentStorageInterface::ClearContentCache() {
     if (memcmp(this->cached_content_id.uuid, InvalidUuid.uuid, sizeof(ContentId)) != 0) {
@@ -77,16 +29,13 @@ void ContentStorageInterface::ClearContentCache() {
 }
 
 unsigned int ContentStorageInterface::GetContentDirectoryDepth() {
-    if (this->make_content_path_func == reinterpret_cast<MakeContentPathFunc>(MakeContentPathUnlayered)) {
+    if (this->make_content_path_func == static_cast<MakeContentPathFunc>(ContentPathBuilder::MakeContentPathUnlayered)) {
         return 1;
-    }
-    else if (this->make_content_path_func == reinterpret_cast<MakeContentPathFunc>(MakeContentPathHashByteLayered)) {
+    } else if (this->make_content_path_func == static_cast<MakeContentPathFunc>(ContentPathBuilder::MakeContentPathHashByteLayered)) {
         return 2;
-    }
-    else if (this->make_content_path_func == reinterpret_cast<MakeContentPathFunc>(MakeContentPath10BitLayered)) {
+    } else if (this->make_content_path_func == static_cast<MakeContentPathFunc>(ContentPathBuilder::MakeContentPath10BitLayered)) {
         return 2;
-    }
-    else if (this->make_content_path_func == reinterpret_cast<MakeContentPathFunc>(MakeContentPathDualLayered)) {
+    } else if (this->make_content_path_func == static_cast<MakeContentPathFunc>(ContentPathBuilder::MakeContentPathDualLayered)) {
         return 3;
     }
 
@@ -159,8 +108,7 @@ Result ContentStorageInterface::HasPlaceHolder(Out<bool> out, PlaceHolderId plac
 
     if (access(placeholder_path, F_OK) != -1) {
         out.SetValue(true);
-    }
-    else if (errno != 0 && errno != ENOENT && errno != ENOTDIR) {
+    } else if (errno != 0 && errno != ENOENT && errno != ENOTDIR) {
         return fsdevGetLastResult();
     }
 
@@ -265,8 +213,7 @@ Result ContentStorageInterface::Has(Out<bool> out, ContentId content_id) {
 
     if (access(content_path, F_OK) != -1) {
         out.SetValue(true);
-    }
-    else if (errno != 0 && errno != ENOENT && errno != ENOTDIR) {
+    } else if (errno != 0 && errno != ENOENT && errno != ENOTDIR) {
         return fsdevGetLastResult();
     }
 

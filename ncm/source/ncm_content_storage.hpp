@@ -62,11 +62,6 @@ class ContentStorageInterface : public IServiceObject
         ContentId cached_content_id;
         FILE* content_cache_file_handle;
 
-        static void MakeContentPathUnlayered(char* out_path, ContentId content_id, const char* root);
-        static void MakeContentPathHashByteLayered(char* out_path, ContentId content_id, const char* root);
-        static void MakeContentPath10BitLayered(char* out_path, ContentId content_id, const char* root);
-        static void MakeContentPathDualLayered(char* out_path, ContentId content_id, const char* root);
-
     private:
         void ClearContentCache();
         unsigned int GetContentDirectoryDepth();

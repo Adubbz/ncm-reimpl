@@ -28,9 +28,6 @@ class PlaceHolderAccessor {
                 u64 counter;
         };
 
-        static void MakePlaceHolderPathUnlayered(char* out_path, PlaceHolderId placeholder_id, const char* root);
-        static void MakePlaceHolderPathHashByteLayered(char* out_path, PlaceHolderId placeholder_id, const char* root);
-
     public:
         static constexpr size_t MaxCaches = 0x2;
 
