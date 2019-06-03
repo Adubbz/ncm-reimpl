@@ -29,13 +29,13 @@ void ContentStorageInterface::ClearContentCache() {
 }
 
 unsigned int ContentStorageInterface::GetContentDirectoryDepth() {
-    if (this->make_content_path_func == static_cast<MakeContentPathFunc>(ContentPathBuilder::MakeContentPathUnlayered)) {
+    if (this->make_content_path_func == static_cast<MakeContentPathFunc>(PathBuilder::MakeContentPathFlat)) {
         return 1;
-    } else if (this->make_content_path_func == static_cast<MakeContentPathFunc>(ContentPathBuilder::MakeContentPathHashByteLayered)) {
+    } else if (this->make_content_path_func == static_cast<MakeContentPathFunc>(PathBuilder::MakeContentPathHashByteLayered)) {
         return 2;
-    } else if (this->make_content_path_func == static_cast<MakeContentPathFunc>(ContentPathBuilder::MakeContentPath10BitLayered)) {
+    } else if (this->make_content_path_func == static_cast<MakeContentPathFunc>(PathBuilder::MakeContentPath10BitLayered)) {
         return 2;
-    } else if (this->make_content_path_func == static_cast<MakeContentPathFunc>(ContentPathBuilder::MakeContentPathDualLayered)) {
+    } else if (this->make_content_path_func == static_cast<MakeContentPathFunc>(PathBuilder::MakeContentPathDualLayered)) {
         return 3;
     }
 

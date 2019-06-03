@@ -19,16 +19,16 @@
 #include <stratosphere.hpp>
 #include "ncm_types.hpp"
 
-class ContentPathBuilder {
+class PathBuilder {
     public:
-        static void MakeContentPathUnlayered(char* out_path, ContentId content_id, const char* root);
+        static u16 Get16BitSha256HashPrefix(Uuid uuid);
+        static u8 Get8BitSha256HashPrefix(Uuid uuid);
+
+        static void MakeContentPathFlat(char* out_path, ContentId content_id, const char* root);
         static void MakeContentPathHashByteLayered(char* out_path, ContentId content_id, const char* root);
         static void MakeContentPath10BitLayered(char* out_path, ContentId content_id, const char* root);
         static void MakeContentPathDualLayered(char* out_path, ContentId content_id, const char* root);
-};
 
-class PlaceHolderPathBuilder {
-    public:
-        static void MakePlaceHolderPathUnlayered(char* out_path, PlaceHolderId placeholder_id, const char* root);
+        static void MakePlaceHolderPathFlat(char* out_path, PlaceHolderId placeholder_id, const char* root);
         static void MakePlaceHolderPathHashByteLayered(char* out_path, PlaceHolderId placeholder_id, const char* root);
 };

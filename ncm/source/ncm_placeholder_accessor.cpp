@@ -21,9 +21,9 @@
 #include "ncm_path_utils.hpp"
 
 unsigned int PlaceHolderAccessor::GetDirectoryDepth() {
-    if (this->make_placeholder_path_func == static_cast<MakePlaceHolderPathFunc>(PlaceHolderPathBuilder::MakePlaceHolderPathUnlayered)) {
+    if (this->make_placeholder_path_func == static_cast<MakePlaceHolderPathFunc>(PathBuilder::MakePlaceHolderPathFlat)) {
         return 1;
-    } else if (this->make_placeholder_path_func == static_cast<MakePlaceHolderPathFunc>(PlaceHolderPathBuilder::MakePlaceHolderPathHashByteLayered)) {
+    } else if (this->make_placeholder_path_func == static_cast<MakePlaceHolderPathFunc>(PathBuilder::MakePlaceHolderPathHashByteLayered)) {
         return 2;
     }
 
