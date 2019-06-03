@@ -28,7 +28,6 @@ static constexpr Uuid InvalidUuid = { { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 
 typedef Uuid ContentId;
 typedef Uuid PlaceHolderId;
-typedef Uuid RightsId;
 
 typedef void (*MakeContentPathFunc)(char* out, ContentId content_id, const char* root);
 typedef void (*MakePlaceHolderPathFunc)(char* out, PlaceHolderId placeholder_id, const char* root);

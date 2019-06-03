@@ -107,15 +107,15 @@ class ContentStorageInterface : public IServiceObject
         Result RevertToPlaceHolder(PlaceHolderId placeholder_id, ContentId old_content_id, ContentId new_content_id);
         Result SetPlaceHolderSize(PlaceHolderId placeholder_id, u64 size);
         Result ReadContentIdFile(OutBuffer<u8> buf, ContentId content_id, u64 offset);
-        Result GetRightsIdFromPlaceHolderId(Out<RightsId> out, PlaceHolderId placeholder_id);
-        Result GetRightsIdFromContentId(Out<RightsId> out, ContentId content_id);
+        Result GetRightsIdFromPlaceHolderId(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, PlaceHolderId placeholder_id);
+        Result GetRightsIdFromContentId(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, ContentId content_id);
         Result WriteContentForDebug(ContentId content_id, u64 offset, InBuffer<u8> data);
         Result GetFreeSpaceSize(Out<u64> out_size);
         Result GetTotalSpaceSize(Out<u64> out_size);
         Result FlushPlaceHolder();
         Result GetSizeFromPlaceHolderId(Out<u64> out, PlaceHolderId placeholder_id);
         Result RepairInvalidFileAttribute();
-        Result GetRightsIdFromPlaceHolderIdWithCache(Out<RightsId> out, PlaceHolderId placeholder_id, ContentId content_id);
+        Result GetRightsIdFromPlaceHolderIdWithCache(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, PlaceHolderId placeholder_id, ContentId content_id);
 
     public:
         DEFINE_SERVICE_DISPATCH_TABLE

@@ -511,13 +511,26 @@ Result ContentStorageInterface::ReadContentIdFile(OutBuffer<u8> buf, ContentId c
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::GetRightsIdFromPlaceHolderId(Out<RightsId> out, PlaceHolderId placeholder_id)
-{
-    return ResultKernelConnectionClosed;
+Result ContentStorageInterface::GetRightsIdFromPlaceHolderId(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, PlaceHolderId placeholder_id) {
+    if (this->disabled) {
+        return ResultNcmInvalidContentStorage;
+    }
+
+    FsRightsId rights_id = {0};
+    u8 key_generation = 0;
+
+    char placeholder_path[FS_MAX_PATH] = {0};
+    this->placeholder_accessor.GetPlaceHolderPathUncached(placeholder_path, placeholder_id);
+
+    R_TRY(fsGetRightsIdAndKeyGenerationByPath(placeholder_path, &key_generation, &rights_id));
+
+    out_rights_id.SetValue(rights_id);
+    out_key_generation.SetValue(static_cast<u64>(key_generation));
+
+    return ResultSuccess;
 }
 
-Result ContentStorageInterface::GetRightsIdFromContentId(Out<RightsId> out, ContentId content_id)
-{
+Result ContentStorageInterface::GetRightsIdFromContentId(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, ContentId content_id) {
     return ResultKernelConnectionClosed;
 }
 
@@ -658,6 +671,6 @@ Result ContentStorageInterface::RepairInvalidFileAttribute() {
     return ResultSuccess;
 }
 
-Result ContentStorageInterface::GetRightsIdFromPlaceHolderIdWithCache(Out<RightsId> out, PlaceHolderId placeholder_id, ContentId content_id) {
+Result ContentStorageInterface::GetRightsIdFromPlaceHolderIdWithCache(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, PlaceHolderId placeholder_id, ContentId content_id) {
     return ResultKernelConnectionClosed;
 }
