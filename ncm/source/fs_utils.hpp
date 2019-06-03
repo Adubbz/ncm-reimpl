@@ -23,9 +23,6 @@ class FsUtils {
     public:
         /* Create all parent directories for a file path */
         static Result EnsureParentDirectoryRecursively(const char* path);
-        /* Create a file. Flush immediately is currently unused, but included to maintain consistency with N's impl */
-        static Result CreateFile(const char* path, size_t size, bool flush_immediately);
-
         template<typename F>
         static Result TraverseDirectory(const char* root_path, int max_level, F f) {
             bool should_continue = false;

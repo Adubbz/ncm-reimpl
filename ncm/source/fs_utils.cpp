@@ -52,16 +52,3 @@ Result FsUtils::EnsureParentDirectoryRecursively(const char* path) {
 
     return ResultSuccess;
 }
-
-Result FsUtils::CreateFile(const char* path, size_t size, bool flush_immediately) {
-    errno = 0;
-    FILE* f = fopen(path, "w");
-
-    if (f == NULL) {
-        return fsdevGetLastResult();
-    }
-
-    fseek(f, size, SEEK_SET);
-    fclose(f);
-    return ResultSuccess;
-}

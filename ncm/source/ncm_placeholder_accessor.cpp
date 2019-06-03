@@ -83,7 +83,7 @@ Result PlaceHolderAccessor::Create(PlaceHolderId placeholder_id, size_t size) {
     this->EnsureRecursively(placeholder_id);
     this->GetPlaceHolderPathUncached(placeholder_path, placeholder_id);
 
-    R_TRY_CATCH(FsUtils::CreateFile(placeholder_path, size, true)) {
+    R_TRY_CATCH(fsdevCreateFile(placeholder_path, size, FS_CREATE_BIG_FILE)) {
         R_CATCH(ResultFsPathAlreadyExists) {
             return ResultNcmPlaceHolderAlreadyExists;
         }
