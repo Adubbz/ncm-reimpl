@@ -115,7 +115,7 @@ class ContentStorageInterface : public IServiceObject
         Result FlushPlaceHolder();
         Result GetSizeFromPlaceHolderId(Out<u64> out, PlaceHolderId placeholder_id);
         Result RepairInvalidFileAttribute();
-        Result GetRightsIdFromPlaceHolderIdWithCache(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, PlaceHolderId placeholder_id, ContentId content_id);
+        Result GetRightsIdFromPlaceHolderIdWithCache(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, PlaceHolderId placeholder_id, ContentId cache_content_id);
 
     public:
         DEFINE_SERVICE_DISPATCH_TABLE
