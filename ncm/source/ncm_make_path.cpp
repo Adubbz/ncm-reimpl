@@ -40,9 +40,9 @@ void PathBuilder::MakeContentPathFlat(char* path_out, ContentId content_id, cons
 
 void PathBuilder::MakeContentPathDualLayered(char* path_out, ContentId content_id, const char* root) {
     char content_name[FS_MAX_PATH] = {0};
-    u16 hash = Get16BitSha256HashPrefix(content_id);
-    u32 hash_lower = (hash >> 4) & 0x3f;
-    u32 hash_upper = (hash >> 10) & 0x3f;
+    const u16 hash = Get16BitSha256HashPrefix(content_id);
+    const u32 hash_lower = (hash >> 4) & 0x3f;
+    const u32 hash_upper = (hash >> 10) & 0x3f;
 
     PathUtils::GetContentFileName(content_name, content_id);
     if (snprintf(path_out, FS_MAX_PATH-1, "%s/%08X/%08X/%s", root, hash_upper, hash_lower, content_name) < 0) {
@@ -61,7 +61,7 @@ void PathBuilder::MakeContentPath10BitLayered(char* path_out, ContentId content_
 
 void PathBuilder::MakeContentPathHashByteLayered(char* path_out, ContentId content_id, const char* root) {
     char content_name[FS_MAX_PATH] = {0};
-    u32 hash_byte = static_cast<u32>(Get8BitSha256HashPrefix(content_id));
+    const u32 hash_byte = static_cast<u32>(Get8BitSha256HashPrefix(content_id));
     PathUtils::GetContentFileName(content_name, content_id);
     if (snprintf(path_out, FS_MAX_PATH-1, "%s/%08X/%s", root, hash_byte, content_name) < 0) {
         std::abort();
@@ -78,7 +78,7 @@ void PathBuilder::MakePlaceHolderPathFlat(char* path_out, PlaceHolderId placehol
 
 void PathBuilder::MakePlaceHolderPathHashByteLayered(char* path_out, PlaceHolderId placeholder_id, const char* root) {
     char placeholder_name[FS_MAX_PATH] = {0};
-    u32 hash_byte = static_cast<u32>(Get8BitSha256HashPrefix(placeholder_id));
+    const u32 hash_byte = static_cast<u32>(Get8BitSha256HashPrefix(placeholder_id));
     PathUtils::GetPlaceHolderFileName(placeholder_name, placeholder_id);
     if (snprintf(path_out, FS_MAX_PATH-1, "%s/%08X/%s", root, hash_byte, placeholder_name) < 0) {
         std::abort();

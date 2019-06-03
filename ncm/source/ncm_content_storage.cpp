@@ -265,7 +265,7 @@ Result ContentStorageInterface::ListPlaceHolder(Out<u32> out_count, OutBuffer<Pl
 
     char placeholder_root_path[FS_MAX_PATH] = {0};
     this->placeholder_accessor.GetPlaceHolderRootPath(placeholder_root_path);
-    unsigned int dir_depth = this->placeholder_accessor.GetDirectoryDepth();
+    const unsigned int dir_depth = this->placeholder_accessor.GetDirectoryDepth();
     size_t entry_count = 0;
 
     R_TRY(FsUtils::TraverseDirectory(placeholder_root_path, dir_depth, [&](bool* should_continue, bool* should_retry_dir_read, const char* current_path, struct dirent* dir_entry) {
@@ -296,7 +296,7 @@ Result ContentStorageInterface::GetContentCount(Out<u32> out_count) {
 
     char content_root_path[FS_MAX_PATH] = {0};
     this->GetContentRootPath(content_root_path);
-    unsigned int dir_depth = this->GetContentDirectoryDepth();
+    const unsigned int dir_depth = this->GetContentDirectoryDepth();
     u32 content_count = 0;
 
     R_TRY(FsUtils::TraverseDirectory(content_root_path, dir_depth, [&](bool* should_continue, bool* should_retry_dir_read, const char* current_path, struct dirent* dir_entry) {
@@ -325,7 +325,7 @@ Result ContentStorageInterface::ListContentId(Out<u32> out_count, OutBuffer<Cont
 
     char content_root_path[FS_MAX_PATH] = {0};
     this->GetContentRootPath(content_root_path);
-    unsigned int dir_depth = this->GetContentDirectoryDepth();
+    const unsigned int dir_depth = this->GetContentDirectoryDepth();
     size_t entry_count = 0;
 
     R_TRY(FsUtils::TraverseDirectory(content_root_path, dir_depth, [&](bool* should_continue,  bool* should_retry_dir_read, const char* current_path, struct dirent* dir_entry) {
