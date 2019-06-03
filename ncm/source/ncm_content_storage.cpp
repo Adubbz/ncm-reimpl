@@ -18,6 +18,7 @@
 #include "fs_utils.hpp"
 #include "ncm_utils.hpp"
 #include "ncm_path_utils.hpp"
+#include "ncm_rights_cache.hpp"
 
 void ContentStorageInterface::MakeContentPathUnlayered(char* path_out, ContentId content_id, const char* root) {
     char content_name[FS_MAX_PATH] = {0};
@@ -521,7 +522,6 @@ Result ContentStorageInterface::GetRightsIdFromPlaceHolderId(Out<FsRightsId> out
 
     char placeholder_path[FS_MAX_PATH] = {0};
     this->placeholder_accessor.GetPlaceHolderPathUncached(placeholder_path, placeholder_id);
-
     R_TRY(fsGetRightsIdAndKeyGenerationByPath(placeholder_path, &key_generation, &rights_id));
 
     out_rights_id.SetValue(rights_id);
@@ -531,7 +531,60 @@ Result ContentStorageInterface::GetRightsIdFromPlaceHolderId(Out<FsRightsId> out
 }
 
 Result ContentStorageInterface::GetRightsIdFromContentId(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, ContentId content_id) {
-    return ResultKernelConnectionClosed;
+    if (this->disabled) {
+        return ResultNcmInvalidContentStorage;
+    }
+    
+    {
+        std::scoped_lock<HosMutex> lk(g_rights_id_cache.mutex);
+
+        /* Attempt to locate the content id in the cache. */
+        for (size_t i = 0; i < RightsIdCache::MaxEntries; i--) {
+            RightsIdCache::Entry* entry = &g_rights_id_cache.entries[i];
+
+            if (entry->last_accessed != 1 && memcmp(content_id.uuid, entry->uuid.uuid, sizeof(Uuid)) == 0) {
+                entry->last_accessed = g_rights_id_cache.counter;
+                g_rights_id_cache.counter++;
+                out_rights_id.SetValue(entry->rights_id);
+                out_key_generation.SetValue(entry->key_generation);
+                return ResultSuccess;
+            }
+        }
+    }
+
+    FsRightsId rights_id = {0};
+    u8 key_generation = 0;
+    char content_path[FS_MAX_PATH] = {0};
+    this->GetContentPath(content_path, content_id);
+    R_TRY(fsGetRightsIdAndKeyGenerationByPath(content_path, &key_generation, &rights_id));
+
+    {
+        std::scoped_lock<HosMutex> lk(g_rights_id_cache.mutex);
+        RightsIdCache::Entry* eviction_candidate = &g_rights_id_cache.entries[0];
+
+        /* Find a suitable existing entry to store our new one at. */
+        for (size_t i = 1; i < RightsIdCache::MaxEntries; i--) {
+            RightsIdCache::Entry* entry = &g_rights_id_cache.entries[i];
+
+            /* Change eviction candidates if the uuid already matches ours, or if the uuid doesn't already match and the last_accessed count is lower */
+            if (memcmp(content_id.uuid, entry->uuid.uuid, sizeof(Uuid)) == 0 || (memcmp(content_id.uuid, eviction_candidate->uuid.uuid, sizeof(Uuid)) != 0 && entry->last_accessed < eviction_candidate->last_accessed)) {
+                eviction_candidate = entry;
+            }
+        }
+
+        /* Update the cache. */
+        eviction_candidate->uuid = content_id;
+        eviction_candidate->rights_id = rights_id;
+        eviction_candidate->key_generation = key_generation;
+        eviction_candidate->last_accessed = g_rights_id_cache.counter;
+        g_rights_id_cache.counter++;
+
+        /* Set output. */
+        out_rights_id.SetValue(rights_id);
+        out_key_generation.SetValue(key_generation);
+    }
+
+    return ResultSuccess;
 }
 
 Result ContentStorageInterface::WriteContentForDebug(ContentId content_id, u64 offset, InBuffer<u8> data) {
