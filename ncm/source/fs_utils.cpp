@@ -34,10 +34,13 @@ Result FsUtils::EnsureParentDirectoryRecursively(const char* path) {
                     /* Temporarily make the path terminate before the '/' */
                     working_path_buf[i + 1] = 0;
                     mkdir(working_path_buf + 1, S_IRWXU);
-                    Result mkdir_rc = fsdevGetLastResult();
 
-                    if (errno != 0 && mkdir_rc != ResultSuccess && mkdir_rc != ResultFsPathAlreadyExists) {
-                        return mkdir_rc;
+                    if (errno != 0) {
+                        R_TRY_CATCH(fsdevGetLastResult()) {
+                            R_CATCH(ResultFsPathAlreadyExists) {
+                                /* If the path already exists, that's okay. Anything else is an error. */
+                            }
+                        } R_END_TRY_CATCH;
                     }
 
                     /* Restore the path to its former state */
