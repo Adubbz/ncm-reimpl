@@ -346,8 +346,7 @@ Result ContentStorageInterface::ListContentId(Out<u32> out_count, OutBuffer<Cont
             }
 
             size_t name_len = strlen(dir_entry->d_name);
-            std::optional<ContentId> content_id = std::nullopt;
-            NcmUtils::GetContentIdFromString(dir_entry->d_name, name_len, &content_id);
+            std::optional<ContentId> content_id = NcmUtils::GetContentIdFromString(dir_entry->d_name, name_len);
 
             /* Skip to the next entry if the id was invalid. */
             if (!content_id) {

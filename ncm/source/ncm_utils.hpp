@@ -26,5 +26,5 @@ class NcmUtils {
         static void GetStringFromPlaceHolderId(char* out, PlaceHolderId placeholder_id);
 
         static Result GetPlaceHolderIdFromDirEntry(PlaceHolderId* out, struct dirent* dir_entry);
-        static void GetContentIdFromString(const char* str, size_t len, std::optional<ContentId>* out);
+        static std::optional<ContentId> GetContentIdFromString(const char* str, size_t len);
 };

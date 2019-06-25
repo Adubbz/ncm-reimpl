@@ -52,12 +52,11 @@ Result NcmUtils::GetPlaceHolderIdFromDirEntry(PlaceHolderId* out, struct dirent*
     return ResultSuccess;
 }
 
-void NcmUtils::GetContentIdFromString(const char* str, size_t len, std::optional<ContentId>* out) {
+std::optional<ContentId> NcmUtils::GetContentIdFromString(const char* str, size_t len) {
     ContentId content_id = {0};
 
     if (len < 0x20) {
-        *out = std::nullopt;
-        return;
+        return std::nullopt;
     }
 
     char byte_string[2];
@@ -74,5 +73,5 @@ void NcmUtils::GetContentIdFromString(const char* str, size_t len, std::optional
         content_id.uuid[i] = (u8)converted_val;
     }
 
-    *out = std::optional<ContentId>(content_id);
+    return std::optional<ContentId>(content_id);
 }
