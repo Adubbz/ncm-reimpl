@@ -70,7 +70,7 @@ Result ContentStorageInterface::GeneratePlaceHolderId(OutPointerWithServerSize<P
         return ResultNcmInvalidContentStorage;
     }
 
-    StratosphereRandomUtils::GetRandomBytes(out.pointer, sizeof(NcmNcaId));
+    sts::rnd::GenerateRandomBytes(out.pointer, sizeof(NcmNcaId));
     return ResultSuccess;
 }
 
