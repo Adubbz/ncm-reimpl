@@ -17,7 +17,10 @@
 #pragma once
 #include <switch.h>
 #include <stratosphere.hpp>
-#include "ncm_types.hpp"
+
+#include "../ncm_types.hpp"
+
+namespace sts::ncm::impl {
 
 class PlaceHolderAccessor {
     public:
@@ -71,3 +74,5 @@ class PlaceHolderAccessor {
         void FlushCache(FILE* handle, PlaceHolderId placeholder_id);
         void ClearAllCaches();
 };
+
+}

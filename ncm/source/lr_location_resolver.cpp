@@ -16,150 +16,131 @@
 
 #include "lr_location_resolver.hpp"
 
-LocationResolverBase::LocationResolverBase(FsStorageId storage_id) :
-    storage_id(storage_id)
-{
-    // TODO: CreateContentMetaDatabase
-    // TODO: CreateContentStorage
-}
+namespace sts::lr {
 
-Result LocationResolverBase::RedirectProgramPath(u64 tid, InPointer<const char> path)
-{
-    Registration::RedirectPath(&this->program_location_list, tid, path.pointer, false);
-    return ResultSuccess;
-}
+    LocationResolverService::LocationResolverService(FsStorageId storage_id) :
+        storage_id(storage_id) {
+        // TODO: CreateContentMetaDatabase
+        // TODO: CreateContentStorage
+    }
 
-Result LocationResolverBase::ResolveApplicationControlPath(OutPointerWithClientSize<char> out, u64 tid)
-{
-    char path[FS_MAX_PATH] = {0};
+    Result LocationResolverService::RedirectProgramPath(u64 tid, InPointer<const char> path) {
+        reg::RedirectPath(&this->program_location_list, tid, path.pointer, false);
+        return ResultSuccess;
+    }
 
-    if (!Registration::ResolvePath(&this->app_control_location_list, path, tid))
-        return ResultLrControlNotFound;
+    Result LocationResolverService::ResolveApplicationControlPath(OutPointerWithClientSize<char> out, u64 tid) {
+        char path[FS_MAX_PATH] = {0};
 
-    memcpy(out.pointer, path, FS_MAX_PATH-1);
-    return ResultSuccess;
-}
+        if (!reg::ResolvePath(&this->app_control_location_list, path, tid))
+            return ResultLrControlNotFound;
 
-Result LocationResolverBase::ResolveApplicationHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid)
-{
-    char path[FS_MAX_PATH] = {0};
+        memcpy(out.pointer, path, FS_MAX_PATH-1);
+        return ResultSuccess;
+    }
 
-    if (!Registration::ResolvePath(&this->html_docs_location_list, path, tid))
-        return ResultLrHtmlDocumentNotFound;
+    Result LocationResolverService::ResolveApplicationHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid) {
+        char path[FS_MAX_PATH] = {0};
 
-    memcpy(out.pointer, path, FS_MAX_PATH-1);
-    return ResultSuccess;
-}
+        if (!reg::ResolvePath(&this->html_docs_location_list, path, tid))
+            return ResultLrHtmlDocumentNotFound;
 
-Result LocationResolverBase::RedirectApplicationControlPath(u64 tid, InPointer<const char> path)
-{
-    Registration::RedirectPath(&this->app_control_location_list, tid, path.pointer, true);
-    return ResultSuccess;
-}
+        memcpy(out.pointer, path, FS_MAX_PATH-1);
+        return ResultSuccess;
+    }
 
-Result LocationResolverBase::RedirectApplicationHtmlDocumentPath(u64 tid, InPointer<const char> path)
-{
-    Registration::RedirectPath(&this->html_docs_location_list, tid, path.pointer, true);
-    return ResultSuccess;
-}
+    Result LocationResolverService::RedirectApplicationControlPath(u64 tid, InPointer<const char> path) {
+        reg::RedirectPath(&this->app_control_location_list, tid, path.pointer, true);
+        return ResultSuccess;
+    }
 
-Result LocationResolverBase::ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid)
-{
-    char path[FS_MAX_PATH] = {0};
+    Result LocationResolverService::RedirectApplicationHtmlDocumentPath(u64 tid, InPointer<const char> path) {
+        reg::RedirectPath(&this->html_docs_location_list, tid, path.pointer, true);
+        return ResultSuccess;
+    }
 
-    if (!Registration::ResolvePath(&this->legal_info_location_list, path, tid))
-        return ResultLrLegalInformationNotFound;
+    Result LocationResolverService::ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid) {
+        char path[FS_MAX_PATH] = {0};
 
-    memcpy(out.pointer, path, FS_MAX_PATH-1);
-    return ResultSuccess;
-}
+        if (!reg::ResolvePath(&this->legal_info_location_list, path, tid))
+            return ResultLrLegalInformationNotFound;
 
-Result LocationResolverBase::RedirectApplicationLegalInformationPath(u64 tid, InPointer<const char> path)
-{
-    Registration::RedirectPath(&this->legal_info_location_list, tid, path.pointer, true);
-    return ResultSuccess;
-}
+        memcpy(out.pointer, path, FS_MAX_PATH-1);
+        return ResultSuccess;
+    }
 
-Result LocationResolverBase::RedirectApplicationProgramPath(u64 tid, InPointer<const char> path)
-{
-    Registration::RedirectPath(&this->program_location_list, tid, path.pointer, true);
-    return ResultSuccess;
-}
+    Result LocationResolverService::RedirectApplicationLegalInformationPath(u64 tid, InPointer<const char> path) {
+        reg::RedirectPath(&this->legal_info_location_list, tid, path.pointer, true);
+        return ResultSuccess;
+    }
 
-Result LocationResolverBase::ClearApplicationRedirection()
-{
-    Registration::EraseRedirectionWithMask(&this->program_location_list, 1);
-    Registration::EraseRedirectionWithMask(&this->app_control_location_list, 1);
-    Registration::EraseRedirectionWithMask(&this->html_docs_location_list, 1);
-    Registration::EraseRedirectionWithMask(&this->legal_info_location_list, 1);
-    return ResultSuccess;
-}
+    Result LocationResolverService::RedirectApplicationProgramPath(u64 tid, InPointer<const char> path) {
+        reg::RedirectPath(&this->program_location_list, tid, path.pointer, true);
+        return ResultSuccess;
+    }
 
-Result LocationResolverBase::EraseProgramRedirection(u64 tid)
-{
-    Registration::EraseRedirectionWithTid(&this->program_location_list, tid);
-    return ResultSuccess;
-}
+    Result LocationResolverService::ClearApplicationRedirection() {
+        reg::EraseRedirectionWithMask(&this->program_location_list, 1);
+        reg::EraseRedirectionWithMask(&this->app_control_location_list, 1);
+        reg::EraseRedirectionWithMask(&this->html_docs_location_list, 1);
+        reg::EraseRedirectionWithMask(&this->legal_info_location_list, 1);
+        return ResultSuccess;
+    }
 
-Result LocationResolverBase::EraseApplicationControlRedirection(u64 tid)
-{
-    Registration::EraseRedirectionWithTid(&this->app_control_location_list, tid);
-    return ResultSuccess;
-}
+    Result LocationResolverService::EraseProgramRedirection(u64 tid) {
+        reg::EraseRedirectionWithTid(&this->program_location_list, tid);
+        return ResultSuccess;
+    }
 
-Result LocationResolverBase::EraseApplicationHtmlDocumentRedirection(u64 tid)
-{
-    Registration::EraseRedirectionWithTid(&this->html_docs_location_list, tid);
-    return ResultSuccess;
-}
+    Result LocationResolverService::EraseApplicationControlRedirection(u64 tid) {
+        reg::EraseRedirectionWithTid(&this->app_control_location_list, tid);
+        return ResultSuccess;
+    }
 
-Result LocationResolverBase::EraseApplicationLegalInformationRedirection(u64 tid)
-{
-    Registration::EraseRedirectionWithTid(&this->legal_info_location_list, tid);
-    return ResultSuccess;
-}
+    Result LocationResolverService::EraseApplicationHtmlDocumentRedirection(u64 tid) {
+        reg::EraseRedirectionWithTid(&this->html_docs_location_list, tid);
+        return ResultSuccess;
+    }
 
-LocationResolver::LocationResolver(FsStorageId storage_id) :
-    LocationResolverBase(storage_id)
-{
-}
+    Result LocationResolverService::EraseApplicationLegalInformationRedirection(u64 tid) {
+        reg::EraseRedirectionWithTid(&this->legal_info_location_list, tid);
+        return ResultSuccess;
+    }
 
-Result LocationResolver::RefreshImpl()
-{
-    return ResultKernelConnectionClosed;
-}
+    LocationResolverInterface::LocationResolverInterface(FsStorageId storage_id) :
+        LocationResolverService(storage_id) {
+    }
 
-Result LocationResolver::ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result LocationResolverInterface::RefreshImpl() {
+        return ResultKernelConnectionClosed;
+    }
 
-Result LocationResolver::ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result LocationResolverInterface::ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result LocationResolver::Refresh()
-{
-    return ResultKernelConnectionClosed;
-}
+    Result LocationResolverInterface::ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) {
+        return ResultKernelConnectionClosed;
+    }
 
-HostLocationResolver::HostLocationResolver(FsStorageId storage_id) :
-    LocationResolverBase(storage_id)
-{
-}
+    Result LocationResolverInterface::Refresh() {
+        return ResultKernelConnectionClosed;
+    }
 
-Result HostLocationResolver::ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid)
-{
-    return ResultKernelConnectionClosed;
-}
+    HostLocationResolverInterface::HostLocationResolverInterface(FsStorageId storage_id) :
+        LocationResolverService(storage_id) {
+    }
 
-Result HostLocationResolver::ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid)
-{
-    return ResultKernelConnectionClosed; // Unsupported operation for context
-}
+    Result HostLocationResolverInterface::ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result HostLocationResolver::Refresh()
-{
-    return ResultKernelConnectionClosed;
+    Result HostLocationResolverInterface::ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) {
+        return ResultKernelConnectionClosed; // Unsupported operation for context
+    }
+
+    Result HostLocationResolverInterface::Refresh() {
+        return ResultKernelConnectionClosed;
+    }
+
 }

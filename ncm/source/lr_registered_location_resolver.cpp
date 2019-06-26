@@ -16,42 +16,38 @@
 
 #include "lr_registered_location_resolver.hpp"
 
-Result RegisteredLocationResolverInterface::ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid)
-{
-    return ResultKernelConnectionClosed;
-}
+namespace sts::lr {
 
-Result RegisteredLocationResolverInterface::RegisterProgramPath(u64 tid, InPointer<const char> path)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result RegisteredLocationResolverInterface::ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result RegisteredLocationResolverInterface::UnregisterProgramPath(u64 tid)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result RegisteredLocationResolverInterface::RegisterProgramPath(u64 tid, InPointer<const char> path) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result RegisteredLocationResolverInterface::RedirectProgramPath(u64 tid, InPointer<const char> path)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result RegisteredLocationResolverInterface::UnregisterProgramPath(u64 tid) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result RegisteredLocationResolverInterface::ResolveHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result RegisteredLocationResolverInterface::RedirectProgramPath(u64 tid, InPointer<const char> path) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result RegisteredLocationResolverInterface::RegisterHtmlDocumentPath(u64 tid, InPointer<const char> path)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result RegisteredLocationResolverInterface::ResolveHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result RegisteredLocationResolverInterface::UnregisterHtmlDocumentPath(u64 tid)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result RegisteredLocationResolverInterface::RegisterHtmlDocumentPath(u64 tid, InPointer<const char> path) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result RegisteredLocationResolverInterface::RedirectHtmlDocumentPath(u64 tid, InPointer<const char> path)
-{
-    return ResultKernelConnectionClosed;
+    Result RegisteredLocationResolverInterface::UnregisterHtmlDocumentPath(u64 tid) {
+        return ResultKernelConnectionClosed;
+    }
+
+    Result RegisteredLocationResolverInterface::RedirectHtmlDocumentPath(u64 tid, InPointer<const char> path) {
+        return ResultKernelConnectionClosed;
+    }
+
 }

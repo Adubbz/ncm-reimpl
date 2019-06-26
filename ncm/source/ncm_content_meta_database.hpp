@@ -18,10 +18,12 @@
 #include <switch.h>
 #include <stratosphere.hpp>
 
-class ContentMetaDatabaseInterface : public IServiceObject
-{
-    public:
-        DEFINE_SERVICE_DISPATCH_TABLE
-        {
-        };
-};
+namespace sts::ncm {
+
+    class ContentMetaDatabaseInterface : public IServiceObject {
+        public:
+            DEFINE_SERVICE_DISPATCH_TABLE {
+            };
+    };
+
+}

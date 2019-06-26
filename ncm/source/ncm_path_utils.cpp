@@ -17,48 +17,52 @@
 #include "ncm_path_utils.hpp"
 #include "ncm_utils.hpp"
 
-void PathUtils::GetContentFileName(char* out, ContentId content_id) {
-    char content_name[sizeof(ContentId)*2+1] = {0};
-    NcmUtils::GetStringFromContentId(content_name, content_id);
-    snprintf(out, FS_MAX_PATH-1, "%s%s", content_name, ".nca");
-}
+namespace sts::ncm::path {
 
-void PathUtils::GetPlaceHolderFileName(char* out, PlaceHolderId placeholder_id) {
-    char placeholder_name[sizeof(PlaceHolderId)*2+1] = {0};
-    NcmUtils::GetStringFromPlaceHolderId(placeholder_name, placeholder_id);
-    snprintf(out, FS_MAX_PATH-1, "%s%s", placeholder_name, ".nca");
-}
-
-bool PathUtils::IsNcaPath(const char* path) {
-    PathView path_view(path);
-
-    if (!path_view.HasSuffix(".nca")) {
-        return false;
+    void GetContentFileName(char* out, ContentId content_id) {
+        char content_name[sizeof(ContentId)*2+1] = {0};
+        GetStringFromContentId(content_name, content_id);
+        snprintf(out, FS_MAX_PATH-1, "%s%s", content_name, ".nca");
     }
 
-    std::string_view file_name = path_view.GetFileName();
-
-    if (file_name.length() != 0x24) {
-        return false;
+    void GetPlaceHolderFileName(char* out, PlaceHolderId placeholder_id) {
+        char placeholder_name[sizeof(PlaceHolderId)*2+1] = {0};
+        GetStringFromPlaceHolderId(placeholder_name, placeholder_id);
+        snprintf(out, FS_MAX_PATH-1, "%s%s", placeholder_name, ".nca");
     }
 
-    for (size_t i = 0; i < sizeof(Uuid)*2; i++) {
-        if (!std::isxdigit(file_name.at(i))) {
+    bool IsNcaPath(const char* path) {
+        PathView path_view(path);
+
+        if (!path_view.HasSuffix(".nca")) {
             return false;
         }
+
+        std::string_view file_name = path_view.GetFileName();
+
+        if (file_name.length() != 0x24) {
+            return false;
+        }
+
+        for (size_t i = 0; i < sizeof(Uuid)*2; i++) {
+            if (!std::isxdigit(file_name.at(i))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    return true;
-}
+    bool PathView::HasPrefix(std::string_view prefix) const {
+        return this->path.compare(0, prefix.length(), prefix) == 0;
+    }
 
-bool PathView::HasPrefix(std::string_view prefix) const {
-    return this->path.compare(0, prefix.length(), prefix) == 0;
-}
+    bool PathView::HasSuffix(std::string_view suffix) const {
+        return this->path.compare(this->path.length() - suffix.length(), suffix.length(), suffix) == 0;
+    }
 
-bool PathView::HasSuffix(std::string_view suffix) const {
-    return this->path.compare(this->path.length() - suffix.length(), suffix.length(), suffix) == 0;
-}
+    std::string_view PathView::GetFileName() const {
+        return this->path.substr(this->path.find_last_of("/") + 1);
+    }
 
-std::string_view PathView::GetFileName() const {
-    return this->path.substr(this->path.find_last_of("/") + 1);
 }

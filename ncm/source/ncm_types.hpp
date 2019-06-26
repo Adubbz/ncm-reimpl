@@ -18,19 +18,23 @@
 #include <switch.h>
 #include <stratosphere.hpp>
 
-struct Uuid {
-    u8 uuid[0x10];
-};
+namespace sts::ncm {
 
-static_assert(sizeof(Uuid) == 0x10, "Uuid definition!");
+    struct Uuid {
+        u8 uuid[0x10];
+    };
 
-static constexpr Uuid InvalidUuid = { { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+    static_assert(sizeof(Uuid) == 0x10, "Uuid definition!");
 
-typedef Uuid ContentId;
-typedef Uuid PlaceHolderId;
+    static constexpr Uuid InvalidUuid = { { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
 
-typedef void (*MakeContentPathFunc)(char* out, ContentId content_id, const char* root);
-typedef void (*MakePlaceHolderPathFunc)(char* out, PlaceHolderId placeholder_id, const char* root);
+    typedef Uuid ContentId;
+    typedef Uuid PlaceHolderId;
 
-// TODO: Remove this
-static constexpr Result ResultNcmInvalidPlaceHolderDirectoryEntry = MAKERESULT(Module_Ncm, 170);
+    typedef void (*MakeContentPathFunc)(char* out, ContentId content_id, const char* root);
+    typedef void (*MakePlaceHolderPathFunc)(char* out, PlaceHolderId placeholder_id, const char* root);
+
+    // TODO: Remove this
+    static constexpr Result ResultNcmInvalidPlaceHolderDirectoryEntry = MAKERESULT(Module_Ncm, 170);
+
+}

@@ -70,8 +70,8 @@ int main(int argc, char **argv)
     // TODO: Create content manager
     // TODO: Global content manager var
 
-    server_manager->AddWaitable(new ServiceServer<LocationResolverManagerService>("lr", 0x10));
-    server_manager->AddWaitable(new ServiceServer<ContentManagerService>("ncm", 0x10));
+    server_manager->AddWaitable(new ServiceServer<sts::lr::LocationResolverManagerService>("lr", 0x10));
+    server_manager->AddWaitable(new ServiceServer<sts::ncm::ContentManagerService>("ncm", 0x10));
     
     /* Loop forever, servicing our services. */
     server_manager->Process();

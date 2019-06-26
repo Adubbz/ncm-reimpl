@@ -14,6 +14,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ncm_rights_cache.hpp"
+#pragma once
+#include <switch.h>
+#include <stratosphere.hpp>
 
-RightsIdCache g_rights_id_cache;
+#include "../ncm_types.hpp"
+
+namespace sts::ncm::impl {
+
+    class RightsIdCache {
+        public:
+            static constexpr size_t MaxEntries = 0x80;
+        public:
+            struct Entry {
+                public:
+                    Uuid uuid;
+                    FsRightsId rights_id;
+                    u64 key_generation;
+                    u64 last_accessed = 1;
+            };
+
+            Entry entries[MaxEntries];
+            u64 counter = 2;
+            HosMutex mutex;
+    };
+
+    RightsIdCache* GetRightsIdCache();
+
+}

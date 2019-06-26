@@ -16,62 +16,102 @@
 
 #include "ncm_utils.hpp"
 
-void NcmUtils::GetStringFromContentId(char* out, ContentId content_id) {
-    for (size_t i = 0; i < sizeof(ContentId); i++) {
-        snprintf(out+i, 3, "%02x", content_id.uuid[i]);
-    }
-}
+namespace sts::ncm {
 
-void NcmUtils::GetStringFromPlaceHolderId(char* out, PlaceHolderId placeholder_id) {
-    for (size_t i = 0; i < sizeof(PlaceHolderId); i++) {
-        snprintf(out+i, 3, "%02x", placeholder_id.uuid[i]);
-    }
-}
-
-Result NcmUtils::GetPlaceHolderIdFromDirEntry(PlaceHolderId* out, struct dirent* dir_entry) {
-    if (strnlen(dir_entry->d_name, 0x30) != 0x24 || strncmp(dir_entry->d_name + 0x20, ".nca", 4) != 0) {
-        return ResultNcmInvalidPlaceHolderDirectoryEntry;
+    void GetStringFromContentId(char* out, ContentId content_id) {
+        for (size_t i = 0; i < sizeof(ContentId); i++) {
+            snprintf(out+i, 3, "%02x", content_id.uuid[i]);
+        }
     }
 
-    PlaceHolderId placeholder_id = {0};
-    char byte_string[2];
-    char* end_ptr;
-    u64 converted_val;
-
-    for (size_t i = 0; i < sizeof(PlaceHolderId); i++) {
-        char* name_char_pair = dir_entry->d_name + i * 2;         
-    
-        byte_string[0] = name_char_pair[0];
-        byte_string[1] = name_char_pair[1];
-
-        converted_val = strtoull(byte_string, &end_ptr, 0x10);
-        placeholder_id.uuid[i] = (u8)converted_val;
+    void GetStringFromPlaceHolderId(char* out, PlaceHolderId placeholder_id) {
+        for (size_t i = 0; i < sizeof(PlaceHolderId); i++) {
+            snprintf(out+i, 3, "%02x", placeholder_id.uuid[i]);
+        }
     }
 
-    *out = placeholder_id;
-    return ResultSuccess;
-}
+    Result GetPlaceHolderIdFromDirEntry(PlaceHolderId* out, struct dirent* dir_entry) {
+        if (strnlen(dir_entry->d_name, 0x30) != 0x24 || strncmp(dir_entry->d_name + 0x20, ".nca", 4) != 0) {
+            return ResultNcmInvalidPlaceHolderDirectoryEntry;
+        }
 
-std::optional<ContentId> NcmUtils::GetContentIdFromString(const char* str, size_t len) {
-    ContentId content_id = {0};
+        PlaceHolderId placeholder_id = {0};
+        char byte_string[2];
+        char* end_ptr;
+        u64 converted_val;
 
-    if (len < 0x20) {
-        return std::nullopt;
+        for (size_t i = 0; i < sizeof(PlaceHolderId); i++) {
+            char* name_char_pair = dir_entry->d_name + i * 2;         
+        
+            byte_string[0] = name_char_pair[0];
+            byte_string[1] = name_char_pair[1];
+
+            converted_val = strtoull(byte_string, &end_ptr, 0x10);
+            placeholder_id.uuid[i] = (u8)converted_val;
+        }
+
+        *out = placeholder_id;
+        return ResultSuccess;
     }
 
-    char byte_string[2];
-    char* end_ptr;
-    u64 converted_val;
+    std::optional<ContentId> GetContentIdFromString(const char* str, size_t len) {
+        ContentId content_id = {0};
 
-    for (size_t i = 0; i < sizeof(ContentId); i++) {
-        const char* char_par = str + i * 2;         
-    
-        byte_string[0] = char_par[0];
-        byte_string[1] = char_par[1];
+        if (len < 0x20) {
+            return std::nullopt;
+        }
 
-        converted_val = strtoull(byte_string, &end_ptr, 0x10);
-        content_id.uuid[i] = (u8)converted_val;
+        char byte_string[2];
+        char* end_ptr;
+        u64 converted_val;
+
+        for (size_t i = 0; i < sizeof(ContentId); i++) {
+            const char* char_par = str + i * 2;         
+        
+            byte_string[0] = char_par[0];
+            byte_string[1] = char_par[1];
+
+            converted_val = strtoull(byte_string, &end_ptr, 0x10);
+            content_id.uuid[i] = (u8)converted_val;
+        }
+
+        return std::optional<ContentId>(content_id);
     }
 
-    return std::optional<ContentId>(content_id);
+    Result EnsureParentDirectoryRecursively(const char* path) {
+        size_t path_len = strlen(path);
+        char working_path_buf[FS_MAX_PATH] = {0};
+
+        if (path_len + 1 < FS_MAX_PATH) {
+            strncpy(working_path_buf + 1, path, FS_MAX_PATH-1);
+
+            if (path_len != 0) {
+                for (size_t i = 0; i < path_len; i++) {
+                    if (i != 0 && working_path_buf[i + 1] == '/' && working_path_buf[i] != ':') {
+                        /* Wipe the errno to prevent cross-contamination */
+                        errno = 0;
+                        /* Temporarily make the path terminate before the '/' */
+                        working_path_buf[i + 1] = 0;
+                        mkdir(working_path_buf + 1, S_IRWXU);
+
+                        if (errno != 0) {
+                            R_TRY_CATCH(fsdevGetLastResult()) {
+                                R_CATCH(ResultFsPathAlreadyExists) {
+                                    /* If the path already exists, that's okay. Anything else is an error. */
+                                }
+                            } R_END_TRY_CATCH;
+                        }
+
+                        /* Restore the path to its former state */
+                        working_path_buf[i + 1] = '/';
+                    }
+                }
+            }
+        } else {
+            return ResultNcmAllocationFailed;
+        }
+
+        return ResultSuccess;
+    }
+
 }

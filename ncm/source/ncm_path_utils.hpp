@@ -17,21 +17,23 @@
 #pragma once
 #include <switch.h>
 #include <stratosphere.hpp>
+
 #include "ncm_types.hpp"
 
-class PathUtils {
-    public:
-        static void GetContentFileName(char* out, ContentId content_id);
-        static void GetPlaceHolderFileName(char* out, PlaceHolderId placeholder_id);
-        static bool IsNcaPath(const char* path);
-};
+namespace sts::ncm::path {
 
-class PathView {
-    private:
-        std::string_view path; /* Nintendo uses nn::util::string_view here. */    
-    public:
-        PathView(std::string_view p) : path(p) { /* ...*/ }
-        bool HasPrefix(std::string_view prefix) const;
-        bool HasSuffix(std::string_view suffix) const;
-        std::string_view GetFileName() const;
-};
+    void GetContentFileName(char* out, ContentId content_id);
+    void GetPlaceHolderFileName(char* out, PlaceHolderId placeholder_id);
+    bool IsNcaPath(const char* path);
+
+    class PathView {
+        private:
+            std::string_view path; /* Nintendo uses nn::util::string_view here. */    
+        public:
+            PathView(std::string_view p) : path(p) { /* ...*/ }
+            bool HasPrefix(std::string_view prefix) const;
+            bool HasSuffix(std::string_view suffix) const;
+            std::string_view GetFileName() const;
+    };
+
+}

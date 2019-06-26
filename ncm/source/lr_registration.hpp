@@ -20,18 +20,17 @@
 #include <switch.h>
 #include <stratosphere.hpp>
 
-class Registration
-{
-    public:
-        struct LocationListEntry
-        {
-            u64 tid;
-            char content_path[FS_MAX_PATH];
-            u8 is_application;
-        };
+namespace sts::lr::reg {
 
-        static char* RedirectPath(std::list<std::shared_ptr<LocationListEntry>>* list, u64 tid, const char* path, bool is_application);
-        static bool ResolvePath(std::list<std::shared_ptr<LocationListEntry>>* list, char* path_out, u64 tid);
-        static void EraseRedirectionWithTid(std::list<std::shared_ptr<LocationListEntry>>* list, u64 tid);
-        static void EraseRedirectionWithMask(std::list<std::shared_ptr<LocationListEntry>>* list, int mask);
+    struct LocationListEntry {
+        u64 tid;
+        char content_path[FS_MAX_PATH];
+        u8 is_application;
+    };
+
+    char* RedirectPath(std::list<std::shared_ptr<LocationListEntry>>* list, u64 tid, const char* path, bool is_application);
+    bool ResolvePath(std::list<std::shared_ptr<LocationListEntry>>* list, char* path_out, u64 tid);
+    void EraseRedirectionWithTid(std::list<std::shared_ptr<LocationListEntry>>* list, u64 tid);
+    void EraseRedirectionWithMask(std::list<std::shared_ptr<LocationListEntry>>* list, int mask);
+
 };

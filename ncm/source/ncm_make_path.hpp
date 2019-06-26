@@ -17,18 +17,17 @@
 #pragma once
 #include <switch.h>
 #include <stratosphere.hpp>
+
 #include "ncm_types.hpp"
 
-class PathBuilder {
-    public:
-        static u16 Get16BitSha256HashPrefix(Uuid uuid);
-        static u8 Get8BitSha256HashPrefix(Uuid uuid);
+namespace sts::ncm::path {
 
-        static void MakeContentPathFlat(char* out_path, ContentId content_id, const char* root);
-        static void MakeContentPathHashByteLayered(char* out_path, ContentId content_id, const char* root);
-        static void MakeContentPath10BitLayered(char* out_path, ContentId content_id, const char* root);
-        static void MakeContentPathDualLayered(char* out_path, ContentId content_id, const char* root);
+    void MakeContentPathFlat(char* out_path, ContentId content_id, const char* root);
+    void MakeContentPathHashByteLayered(char* out_path, ContentId content_id, const char* root);
+    void MakeContentPath10BitLayered(char* out_path, ContentId content_id, const char* root);
+    void MakeContentPathDualLayered(char* out_path, ContentId content_id, const char* root);
 
-        static void MakePlaceHolderPathFlat(char* out_path, PlaceHolderId placeholder_id, const char* root);
-        static void MakePlaceHolderPathHashByteLayered(char* out_path, PlaceHolderId placeholder_id, const char* root);
-};
+    void MakePlaceHolderPathFlat(char* out_path, PlaceHolderId placeholder_id, const char* root);
+    void MakePlaceHolderPathHashByteLayered(char* out_path, PlaceHolderId placeholder_id, const char* root);
+
+}

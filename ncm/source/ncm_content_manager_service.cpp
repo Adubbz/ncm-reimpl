@@ -16,67 +16,58 @@
 
 #include "ncm_content_manager_service.hpp"
 
-Result ContentManagerService::CreateContentStorage(FsStorageId storage_id)
-{
-    return ResultKernelConnectionClosed;
-}
+namespace sts::ncm {
 
-Result ContentManagerService::CreateContentMetaDatabase(FsStorageId storage_id)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result ContentManagerService::CreateContentStorage(FsStorageId storage_id) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result ContentManagerService::VerifyContentStorage(FsStorageId storage_id)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result ContentManagerService::CreateContentMetaDatabase(FsStorageId storage_id) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result ContentManagerService::VerifyContentMetaDatabase(FsStorageId storage_id)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result ContentManagerService::VerifyContentStorage(FsStorageId storage_id) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result ContentManagerService::OpenContentStorage(Out<std::shared_ptr<ContentStorageInterface>> out, FsStorageId storage_id)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result ContentManagerService::VerifyContentMetaDatabase(FsStorageId storage_id) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result ContentManagerService::OpenContentMetaDatabase(Out<std::shared_ptr<ContentMetaDatabaseInterface>> out, FsStorageId storage_id)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result ContentManagerService::OpenContentStorage(Out<std::shared_ptr<ContentStorageInterface>> out, FsStorageId storage_id) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result ContentManagerService::CloseContentStorageForcibly(FsStorageId storage_id)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result ContentManagerService::OpenContentMetaDatabase(Out<std::shared_ptr<ContentMetaDatabaseInterface>> out, FsStorageId storage_id) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result ContentManagerService::CloseContentMetaDatabaseForcibly(FsStorageId storage_id)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result ContentManagerService::CloseContentStorageForcibly(FsStorageId storage_id) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result ContentManagerService::CleanupContentMetaDatabase(FsStorageId storage_id)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result ContentManagerService::CloseContentMetaDatabaseForcibly(FsStorageId storage_id) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result ContentManagerService::ActivateContentStorage(FsStorageId storage_id)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result ContentManagerService::CleanupContentMetaDatabase(FsStorageId storage_id) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result ContentManagerService::InactivateContentStorage(FsStorageId storage_id)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result ContentManagerService::ActivateContentStorage(FsStorageId storage_id) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result ContentManagerService::ActivateContentMetaDatabase(FsStorageId storage_id)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result ContentManagerService::InactivateContentStorage(FsStorageId storage_id) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result ContentManagerService::InactivateContentMetaDatabase(FsStorageId storage_id)
-{
-    return ResultKernelConnectionClosed;
+    Result ContentManagerService::ActivateContentMetaDatabase(FsStorageId storage_id) {
+        return ResultKernelConnectionClosed;
+    }
+
+    Result ContentManagerService::InactivateContentMetaDatabase(FsStorageId storage_id) {
+        return ResultKernelConnectionClosed;
+    }
+
 }

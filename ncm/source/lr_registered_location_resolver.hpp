@@ -18,43 +18,44 @@
 #include <switch.h>
 #include <stratosphere.hpp>
 
-enum LrRegisteredLrCmd : u32
-{
-    LrRegisteredLr_Cmd_ResolveProgramPath = 0,
-    LrRegisteredLr_Cmd_RegisterProgramPath = 1,
-    LrRegisteredLr_Cmd_UnregisterProgramPath = 2,
-    LrRegisteredLr_Cmd_RedirectProgramPath = 3,
-    LrRegisteredLr_Cmd_ResolveHtmlDocumentPath = 4,
-    LrRegisteredLr_Cmd_RegisterHtmlDocumentPath = 5,
-    LrRegisteredLr_Cmd_UnregisterHtmlDocumentPath = 6,
-    LrRegisteredLr_Cmd_RedirectHtmlDocumentPath = 7,
-};
+namespace sts::lr {
 
-class RegisteredLocationResolverInterface : public IServiceObject
-{
-    private:
-        Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid);
-        Result RegisterProgramPath(u64 tid, InPointer<const char> path);
-        Result UnregisterProgramPath(u64 tid);
-        Result RedirectProgramPath(u64 tid, InPointer<const char> path);
-        Result ResolveHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid);
-        Result RegisterHtmlDocumentPath(u64 tid, InPointer<const char> path);
-        Result UnregisterHtmlDocumentPath(u64 tid);
-        Result RedirectHtmlDocumentPath(u64 tid, InPointer<const char> path);
-    
-    public:
-        DEFINE_SERVICE_DISPATCH_TABLE 
-        {
-            /* 1.0.0- */
-            MakeServiceCommandMeta<LrRegisteredLr_Cmd_ResolveProgramPath, &RegisteredLocationResolverInterface::ResolveProgramPath>(),
-            MakeServiceCommandMeta<LrRegisteredLr_Cmd_RegisterProgramPath, &RegisteredLocationResolverInterface::RegisterProgramPath>(),
-            MakeServiceCommandMeta<LrRegisteredLr_Cmd_UnregisterProgramPath, &RegisteredLocationResolverInterface::UnregisterProgramPath>(),
-            MakeServiceCommandMeta<LrRegisteredLr_Cmd_RedirectProgramPath, &RegisteredLocationResolverInterface::RedirectProgramPath>(),
-                
-            /* 2.0.0- */
-            MakeServiceCommandMeta<LrRegisteredLr_Cmd_ResolveHtmlDocumentPath, &RegisteredLocationResolverInterface::ResolveHtmlDocumentPath, FirmwareVersion_200>(),
-            MakeServiceCommandMeta<LrRegisteredLr_Cmd_RegisterHtmlDocumentPath, &RegisteredLocationResolverInterface::RegisterHtmlDocumentPath, FirmwareVersion_200>(),
-            MakeServiceCommandMeta<LrRegisteredLr_Cmd_UnregisterHtmlDocumentPath, &RegisteredLocationResolverInterface::UnregisterHtmlDocumentPath, FirmwareVersion_200>(),
-            MakeServiceCommandMeta<LrRegisteredLr_Cmd_RedirectHtmlDocumentPath, &RegisteredLocationResolverInterface::RedirectHtmlDocumentPath, FirmwareVersion_200>(),
-        };
-};
+    class RegisteredLocationResolverInterface final : public IServiceObject {
+        private:
+            enum class CommandId {
+                ResolveProgramPath = 0,
+                RegisterProgramPath = 1,
+                UnregisterProgramPath = 2,
+                RedirectProgramPath = 3,
+                ResolveHtmlDocumentPath = 4,
+                RegisterHtmlDocumentPath = 5,
+                UnregisterHtmlDocumentPath = 6,
+                RedirectHtmlDocumentPath = 7,
+            };
+
+            Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid);
+            Result RegisterProgramPath(u64 tid, InPointer<const char> path);
+            Result UnregisterProgramPath(u64 tid);
+            Result RedirectProgramPath(u64 tid, InPointer<const char> path);
+            Result ResolveHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid);
+            Result RegisterHtmlDocumentPath(u64 tid, InPointer<const char> path);
+            Result UnregisterHtmlDocumentPath(u64 tid);
+            Result RedirectHtmlDocumentPath(u64 tid, InPointer<const char> path);
+        
+        public:
+            DEFINE_SERVICE_DISPATCH_TABLE {
+                /* 1.0.0- */
+                MakeServiceCommandMeta<CommandId::ResolveProgramPath, &RegisteredLocationResolverInterface::ResolveProgramPath>(),
+                MakeServiceCommandMeta<CommandId::RegisterProgramPath, &RegisteredLocationResolverInterface::RegisterProgramPath>(),
+                MakeServiceCommandMeta<CommandId::UnregisterProgramPath, &RegisteredLocationResolverInterface::UnregisterProgramPath>(),
+                MakeServiceCommandMeta<CommandId::RedirectProgramPath, &RegisteredLocationResolverInterface::RedirectProgramPath>(),
+                    
+                /* 2.0.0- */
+                MakeServiceCommandMeta<CommandId::ResolveHtmlDocumentPath, &RegisteredLocationResolverInterface::ResolveHtmlDocumentPath, FirmwareVersion_200>(),
+                MakeServiceCommandMeta<CommandId::RegisterHtmlDocumentPath, &RegisteredLocationResolverInterface::RegisterHtmlDocumentPath, FirmwareVersion_200>(),
+                MakeServiceCommandMeta<CommandId::UnregisterHtmlDocumentPath, &RegisteredLocationResolverInterface::UnregisterHtmlDocumentPath, FirmwareVersion_200>(),
+                MakeServiceCommandMeta<CommandId::RedirectHtmlDocumentPath, &RegisteredLocationResolverInterface::RedirectHtmlDocumentPath, FirmwareVersion_200>(),
+            };
+    };
+
+}

@@ -17,140 +17,142 @@
 #pragma once
 #include <switch.h>
 #include <stratosphere.hpp>
-#include "ncm_placeholder_accessor.hpp"
+
 #include "ncm_types.hpp"
+#include "impl/ncm_placeholder_accessor.hpp"
 
-enum CsCmd : u32
-{
-    Cs_Cmd_GeneratePlaceHolderId = 0,
-    Cs_Cmd_CreatePlaceHolder = 1,
-    Cs_Cmd_DeletePlaceHolder = 2,
-    Cs_Cmd_HasPlaceHolder = 3,
-    Cs_Cmd_WritePlaceHolder = 4,
-    Cs_Cmd_Register = 5,
-    Cs_Cmd_Delete = 6,
-    Cs_Cmd_Has = 7,
-    Cs_Cmd_GetPath = 8,
-    Cs_Cmd_GetPlaceHolderPath = 9,
-    Cs_Cmd_CleanupAllPlaceHolder = 10,
-    Cs_Cmd_ListPlaceHolder = 11,
-    Cs_Cmd_GetContentCount = 12,
-    Cs_Cmd_ListContentId = 13,
-    Cs_Cmd_GetSizeFromContentId = 14,
-    Cs_Cmd_DisableForcibly = 15,
-    Cs_Cmd_RevertToPlaceHolder = 16,
-    Cs_Cmd_SetPlaceHolderSize = 17,
-    Cs_Cmd_ReadContentIdFile = 18,
-    Cs_Cmd_GetRightsIdFromPlaceHolderId = 19,
-    Cs_Cmd_GetRightsIdFromContentId = 20,
-    Cs_Cmd_WriteContentForDebug = 21,
-    Cs_Cmd_GetFreeSpaceSize = 22,
-    Cs_Cmd_GetTotalSpaceSize = 23,
-    Cs_Cmd_FlushPlaceHolder = 24,
-    Cs_Cmd_GetSizeFromPlaceHolderId = 25,
-    Cs_Cmd_RepairInvalidFileAttribute = 26,
-    Cs_Cmd_GetRightsIdFromPlaceHolderIdWithCache = 27,
-};
+namespace sts::ncm {
 
-class ContentStorageInterface : public IServiceObject
-{
-    public:
-        char root_path[FS_MAX_PATH-1];
-        MakeContentPathFunc make_content_path_func;
-        bool disabled;
-        PlaceHolderAccessor placeholder_accessor;
-        ContentId cached_content_id;
-        FILE* content_cache_file_handle;
+    class ContentStorageInterface : public IServiceObject {
+        private:
+            char root_path[FS_MAX_PATH-1];
+            MakeContentPathFunc make_content_path_func;
+            bool disabled;
+            impl::PlaceHolderAccessor placeholder_accessor;
+            ContentId cached_content_id;
+            FILE* content_cache_file_handle;
 
-    private:
-        void ClearContentCache();
-        unsigned int GetContentDirectoryDepth();
-        Result OpenCachedContentFile(ContentId content_id);
+        private:
+            void ClearContentCache();
+            unsigned int GetContentDirectoryDepth();
+            Result OpenCachedContentFile(ContentId content_id);
 
-        inline void GetContentRootPath(char* out_content_root) {
-            /* TODO: Replace with BoundedString? */
-            if (snprintf(out_content_root, FS_MAX_PATH-1, "%s%s", this->root_path, "/registered") < 0) {
-                std::abort();
+            inline void GetContentRootPath(char* out_content_root) {
+                /* TODO: Replace with BoundedString? */
+                if (snprintf(out_content_root, FS_MAX_PATH-1, "%s%s", this->root_path, "/registered") < 0) {
+                    std::abort();
+                }
             }
-        }
 
-        inline void GetContentPath(char* out_content_root, ContentId content_id) {
-            char content_root_path[FS_MAX_PATH] = {0};
+            inline void GetContentPath(char* out_content_root, ContentId content_id) {
+                char content_root_path[FS_MAX_PATH] = {0};
 
-            this->GetContentRootPath(content_root_path);
-            this->make_content_path_func(out_content_root, content_id, content_root_path);
-        }
+                this->GetContentRootPath(content_root_path);
+                this->make_content_path_func(out_content_root, content_id, content_root_path);
+            }
 
-    private:
-        /* Actual commands. */
-        Result GeneratePlaceHolderId(OutPointerWithServerSize<PlaceHolderId, 0x1> out);
-        Result CreatePlaceHolder(PlaceHolderId placeholder_id, ContentId content_id, u64 size);
-        Result DeletePlaceHolder(PlaceHolderId placeholder_id);
-        Result HasPlaceHolder(Out<bool> out, PlaceHolderId placeholder_id);
-        Result WritePlaceHolder(PlaceHolderId placeholder_id, u64 offset, InBuffer<u8> data);
-        Result Register(PlaceHolderId placeholder_id, ContentId content_id);
-        Result Delete(ContentId content_id);
-        Result Has(Out<bool> out, ContentId content_id);
-        Result GetPath(OutPointerWithClientSize<char> out, ContentId content_id);
-        Result GetPlaceHolderPath(OutPointerWithClientSize<char> out, PlaceHolderId placeholder_id);
-        Result CleanupAllPlaceHolder();
-        Result ListPlaceHolder(Out<u32> out_count, OutBuffer<PlaceHolderId> out_buf);
-        Result GetContentCount(Out<u32> out_count);
-        Result ListContentId(Out<u32> out_count, OutBuffer<ContentId> out_buf, u32 start_offset);
-        Result GetSizeFromContentId(Out<u64> out_size, ContentId content_id);
-        Result DisableForcibly();
-        Result RevertToPlaceHolder(PlaceHolderId placeholder_id, ContentId old_content_id, ContentId new_content_id);
-        Result SetPlaceHolderSize(PlaceHolderId placeholder_id, u64 size);
-        Result ReadContentIdFile(OutBuffer<u8> buf, ContentId content_id, u64 offset);
-        Result GetRightsIdFromPlaceHolderId(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, PlaceHolderId placeholder_id);
-        Result GetRightsIdFromContentId(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, ContentId content_id);
-        Result WriteContentForDebug(ContentId content_id, u64 offset, InBuffer<u8> data);
-        Result GetFreeSpaceSize(Out<u64> out_size);
-        Result GetTotalSpaceSize(Out<u64> out_size);
-        Result FlushPlaceHolder();
-        Result GetSizeFromPlaceHolderId(Out<u64> out, PlaceHolderId placeholder_id);
-        Result RepairInvalidFileAttribute();
-        Result GetRightsIdFromPlaceHolderIdWithCache(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, PlaceHolderId placeholder_id, ContentId cache_content_id);
+        private:
+            enum class CommandId {
+                GeneratePlaceHolderId = 0,
+                CreatePlaceHolder = 1,
+                DeletePlaceHolder = 2,
+                HasPlaceHolder = 3,
+                WritePlaceHolder = 4,
+                Register = 5,
+                Delete = 6,
+                Has = 7,
+                GetPath = 8,
+                GetPlaceHolderPath = 9,
+                CleanupAllPlaceHolder = 10,
+                ListPlaceHolder = 11,
+                GetContentCount = 12,
+                ListContentId = 13,
+                GetSizeFromContentId = 14,
+                DisableForcibly = 15,
+                RevertToPlaceHolder = 16,
+                SetPlaceHolderSize = 17,
+                ReadContentIdFile = 18,
+                GetRightsIdFromPlaceHolderId = 19,
+                GetRightsIdFromContentId = 20,
+                WriteContentForDebug = 21,
+                GetFreeSpaceSize = 22,
+                GetTotalSpaceSize = 23,
+                FlushPlaceHolder = 24,
+                GetSizeFromPlaceHolderId = 25,
+                RepairInvalidFileAttribute = 26,
+                GetRightsIdFromPlaceHolderIdWithCache = 27,
+            };
 
-    public:
-        DEFINE_SERVICE_DISPATCH_TABLE
-        {
-            /* 1.0.0- */
-            MakeServiceCommandMeta<Cs_Cmd_GeneratePlaceHolderId, &ContentStorageInterface::GeneratePlaceHolderId>(),
-            MakeServiceCommandMeta<Cs_Cmd_CreatePlaceHolder, &ContentStorageInterface::CreatePlaceHolder>(),
-            MakeServiceCommandMeta<Cs_Cmd_DeletePlaceHolder, &ContentStorageInterface::DeletePlaceHolder>(),
-            MakeServiceCommandMeta<Cs_Cmd_HasPlaceHolder, &ContentStorageInterface::HasPlaceHolder>(),
-            MakeServiceCommandMeta<Cs_Cmd_WritePlaceHolder, &ContentStorageInterface::WritePlaceHolder>(),
-            MakeServiceCommandMeta<Cs_Cmd_Register, &ContentStorageInterface::Register>(),
-            MakeServiceCommandMeta<Cs_Cmd_Delete, &ContentStorageInterface::Delete>(),
-            MakeServiceCommandMeta<Cs_Cmd_Has, &ContentStorageInterface::Has>(),
-            MakeServiceCommandMeta<Cs_Cmd_GetPath, &ContentStorageInterface::GetPath>(),
-            MakeServiceCommandMeta<Cs_Cmd_GetPlaceHolderPath, &ContentStorageInterface::GetPlaceHolderPath>(),
-            MakeServiceCommandMeta<Cs_Cmd_CleanupAllPlaceHolder, &ContentStorageInterface::CleanupAllPlaceHolder>(),
-            MakeServiceCommandMeta<Cs_Cmd_ListPlaceHolder, &ContentStorageInterface::ListPlaceHolder>(),
-            MakeServiceCommandMeta<Cs_Cmd_GetContentCount, &ContentStorageInterface::GetContentCount>(),
-            MakeServiceCommandMeta<Cs_Cmd_ListContentId, &ContentStorageInterface::ListContentId>(),
-            MakeServiceCommandMeta<Cs_Cmd_GetSizeFromContentId, &ContentStorageInterface::GetSizeFromContentId>(),
-            MakeServiceCommandMeta<Cs_Cmd_DisableForcibly, &ContentStorageInterface::DisableForcibly>(),
+            /* Actual commands. */
+            Result GeneratePlaceHolderId(OutPointerWithServerSize<PlaceHolderId, 0x1> out);
+            Result CreatePlaceHolder(PlaceHolderId placeholder_id, ContentId content_id, u64 size);
+            Result DeletePlaceHolder(PlaceHolderId placeholder_id);
+            Result HasPlaceHolder(Out<bool> out, PlaceHolderId placeholder_id);
+            Result WritePlaceHolder(PlaceHolderId placeholder_id, u64 offset, InBuffer<u8> data);
+            Result Register(PlaceHolderId placeholder_id, ContentId content_id);
+            Result Delete(ContentId content_id);
+            Result Has(Out<bool> out, ContentId content_id);
+            Result GetPath(OutPointerWithClientSize<char> out, ContentId content_id);
+            Result GetPlaceHolderPath(OutPointerWithClientSize<char> out, PlaceHolderId placeholder_id);
+            Result CleanupAllPlaceHolder();
+            Result ListPlaceHolder(Out<u32> out_count, OutBuffer<PlaceHolderId> out_buf);
+            Result GetContentCount(Out<u32> out_count);
+            Result ListContentId(Out<u32> out_count, OutBuffer<ContentId> out_buf, u32 start_offset);
+            Result GetSizeFromContentId(Out<u64> out_size, ContentId content_id);
+            Result DisableForcibly();
+            Result RevertToPlaceHolder(PlaceHolderId placeholder_id, ContentId old_content_id, ContentId new_content_id);
+            Result SetPlaceHolderSize(PlaceHolderId placeholder_id, u64 size);
+            Result ReadContentIdFile(OutBuffer<u8> buf, ContentId content_id, u64 offset);
+            Result GetRightsIdFromPlaceHolderId(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, PlaceHolderId placeholder_id);
+            Result GetRightsIdFromContentId(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, ContentId content_id);
+            Result WriteContentForDebug(ContentId content_id, u64 offset, InBuffer<u8> data);
+            Result GetFreeSpaceSize(Out<u64> out_size);
+            Result GetTotalSpaceSize(Out<u64> out_size);
+            Result FlushPlaceHolder();
+            Result GetSizeFromPlaceHolderId(Out<u64> out, PlaceHolderId placeholder_id);
+            Result RepairInvalidFileAttribute();
+            Result GetRightsIdFromPlaceHolderIdWithCache(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, PlaceHolderId placeholder_id, ContentId cache_content_id);
 
-            /* 2.0.0- */
-            MakeServiceCommandMeta<Cs_Cmd_RevertToPlaceHolder, &ContentStorageInterface::RevertToPlaceHolder, FirmwareVersion_200>(),
-            MakeServiceCommandMeta<Cs_Cmd_SetPlaceHolderSize, &ContentStorageInterface::SetPlaceHolderSize, FirmwareVersion_200>(),
-            MakeServiceCommandMeta<Cs_Cmd_ReadContentIdFile, &ContentStorageInterface::ReadContentIdFile, FirmwareVersion_200>(),
-            MakeServiceCommandMeta<Cs_Cmd_GetRightsIdFromPlaceHolderId, &ContentStorageInterface::GetRightsIdFromPlaceHolderId, FirmwareVersion_200>(),
-            MakeServiceCommandMeta<Cs_Cmd_GetRightsIdFromContentId, &ContentStorageInterface::GetRightsIdFromContentId, FirmwareVersion_200>(),
-            MakeServiceCommandMeta<Cs_Cmd_WriteContentForDebug, &ContentStorageInterface::WriteContentForDebug, FirmwareVersion_200>(),
-            MakeServiceCommandMeta<Cs_Cmd_GetFreeSpaceSize, &ContentStorageInterface::GetFreeSpaceSize, FirmwareVersion_200>(),
-            MakeServiceCommandMeta<Cs_Cmd_GetTotalSpaceSize, &ContentStorageInterface::GetTotalSpaceSize, FirmwareVersion_200>(),
+        public:
+            DEFINE_SERVICE_DISPATCH_TABLE {
+                /* 1.0.0- */
+                MakeServiceCommandMeta<CommandId::GeneratePlaceHolderId, &ContentStorageInterface::GeneratePlaceHolderId>(),
+                MakeServiceCommandMeta<CommandId::CreatePlaceHolder, &ContentStorageInterface::CreatePlaceHolder>(),
+                MakeServiceCommandMeta<CommandId::DeletePlaceHolder, &ContentStorageInterface::DeletePlaceHolder>(),
+                MakeServiceCommandMeta<CommandId::HasPlaceHolder, &ContentStorageInterface::HasPlaceHolder>(),
+                MakeServiceCommandMeta<CommandId::WritePlaceHolder, &ContentStorageInterface::WritePlaceHolder>(),
+                MakeServiceCommandMeta<CommandId::Register, &ContentStorageInterface::Register>(),
+                MakeServiceCommandMeta<CommandId::Delete, &ContentStorageInterface::Delete>(),
+                MakeServiceCommandMeta<CommandId::Has, &ContentStorageInterface::Has>(),
+                MakeServiceCommandMeta<CommandId::GetPath, &ContentStorageInterface::GetPath>(),
+                MakeServiceCommandMeta<CommandId::GetPlaceHolderPath, &ContentStorageInterface::GetPlaceHolderPath>(),
+                MakeServiceCommandMeta<CommandId::CleanupAllPlaceHolder, &ContentStorageInterface::CleanupAllPlaceHolder>(),
+                MakeServiceCommandMeta<CommandId::ListPlaceHolder, &ContentStorageInterface::ListPlaceHolder>(),
+                MakeServiceCommandMeta<CommandId::GetContentCount, &ContentStorageInterface::GetContentCount>(),
+                MakeServiceCommandMeta<CommandId::ListContentId, &ContentStorageInterface::ListContentId>(),
+                MakeServiceCommandMeta<CommandId::GetSizeFromContentId, &ContentStorageInterface::GetSizeFromContentId>(),
+                MakeServiceCommandMeta<CommandId::DisableForcibly, &ContentStorageInterface::DisableForcibly>(),
 
-            /* 3.0.0- */
-            MakeServiceCommandMeta<Cs_Cmd_FlushPlaceHolder, &ContentStorageInterface::FlushPlaceHolder, FirmwareVersion_300>(),
+                /* 2.0.0- */
+                MakeServiceCommandMeta<CommandId::RevertToPlaceHolder, &ContentStorageInterface::RevertToPlaceHolder, FirmwareVersion_200>(),
+                MakeServiceCommandMeta<CommandId::SetPlaceHolderSize, &ContentStorageInterface::SetPlaceHolderSize, FirmwareVersion_200>(),
+                MakeServiceCommandMeta<CommandId::ReadContentIdFile, &ContentStorageInterface::ReadContentIdFile, FirmwareVersion_200>(),
+                MakeServiceCommandMeta<CommandId::GetRightsIdFromPlaceHolderId, &ContentStorageInterface::GetRightsIdFromPlaceHolderId, FirmwareVersion_200>(),
+                MakeServiceCommandMeta<CommandId::GetRightsIdFromContentId, &ContentStorageInterface::GetRightsIdFromContentId, FirmwareVersion_200>(),
+                MakeServiceCommandMeta<CommandId::WriteContentForDebug, &ContentStorageInterface::WriteContentForDebug, FirmwareVersion_200>(),
+                MakeServiceCommandMeta<CommandId::GetFreeSpaceSize, &ContentStorageInterface::GetFreeSpaceSize, FirmwareVersion_200>(),
+                MakeServiceCommandMeta<CommandId::GetTotalSpaceSize, &ContentStorageInterface::GetTotalSpaceSize, FirmwareVersion_200>(),
 
-            /* 4.0.0- */
-            MakeServiceCommandMeta<Cs_Cmd_GetSizeFromPlaceHolderId, &ContentStorageInterface::GetSizeFromPlaceHolderId, FirmwareVersion_400>(),
-            MakeServiceCommandMeta<Cs_Cmd_RepairInvalidFileAttribute, &ContentStorageInterface::RepairInvalidFileAttribute, FirmwareVersion_400>(),
+                /* 3.0.0- */
+                MakeServiceCommandMeta<CommandId::FlushPlaceHolder, &ContentStorageInterface::FlushPlaceHolder, FirmwareVersion_300>(),
 
-            /* 8.0.0- */
-            MakeServiceCommandMeta<Cs_Cmd_GetRightsIdFromPlaceHolderIdWithCache, &ContentStorageInterface::GetRightsIdFromPlaceHolderIdWithCache, FirmwareVersion_800>(),
-        };
-};
+                /* 4.0.0- */
+                MakeServiceCommandMeta<CommandId::GetSizeFromPlaceHolderId, &ContentStorageInterface::GetSizeFromPlaceHolderId, FirmwareVersion_400>(),
+                MakeServiceCommandMeta<CommandId::RepairInvalidFileAttribute, &ContentStorageInterface::RepairInvalidFileAttribute, FirmwareVersion_400>(),
+
+                /* 8.0.0- */
+                MakeServiceCommandMeta<CommandId::GetRightsIdFromPlaceHolderIdWithCache, &ContentStorageInterface::GetRightsIdFromPlaceHolderIdWithCache, FirmwareVersion_800>(),
+            };
+    };
+
+}

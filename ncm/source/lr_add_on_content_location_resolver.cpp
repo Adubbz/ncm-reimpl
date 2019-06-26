@@ -16,17 +16,18 @@
 
 #include "lr_add_on_content_location_resolver.hpp"
 
-Result AddOnContentLocationResolverInterface::ResolveAddOnContentPath(OutPointerWithClientSize<char> out, u64 tid)
-{
-    return ResultKernelConnectionClosed;
-}
+namespace sts::lr {
 
-Result AddOnContentLocationResolverInterface::RegisterAddOnContentStorage(FsStorageId storage_id, u64 tid)
-{
-    return ResultKernelConnectionClosed;
-}
+    Result AddOnContentLocationResolverInterface::ResolveAddOnContentPath(OutPointerWithClientSize<char> out, u64 tid) {
+        return ResultKernelConnectionClosed;
+    }
 
-Result AddOnContentLocationResolverInterface::UnregisterAllAddOnContentPath()
-{
-    return ResultKernelConnectionClosed;
+    Result AddOnContentLocationResolverInterface::RegisterAddOnContentStorage(FsStorageId storage_id, u64 tid) {
+        return ResultKernelConnectionClosed;
+    }
+
+    Result AddOnContentLocationResolverInterface::UnregisterAllAddOnContentPath() {
+        return ResultKernelConnectionClosed;
+    }
+
 }

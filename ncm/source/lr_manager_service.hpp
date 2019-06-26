@@ -21,45 +21,46 @@
 #include "lr_registered_location_resolver.hpp"
 #include "lr_add_on_content_location_resolver.hpp"
 
-enum LrManagerCmd : u32
-{
-    Lrm_Cmd_OpenLocationResolver = 0,
-    Lrm_Cmd_OpenRegisteredLocationResolver = 1,
-    Lrm_Cmd_RefreshLocationResolver = 2,
-    Lrm_Cmd_OpenAddOnContentLocationResolver = 3,
-};
+namespace sts::lr {
 
-class LocationResolverManagerService final : public IServiceObject
-{
-    public:
-        struct LocationResolverEntry
-        {
-            bool active;
-            FsStorageId storage_id;
-        };
+    class LocationResolverManagerService final : public IServiceObject {
+        private:
+            struct LocationResolverEntry {
+                bool active;
+                FsStorageId storage_id;
+            };
 
-        LocationResolverEntry entries[5] = {0};
-        std::shared_ptr<LocationResolverBase> location_resolvers[5] = {0};
-        HosMutex mutex;
+            LocationResolverEntry entries[5] = {0};
+            std::shared_ptr<LocationResolverService> location_resolvers[5] = {0};
+            HosMutex mutex;
 
-    private:
-        std::shared_ptr<LocationResolverBase>* GetLocationResolverPtr(FsStorageId storage_id);
+        private:
+            std::shared_ptr<LocationResolverService>* GetLocationResolverPtr(FsStorageId storage_id);
 
-        /* Actual commands. */
-        Result OpenLocationResolver(Out<std::shared_ptr<LocationResolverBase>> out, FsStorageId storage_id);
-        Result OpenRegisteredLocationResolver(Out<std::shared_ptr<RegisteredLocationResolverInterface>> out);
-        Result RefreshLocationResolver(FsStorageId storage_id);
-        Result OpenAddOnContentLocationResolver(Out<std::shared_ptr<AddOnContentLocationResolverInterface>> out);
+        private:
+            enum class CommandId {
+                OpenLocationResolver = 0,
+                OpenRegisteredLocationResolver = 1,
+                RefreshLocationResolver = 2,
+                OpenAddOnContentLocationResolver = 3,
+            };
 
-    public:
-        DEFINE_SERVICE_DISPATCH_TABLE
-        {
-            /* 1.0.0- */
-            MakeServiceCommandMeta<Lrm_Cmd_OpenLocationResolver, &LocationResolverManagerService::OpenLocationResolver>(),
-            MakeServiceCommandMeta<Lrm_Cmd_OpenRegisteredLocationResolver, &LocationResolverManagerService::OpenRegisteredLocationResolver>(),
-            MakeServiceCommandMeta<Lrm_Cmd_RefreshLocationResolver, &LocationResolverManagerService::RefreshLocationResolver>(),
-        
-            /* 2.0.0- */
-            MakeServiceCommandMeta<Lrm_Cmd_OpenAddOnContentLocationResolver, &LocationResolverManagerService::OpenAddOnContentLocationResolver, FirmwareVersion_200>(),
-        };
-};
+            /* Actual commands. */
+            Result OpenLocationResolver(Out<std::shared_ptr<LocationResolverService>> out, FsStorageId storage_id);
+            Result OpenRegisteredLocationResolver(Out<std::shared_ptr<RegisteredLocationResolverInterface>> out);
+            Result RefreshLocationResolver(FsStorageId storage_id);
+            Result OpenAddOnContentLocationResolver(Out<std::shared_ptr<AddOnContentLocationResolverInterface>> out);
+
+        public:
+            DEFINE_SERVICE_DISPATCH_TABLE {
+                /* 1.0.0- */
+                MakeServiceCommandMeta<CommandId::OpenLocationResolver, &LocationResolverManagerService::OpenLocationResolver>(),
+                MakeServiceCommandMeta<CommandId::OpenRegisteredLocationResolver, &LocationResolverManagerService::OpenRegisteredLocationResolver>(),
+                MakeServiceCommandMeta<CommandId::RefreshLocationResolver, &LocationResolverManagerService::RefreshLocationResolver>(),
+            
+                /* 2.0.0- */
+                MakeServiceCommandMeta<CommandId::OpenAddOnContentLocationResolver, &LocationResolverManagerService::OpenAddOnContentLocationResolver, FirmwareVersion_200>(),
+            };
+    };
+
+}
