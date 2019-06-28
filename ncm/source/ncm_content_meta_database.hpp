@@ -74,31 +74,31 @@ namespace sts::ncm {
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {
                 /* 1.0.0- */
-                MakeServiceCommandMeta<CommandId::Set, &ContentStorageInterface::Set>(),
-                MakeServiceCommandMeta<CommandId::Get, &ContentStorageInterface::Get>(),
-                MakeServiceCommandMeta<CommandId::Remove, &ContentStorageInterface::Remove>(),
-                MakeServiceCommandMeta<CommandId::GetContentIdByType, &ContentStorageInterface::GetContentIdByType>(),
-                MakeServiceCommandMeta<CommandId::ListContentInfo, &ContentStorageInterface::ListContentInfo>(),
-                MakeServiceCommandMeta<CommandId::List, &ContentStorageInterface::List>(),
-                MakeServiceCommandMeta<CommandId::GetLatestContentMetaKey, &ContentStorageInterface::GetLatestContentMetaKey>(),
-                MakeServiceCommandMeta<CommandId::ListApplication, &ContentStorageInterface::ListApplication>(),
-                MakeServiceCommandMeta<CommandId::Has, &ContentStorageInterface::Has>(),
-                MakeServiceCommandMeta<CommandId::HasAll, &ContentStorageInterface::HasAll>(),
-                MakeServiceCommandMeta<CommandId::GetSize, &ContentStorageInterface::GetSize>(),
-                MakeServiceCommandMeta<CommandId::GetRequiredSystemVersion, &ContentStorageInterface::GetRequiredSystemVersion>(),
-                MakeServiceCommandMeta<CommandId::GetPatchId, &ContentStorageInterface::GetPatchId>(),
-                MakeServiceCommandMeta<CommandId::DisableForcibly, &ContentStorageInterface::DisableForcibly>(),
-                MakeServiceCommandMeta<CommandId::LookupOrphanContent, &ContentStorageInterface::LookupOrphanContent>(),
-                MakeServiceCommandMeta<CommandId::Commit, &ContentStorageInterface::Commit>(),
-                MakeServiceCommandMeta<CommandId::HasContent, &ContentStorageInterface::HasContent>(),
-                MakeServiceCommandMeta<CommandId::ListContentMetaInfo, &ContentStorageInterface::ListContentMetaInfo>(),
-                MakeServiceCommandMeta<CommandId::GetAttributes, &ContentStorageInterface::GetAttributes>(),
+                MakeServiceCommandMeta<CommandId::Set, &ContentMetaDatabaseInterface::Set>(),
+                MakeServiceCommandMeta<CommandId::Get, &ContentMetaDatabaseInterface::Get>(),
+                MakeServiceCommandMeta<CommandId::Remove, &ContentMetaDatabaseInterface::Remove>(),
+                MakeServiceCommandMeta<CommandId::GetContentIdByType, &ContentMetaDatabaseInterface::GetContentIdByType>(),
+                MakeServiceCommandMeta<CommandId::ListContentInfo, &ContentMetaDatabaseInterface::ListContentInfo>(),
+                MakeServiceCommandMeta<CommandId::List, &ContentMetaDatabaseInterface::List>(),
+                MakeServiceCommandMeta<CommandId::GetLatestContentMetaKey, &ContentMetaDatabaseInterface::GetLatestContentMetaKey>(),
+                MakeServiceCommandMeta<CommandId::ListApplication, &ContentMetaDatabaseInterface::ListApplication>(),
+                MakeServiceCommandMeta<CommandId::Has, &ContentMetaDatabaseInterface::Has>(),
+                MakeServiceCommandMeta<CommandId::HasAll, &ContentMetaDatabaseInterface::HasAll>(),
+                MakeServiceCommandMeta<CommandId::GetSize, &ContentMetaDatabaseInterface::GetSize>(),
+                MakeServiceCommandMeta<CommandId::GetRequiredSystemVersion, &ContentMetaDatabaseInterface::GetRequiredSystemVersion>(),
+                MakeServiceCommandMeta<CommandId::GetPatchId, &ContentMetaDatabaseInterface::GetPatchId>(),
+                MakeServiceCommandMeta<CommandId::DisableForcibly, &ContentMetaDatabaseInterface::DisableForcibly>(),
+                MakeServiceCommandMeta<CommandId::LookupOrphanContent, &ContentMetaDatabaseInterface::LookupOrphanContent>(),
+                MakeServiceCommandMeta<CommandId::Commit, &ContentMetaDatabaseInterface::Commit>(),
+                MakeServiceCommandMeta<CommandId::HasContent, &ContentMetaDatabaseInterface::HasContent>(),
+                MakeServiceCommandMeta<CommandId::ListContentMetaInfo, &ContentMetaDatabaseInterface::ListContentMetaInfo>(),
+                MakeServiceCommandMeta<CommandId::GetAttributes, &ContentMetaDatabaseInterface::GetAttributes>(),
 
                 /* 2.0.0- */
-                MakeServiceCommandMeta<CommandId::GetRequiredApplicationVersion, &ContentStorageInterface::GetRequiredApplicationVersion, FirmwareVersion_200>(),
+                MakeServiceCommandMeta<CommandId::GetRequiredApplicationVersion, &ContentMetaDatabaseInterface::GetRequiredApplicationVersion, FirmwareVersion_200>(),
 
                 /* 5.0.0- */
-                MakeServiceCommandMeta<CommandId::GetContentIdByTypeAndIdOffset, &ContentStorageInterface::GetContentIdByTypeAndIdOffset, FirmwareVersion_500>(),
+                MakeServiceCommandMeta<CommandId::GetContentIdByTypeAndIdOffset, &ContentMetaDatabaseInterface::GetContentIdByTypeAndIdOffset, FirmwareVersion_500>(),
             };
     };
 

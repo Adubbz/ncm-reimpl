@@ -84,7 +84,7 @@ namespace sts::ncm {
         u8 id_offset;
     } PACKED;
 
-    static_assert(sizeof(ContentMetaKey) == 0x18, "ContentInfo definition!");
+    static_assert(sizeof(ContentInfo) == 0x18, "ContentInfo definition!");
 
     typedef void (*MakeContentPathFunc)(char* out, ContentId content_id, const char* root);
     typedef void (*MakePlaceHolderPathFunc)(char* out, PlaceHolderId placeholder_id, const char* root);
