@@ -31,6 +31,61 @@ namespace sts::ncm {
     typedef Uuid ContentId;
     typedef Uuid PlaceHolderId;
 
+    enum class ContentMetaType : u8 {
+        SystemProgram          = 0x1,
+        SystemData             = 0x2,
+        SystemUpdate           = 0x3,
+        BootImagePackage       = 0x4,
+        BootImagePackageSafe   = 0x5,
+        Application            = 0x80,
+        Patch                  = 0x81,
+        AddOnContent           = 0x82,
+        Delta                  = 0x83,
+    };
+
+    enum class ContentType : u8 {
+        Meta = 0,
+        Program = 1,
+        Data = 2,
+        Control = 3,
+        HtmlDocument = 4,
+        LegalInformation = 5,
+        DeltaFragment = 6,
+    };
+
+    enum class ContentMetaAttribute : u8 {
+        None = 0,
+        IncludesExFatDriver = 1,
+        Rebootless = 2,
+    };
+
+    struct ContentMetaKey {
+        TitleId id;
+        u32 version;
+        ContentMetaType meta_type;
+        ContentMetaAttribute attributes;
+        u8 padding[2];
+    } PACKED;
+
+    static_assert(sizeof(ContentMetaKey) == 0x10, "ContentMetaKey definition!");
+
+    // Used by system updates. They share the exact same struct as ContentMetaKey;
+    typedef ContentMetaKey ContentMetaInfo;
+
+    struct ApplicationContentMetaKey {
+        ContentMetaKey key;
+        TitleId application_title_id;
+    } PACKED;
+
+    struct ContentInfo {
+        ContentId content_id;
+        u8 size[6];
+        ContentType content_type;
+        u8 id_offset;
+    } PACKED;
+
+    static_assert(sizeof(ContentMetaKey) == 0x18, "ContentInfo definition!");
+
     typedef void (*MakeContentPathFunc)(char* out, ContentId content_id, const char* root);
     typedef void (*MakePlaceHolderPathFunc)(char* out, PlaceHolderId placeholder_id, const char* root);
 
