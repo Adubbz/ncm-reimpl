@@ -18,55 +18,55 @@
 
 namespace sts::ncm {
 
-    Result ContentManagerService::CreateContentStorage(FsStorageId storage_id) {
+    Result ContentManagerService::CreateContentStorage(StorageId storage_id) {
         return ResultKernelConnectionClosed;
     }
 
-    Result ContentManagerService::CreateContentMetaDatabase(FsStorageId storage_id) {
+    Result ContentManagerService::CreateContentMetaDatabase(StorageId storage_id) {
         return ResultKernelConnectionClosed;
     }
 
-    Result ContentManagerService::VerifyContentStorage(FsStorageId storage_id) {
+    Result ContentManagerService::VerifyContentStorage(StorageId storage_id) {
         return ResultKernelConnectionClosed;
     }
 
-    Result ContentManagerService::VerifyContentMetaDatabase(FsStorageId storage_id) {
+    Result ContentManagerService::VerifyContentMetaDatabase(StorageId storage_id) {
         return ResultKernelConnectionClosed;
     }
 
-    Result ContentManagerService::OpenContentStorage(Out<std::shared_ptr<ContentStorageInterface>> out, FsStorageId storage_id) {
+    Result ContentManagerService::OpenContentStorage(Out<std::shared_ptr<ContentStorageInterface>> out, StorageId storage_id) {
         return ResultKernelConnectionClosed;
     }
 
-    Result ContentManagerService::OpenContentMetaDatabase(Out<std::shared_ptr<ContentMetaDatabaseInterface>> out, FsStorageId storage_id) {
+    Result ContentManagerService::OpenContentMetaDatabase(Out<std::shared_ptr<ContentMetaDatabaseInterface>> out, StorageId storage_id) {
         return ResultKernelConnectionClosed;
     }
 
-    Result ContentManagerService::CloseContentStorageForcibly(FsStorageId storage_id) {
+    Result ContentManagerService::CloseContentStorageForcibly(StorageId storage_id) {
         return ResultKernelConnectionClosed;
     }
 
-    Result ContentManagerService::CloseContentMetaDatabaseForcibly(FsStorageId storage_id) {
+    Result ContentManagerService::CloseContentMetaDatabaseForcibly(StorageId storage_id) {
         return ResultKernelConnectionClosed;
     }
 
-    Result ContentManagerService::CleanupContentMetaDatabase(FsStorageId storage_id) {
+    Result ContentManagerService::CleanupContentMetaDatabase(StorageId storage_id) {
         return ResultKernelConnectionClosed;
     }
 
-    Result ContentManagerService::ActivateContentStorage(FsStorageId storage_id) {
+    Result ContentManagerService::ActivateContentStorage(StorageId storage_id) {
         return ResultKernelConnectionClosed;
     }
 
-    Result ContentManagerService::InactivateContentStorage(FsStorageId storage_id) {
+    Result ContentManagerService::InactivateContentStorage(StorageId storage_id) {
         return ResultKernelConnectionClosed;
     }
 
-    Result ContentManagerService::ActivateContentMetaDatabase(FsStorageId storage_id) {
+    Result ContentManagerService::ActivateContentMetaDatabase(StorageId storage_id) {
         return ResultKernelConnectionClosed;
     }
 
-    Result ContentManagerService::InactivateContentMetaDatabase(FsStorageId storage_id) {
+    Result ContentManagerService::InactivateContentMetaDatabase(StorageId storage_id) {
         return ResultKernelConnectionClosed;
     }
 

@@ -29,7 +29,7 @@ namespace sts::lr {
             };
 
             Result ResolveAddOnContentPath(OutPointerWithClientSize<char> out, u64 tid);
-            Result RegisterAddOnContentStorage(FsStorageId storage_id, u64 tid);
+            Result RegisterAddOnContentStorage(ncm::StorageId storage_id, u64 tid);
             Result UnregisterAllAddOnContentPath();
 
         public:

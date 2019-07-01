@@ -22,57 +22,57 @@
 
 namespace sts::ncm::impl {
 
-class PlaceHolderAccessor {
-    public:
-        class CacheEntry {
-            public:
-                PlaceHolderId id;
-                FILE* handle;
-                u64 counter;
-        };
+    class PlaceHolderAccessor {
+        public:
+            class CacheEntry {
+                public:
+                    PlaceHolderId id;
+                    FILE* handle;
+                    u64 counter;
+            };
 
-    public:
-        static constexpr size_t MaxCaches = 0x2;
+        public:
+            static constexpr size_t MaxCaches = 0x2;
 
-        CacheEntry caches[MaxCaches];
-        char* root_path;
-        u64 cur_counter;
-        HosMutex cache_mutex;
-        MakePlaceHolderPathFunc make_placeholder_path_func;
-        bool delay_flush;
+            CacheEntry caches[MaxCaches];
+            char* root_path;
+            u64 cur_counter;
+            HosMutex cache_mutex;
+            MakePlaceHolderPathFunc make_placeholder_path_func;
+            bool delay_flush;
 
-        PlaceHolderAccessor() : cur_counter(0), delay_flush(false) {
-            for (size_t i = 0; i < MaxCaches; i++) {
-                caches[i].id = InvalidUuid;
+            PlaceHolderAccessor() : cur_counter(0), delay_flush(false) {
+                for (size_t i = 0; i < MaxCaches; i++) {
+                    caches[i].id = InvalidUuid;
+                }
             }
-        }
 
-        inline void GetPlaceHolderRootPath(char* out_placeholder_root) {
-            /* TODO: Replace with BoundedString? */
-            if (snprintf(out_placeholder_root, FS_MAX_PATH, "%s%s", this->root_path, "/placehld") < 0) {
-                std::abort();
+            inline void GetPlaceHolderRootPath(char* out_placeholder_root) {
+                /* TODO: Replace with BoundedString? */
+                if (snprintf(out_placeholder_root, FS_MAX_PATH, "%s%s", this->root_path, "/placehld") < 0) {
+                    std::abort();
+                }
             }
-        }
 
-        inline void GetPlaceHolderPath(char* out_placeholder_path, PlaceHolderId placeholder_id) {
-            char placeholder_root_path[FS_MAX_PATH] = {0};
-            this->GetPlaceHolderRootPath(placeholder_root_path);
-            this->make_placeholder_path_func(out_placeholder_path, placeholder_id, placeholder_root_path);
-        }
+            inline void GetPlaceHolderPath(char* out_placeholder_path, PlaceHolderId placeholder_id) {
+                char placeholder_root_path[FS_MAX_PATH] = {0};
+                this->GetPlaceHolderRootPath(placeholder_root_path);
+                this->make_placeholder_path_func(out_placeholder_path, placeholder_id, placeholder_root_path);
+            }
 
-        unsigned int GetDirectoryDepth();
-        void GetPlaceHolderPathUncached(char* out_placeholder_path, PlaceHolderId placeholder_id);
-        Result Create(PlaceHolderId placeholder_id, size_t size);
-        Result Delete(PlaceHolderId placeholder_id);
-        Result Open(FILE** out_handle, PlaceHolderId placeholder_id);
-        Result SetSize(PlaceHolderId placeholder_id, size_t size);
-        Result GetSize(bool* found_in_cache, size_t* out_size, PlaceHolderId placeholder_id);
-        Result EnsureRecursively(PlaceHolderId placeholder_id);
+            unsigned int GetDirectoryDepth();
+            void GetPlaceHolderPathUncached(char* out_placeholder_path, PlaceHolderId placeholder_id);
+            Result Create(PlaceHolderId placeholder_id, size_t size);
+            Result Delete(PlaceHolderId placeholder_id);
+            Result Open(FILE** out_handle, PlaceHolderId placeholder_id);
+            Result SetSize(PlaceHolderId placeholder_id, size_t size);
+            Result GetSize(bool* found_in_cache, size_t* out_size, PlaceHolderId placeholder_id);
+            Result EnsureRecursively(PlaceHolderId placeholder_id);
 
-        CacheEntry *FindInCache(PlaceHolderId placeholder_id);
-        bool LoadFromCache(FILE** out_handle, PlaceHolderId placeholder_id);
-        void FlushCache(FILE* handle, PlaceHolderId placeholder_id);
-        void ClearAllCaches();
-};
+            CacheEntry *FindInCache(PlaceHolderId placeholder_id);
+            bool LoadFromCache(FILE** out_handle, PlaceHolderId placeholder_id);
+            void FlushCache(FILE* handle, PlaceHolderId placeholder_id);
+            void ClearAllCaches();
+    };
 
 }

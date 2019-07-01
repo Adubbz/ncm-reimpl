@@ -28,11 +28,11 @@ namespace sts::lr {
             std::list<std::shared_ptr<reg::LocationListEntry>> app_control_location_list;
             std::list<std::shared_ptr<reg::LocationListEntry>> html_docs_location_list;
             std::list<std::shared_ptr<reg::LocationListEntry>> legal_info_location_list;
-            FsStorageId storage_id;
+            ncm::StorageId storage_id;
             u64* content_meta_database;
             u64* content_storage;
 
-            LocationResolverService(FsStorageId storage_id);
+            LocationResolverService(ncm::StorageId storage_id);
 
         protected:
             enum class CommandId {
@@ -100,7 +100,7 @@ namespace sts::lr {
         public:
             u32 unk_0x60 = 1;
 
-            LocationResolverInterface(FsStorageId storage_id);
+            LocationResolverInterface(ncm::StorageId storage_id);
 
             Result RefreshImpl();
             
@@ -112,7 +112,7 @@ namespace sts::lr {
 
     class HostLocationResolverInterface : public LocationResolverService {
         public:
-            HostLocationResolverInterface(FsStorageId storage_id);
+            HostLocationResolverInterface(ncm::StorageId storage_id);
 
         protected:
             virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) override;

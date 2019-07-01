@@ -18,7 +18,7 @@
 
 namespace sts::lr {
 
-    std::shared_ptr<LocationResolverService>* LocationResolverManagerService::GetLocationResolverPtr(FsStorageId storage_id) {
+    std::shared_ptr<LocationResolverService>* LocationResolverManagerService::GetLocationResolverPtr(ncm::StorageId storage_id) {
         int highest_active_index = -1;
 
         for (unsigned int i = 0; i < 5; i++) {
@@ -42,7 +42,7 @@ namespace sts::lr {
         return &this->location_resolvers[highest_active_index + 1];
     }
 
-    Result LocationResolverManagerService::OpenLocationResolver(Out<std::shared_ptr<LocationResolverService>> out, FsStorageId storage_id) {
+    Result LocationResolverManagerService::OpenLocationResolver(Out<std::shared_ptr<LocationResolverService>> out, ncm::StorageId storage_id) {
         std::scoped_lock lk{this->mutex};
         std::shared_ptr<LocationResolverService> resolver = nullptr;
 
@@ -60,7 +60,7 @@ namespace sts::lr {
             }
         }
 
-        if (storage_id == FsStorageId_Host) {
+        if (storage_id == ncm::StorageId::Host) {
             auto location_resolver = std::make_shared<HostLocationResolverInterface>(storage_id);
             auto* lr_ptr = this->GetLocationResolverPtr(storage_id);
             *lr_ptr = location_resolver;
@@ -92,7 +92,7 @@ namespace sts::lr {
         return ResultKernelConnectionClosed;
     }
 
-    Result LocationResolverManagerService::RefreshLocationResolver(FsStorageId storage_id) {
+    Result LocationResolverManagerService::RefreshLocationResolver(ncm::StorageId storage_id) {
         return ResultKernelConnectionClosed;
     }
 

@@ -50,4 +50,8 @@ namespace sts::lr {
         return ResultKernelConnectionClosed;
     }
 
+    Result RegisteredLocationResolverInterface::Refresh() {
+        return ResultKernelConnectionClosed;
+    }
+
 }

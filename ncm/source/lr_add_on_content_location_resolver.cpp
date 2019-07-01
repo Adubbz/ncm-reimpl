@@ -22,7 +22,7 @@ namespace sts::lr {
         return ResultKernelConnectionClosed;
     }
 
-    Result AddOnContentLocationResolverInterface::RegisterAddOnContentStorage(FsStorageId storage_id, u64 tid) {
+    Result AddOnContentLocationResolverInterface::RegisterAddOnContentStorage(ncm::StorageId storage_id, u64 tid) {
         return ResultKernelConnectionClosed;
     }
 

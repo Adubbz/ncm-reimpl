@@ -18,7 +18,7 @@
 
 namespace sts::lr {
 
-    LocationResolverService::LocationResolverService(FsStorageId storage_id) :
+    LocationResolverService::LocationResolverService(ncm::StorageId storage_id) :
         storage_id(storage_id) {
         // TODO: CreateContentMetaDatabase
         // TODO: CreateContentStorage
@@ -107,7 +107,7 @@ namespace sts::lr {
         return ResultSuccess;
     }
 
-    LocationResolverInterface::LocationResolverInterface(FsStorageId storage_id) :
+    LocationResolverInterface::LocationResolverInterface(ncm::StorageId storage_id) :
         LocationResolverService(storage_id) {
     }
 
@@ -127,7 +127,7 @@ namespace sts::lr {
         return ResultKernelConnectionClosed;
     }
 
-    HostLocationResolverInterface::HostLocationResolverInterface(FsStorageId storage_id) :
+    HostLocationResolverInterface::HostLocationResolverInterface(ncm::StorageId storage_id) :
         LocationResolverService(storage_id) {
     }
 

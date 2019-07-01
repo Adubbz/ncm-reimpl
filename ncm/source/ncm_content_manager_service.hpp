@@ -24,6 +24,41 @@ namespace sts::ncm {
 
     class ContentManagerService final : public IServiceObject {
         private:
+            struct ContentStorageEntry {
+                char mount_point[16];
+                char root_path[128];
+                StorageId storage_id;
+                FsContentStorageId content_storage_id;
+                ContentStorageInterface* content_storage;
+            };
+
+            struct SaveDataMeta {
+                u64 id;
+                u64 size;
+                u64 journal_size;
+                u32 flags;
+                u32 space_id;
+            };
+
+            struct ContentMetaDBEntry {
+                char mount_name[16];
+                char meta_path[128];
+                StorageId storage_id;
+                SaveDataMeta save_meta;
+                ContentMetaDatabaseInterface* content_meta_database;
+                void* kvdb_store; // TODO: Replace this when implemented
+                u32 max_content_metas;
+            };
+
+        private:
+            HosMutex mutex;
+            bool initialized;
+            ContentStorageEntry content_storage_entries[8];
+            ContentMetaDBEntry content_meta_entries[8];
+            u32 num_content_storage_entries;
+            u32 num_content_meta_entries;
+
+        private:
             enum class CommandId {
                 CreateContentStorage = 0,
                 CreateContentMetaDatabase = 1,
@@ -40,19 +75,19 @@ namespace sts::ncm {
                 InactivateContentMetaDatabase = 12,
             };
 
-            Result CreateContentStorage(FsStorageId storage_id);
-            Result CreateContentMetaDatabase(FsStorageId storage_id);
-            Result VerifyContentStorage(FsStorageId storage_id);
-            Result VerifyContentMetaDatabase(FsStorageId storage_id);
-            Result OpenContentStorage(Out<std::shared_ptr<ContentStorageInterface>> out, FsStorageId storage_id);
-            Result OpenContentMetaDatabase(Out<std::shared_ptr<ContentMetaDatabaseInterface>> out, FsStorageId storage_id);
-            Result CloseContentStorageForcibly(FsStorageId storage_id);
-            Result CloseContentMetaDatabaseForcibly(FsStorageId storage_id);
-            Result CleanupContentMetaDatabase(FsStorageId storage_id);
-            Result ActivateContentStorage(FsStorageId storage_id);
-            Result InactivateContentStorage(FsStorageId storage_id);
-            Result ActivateContentMetaDatabase(FsStorageId storage_id);
-            Result InactivateContentMetaDatabase(FsStorageId storage_id);
+            Result CreateContentStorage(StorageId storage_id);
+            Result CreateContentMetaDatabase(StorageId storage_id);
+            Result VerifyContentStorage(StorageId storage_id);
+            Result VerifyContentMetaDatabase(StorageId storage_id);
+            Result OpenContentStorage(Out<std::shared_ptr<ContentStorageInterface>> out, StorageId storage_id);
+            Result OpenContentMetaDatabase(Out<std::shared_ptr<ContentMetaDatabaseInterface>> out, StorageId storage_id);
+            Result CloseContentStorageForcibly(StorageId storage_id);
+            Result CloseContentMetaDatabaseForcibly(StorageId storage_id);
+            Result CleanupContentMetaDatabase(StorageId storage_id);
+            Result ActivateContentStorage(StorageId storage_id);
+            Result InactivateContentStorage(StorageId storage_id);
+            Result ActivateContentMetaDatabase(StorageId storage_id);
+            Result InactivateContentMetaDatabase(StorageId storage_id);
 
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {

@@ -27,7 +27,7 @@ namespace sts::lr {
         private:
             struct LocationResolverEntry {
                 bool active;
-                FsStorageId storage_id;
+                ncm::StorageId storage_id;
             };
 
             LocationResolverEntry entries[5] = {0};
@@ -35,7 +35,7 @@ namespace sts::lr {
             HosMutex mutex;
 
         private:
-            std::shared_ptr<LocationResolverService>* GetLocationResolverPtr(FsStorageId storage_id);
+            std::shared_ptr<LocationResolverService>* GetLocationResolverPtr(ncm::StorageId storage_id);
 
         private:
             enum class CommandId {
@@ -46,9 +46,9 @@ namespace sts::lr {
             };
 
             /* Actual commands. */
-            Result OpenLocationResolver(Out<std::shared_ptr<LocationResolverService>> out, FsStorageId storage_id);
+            Result OpenLocationResolver(Out<std::shared_ptr<LocationResolverService>> out, ncm::StorageId storage_id);
             Result OpenRegisteredLocationResolver(Out<std::shared_ptr<RegisteredLocationResolverInterface>> out);
-            Result RefreshLocationResolver(FsStorageId storage_id);
+            Result RefreshLocationResolver(ncm::StorageId storage_id);
             Result OpenAddOnContentLocationResolver(Out<std::shared_ptr<AddOnContentLocationResolverInterface>> out);
 
         public:

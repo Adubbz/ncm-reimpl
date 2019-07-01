@@ -31,6 +31,7 @@ namespace sts::lr {
                 RegisterHtmlDocumentPath = 5,
                 UnregisterHtmlDocumentPath = 6,
                 RedirectHtmlDocumentPath = 7,
+                Refresh = 8,
             };
 
             Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid);
@@ -41,6 +42,7 @@ namespace sts::lr {
             Result RegisterHtmlDocumentPath(u64 tid, InPointer<const char> path);
             Result UnregisterHtmlDocumentPath(u64 tid);
             Result RedirectHtmlDocumentPath(u64 tid, InPointer<const char> path);
+            Result Refresh();
         
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {
@@ -55,6 +57,9 @@ namespace sts::lr {
                 MakeServiceCommandMeta<CommandId::RegisterHtmlDocumentPath, &RegisteredLocationResolverInterface::RegisterHtmlDocumentPath, FirmwareVersion_200>(),
                 MakeServiceCommandMeta<CommandId::UnregisterHtmlDocumentPath, &RegisteredLocationResolverInterface::UnregisterHtmlDocumentPath, FirmwareVersion_200>(),
                 MakeServiceCommandMeta<CommandId::RedirectHtmlDocumentPath, &RegisteredLocationResolverInterface::RedirectHtmlDocumentPath, FirmwareVersion_200>(),
+            
+                /* 7.0.0- */
+                MakeServiceCommandMeta<CommandId::Refresh, &RegisteredLocationResolverInterface::Refresh, FirmwareVersion_700>(),
             };
     };
 
