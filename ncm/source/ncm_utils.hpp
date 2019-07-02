@@ -29,8 +29,11 @@ namespace sts::ncm {
     Result GetPlaceHolderIdFromDirEntry(PlaceHolderId* out, struct dirent* dir_entry);
     std::optional<ContentId> GetContentIdFromString(const char* str, size_t len);
 
+    Result EnsureDirectoryRecursively(const char* dir_path);
+    Result EnsureRecursively(const char* path, bool is_dir);
     /* Create all parent directories for a file path */
     Result EnsureParentDirectoryRecursively(const char* path);
+
     template<typename F>
     Result TraverseDirectory(const char* root_path, int max_level, F f) {
         bool should_continue = false;

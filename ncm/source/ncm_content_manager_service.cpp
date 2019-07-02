@@ -15,11 +15,45 @@
  */
 
 #include "ncm_content_manager_service.hpp"
+#include "ncm_utils.hpp"
 
 namespace sts::ncm {
 
     Result ContentManagerService::CreateContentStorage(StorageId storage_id) {
-        return ResultKernelConnectionClosed;
+        std::scoped_lock<HosMutex> lk(this->mutex);
+        ContentStorageEntry* found_entry = nullptr;
+        FsFileSystem fs;
+
+        if (storage_id != StorageId::None && static_cast<u8>(storage_id) != 6) {
+            for (size_t i = 0; i < ContentManagerService::MaxContentStorageEntries; i++) {
+                ContentStorageEntry* entry = &this->content_storage_entries[i];
+
+                if (entry->storage_id == storage_id) {
+                    R_TRY(fsOpenContentStorageFileSystem(&fs, entry->content_storage_id));
+                    if (fsdevMountDevice(entry->mount_point, fs) == -1) {
+                        std::abort();
+                    }
+                    found_entry = entry;
+                    break;
+                }
+            }
+        }
+
+        if (!found_entry) {
+            return ResultNcmUnknownStorage;
+        }
+
+        auto fs_guard = SCOPE_GUARD {
+            if (fsdevUnmountDevice(found_entry->mount_point) == -1) {
+                std::abort();
+            }
+        };
+
+        R_TRY(EnsureDirectoryRecursively(found_entry->root_path));
+        R_TRY(EnsureContentAndPlaceHolderRoot(found_entry->root_path));
+
+        fs_guard.Cancel();
+        return ResultSuccess;
     }
 
     Result ContentManagerService::CreateContentMetaDatabase(StorageId storage_id) {

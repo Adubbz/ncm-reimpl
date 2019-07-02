@@ -17,10 +17,21 @@
 #include "ncm_content_storage.hpp"
 #include "ncm_utils.hpp"
 #include "ncm_make_path.hpp"
-#include "ncm_path_utils.hpp"
 #include "impl/ncm_rights_cache.hpp"
 
 namespace sts::ncm {
+
+    Result EnsureContentAndPlaceHolderRoot(const char* root_path) {
+        char content_root[FS_MAX_PATH] = {0};
+        char placeholder_root[FS_MAX_PATH] = {0};
+
+        path::GetContentRootPath(content_root, root_path);
+        R_TRY(EnsureDirectoryRecursively(content_root));
+        path::GetPlaceHolderRootPath(placeholder_root, root_path);
+        R_TRY(EnsureDirectoryRecursively(placeholder_root));
+
+        return ResultSuccess;
+    }
 
     void ContentStorageInterface::ClearContentCache() {
         if (memcmp(this->cached_content_id.uuid, InvalidUuid.uuid, sizeof(ContentId)) != 0) {

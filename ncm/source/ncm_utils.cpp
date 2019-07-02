@@ -78,7 +78,11 @@ namespace sts::ncm {
         return std::optional<ContentId>(content_id);
     }
 
-    Result EnsureParentDirectoryRecursively(const char* path) {
+    Result EnsureDirectoryRecursively(const char* dir_path) {
+        return EnsureRecursively(dir_path, true);
+    }
+
+    Result EnsureRecursively(const char* path, bool is_dir) {
         size_t path_len = strlen(path);
         char working_path_buf[FS_MAX_PATH] = {0};
 
@@ -112,6 +116,10 @@ namespace sts::ncm {
         }
 
         return ResultSuccess;
+    }
+
+    Result EnsureParentDirectoryRecursively(const char* path) {
+        return EnsureRecursively(path, false);
     }
 
 }

@@ -22,6 +22,20 @@
 
 namespace sts::ncm::path {
 
+    inline void GetContentRootPath(char* out_content_root, const char* root_path) {
+        /* TODO: Replace with BoundedString? */
+        if (snprintf(out_content_root, FS_MAX_PATH-1, "%s%s", root_path, "/registered") < 0) {
+            std::abort();
+        }
+    }
+
+    inline void GetPlaceHolderRootPath(char* out_placeholder_root, const char* root_path) {
+        /* TODO: Replace with BoundedString? */
+        if (snprintf(out_placeholder_root, FS_MAX_PATH, "%s%s", root_path, "/placehld") < 0) {
+            std::abort();
+        }
+    }
+
     void GetContentFileName(char* out, ContentId content_id);
     void GetPlaceHolderFileName(char* out, PlaceHolderId placeholder_id);
     bool IsNcaPath(const char* path);

@@ -19,6 +19,7 @@
 #include <stratosphere.hpp>
 
 #include "../ncm_types.hpp"
+#include "../ncm_path_utils.hpp"
 
 namespace sts::ncm::impl {
 
@@ -48,10 +49,7 @@ namespace sts::ncm::impl {
             }
 
             inline void GetPlaceHolderRootPath(char* out_placeholder_root) {
-                /* TODO: Replace with BoundedString? */
-                if (snprintf(out_placeholder_root, FS_MAX_PATH, "%s%s", this->root_path, "/placehld") < 0) {
-                    std::abort();
-                }
+                path::GetPlaceHolderRootPath(out_placeholder_root, this->root_path);
             }
 
             inline void GetPlaceHolderPath(char* out_placeholder_path, PlaceHolderId placeholder_id) {

@@ -51,10 +51,13 @@ namespace sts::ncm {
             };
 
         private:
+            static constexpr size_t MaxContentStorageEntries = 8;
+            static constexpr size_t MaxContentMetaDBEntries = 8;
+
             HosMutex mutex;
             bool initialized;
-            ContentStorageEntry content_storage_entries[8];
-            ContentMetaDBEntry content_meta_entries[8];
+            ContentStorageEntry content_storage_entries[MaxContentStorageEntries];
+            ContentMetaDBEntry content_meta_entries[MaxContentMetaDBEntries];
             u32 num_content_storage_entries;
             u32 num_content_meta_entries;
 

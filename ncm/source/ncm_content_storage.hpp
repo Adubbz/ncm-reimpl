@@ -18,10 +18,13 @@
 #include <switch.h>
 #include <stratosphere.hpp>
 
+#include "ncm_path_utils.hpp"
 #include "ncm_types.hpp"
 #include "impl/ncm_placeholder_accessor.hpp"
 
 namespace sts::ncm {
+
+    Result EnsureContentAndPlaceHolderRoot(const char* root_path);
 
     class ContentStorageInterface : public IServiceObject {
         private:
@@ -38,10 +41,7 @@ namespace sts::ncm {
             Result OpenCachedContentFile(ContentId content_id);
 
             inline void GetContentRootPath(char* out_content_root) {
-                /* TODO: Replace with BoundedString? */
-                if (snprintf(out_content_root, FS_MAX_PATH-1, "%s%s", this->root_path, "/registered") < 0) {
-                    std::abort();
-                }
+                path::GetPlaceHolderRootPath(out_content_root, this->root_path);
             }
 
             inline void GetContentPath(char* out_content_root, ContentId content_id) {
