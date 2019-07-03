@@ -23,6 +23,22 @@
 namespace sts::ncm {
 
     class ContentManagerService final : public IServiceObject {
+        protected:
+            enum class CommandId {
+                CreateContentStorage = 0,
+                CreateContentMetaDatabase = 1,
+                VerifyContentStorage = 2,
+                VerifyContentMetaDatabase = 3,
+                OpenContentStorage = 4,
+                OpenContentMetaDatabase = 5,
+                CloseContentStorageForcibly = 6,
+                CloseContentMetaDatabaseForcibly = 7,
+                CleanupContentMetaDatabase = 8,
+                ActivateContentStorage = 9,
+                InactivateContentStorage = 10,
+                ActivateContentMetaDatabase = 11,
+                InactivateContentMetaDatabase = 12,
+            };
         private:
             struct ContentStorageEntry {
                 char mount_point[16];
@@ -49,7 +65,6 @@ namespace sts::ncm {
                 void* kvdb_store; // TODO: Replace this when implemented
                 u32 max_content_metas;
             };
-
         private:
             static constexpr size_t MaxContentStorageEntries = 8;
             static constexpr size_t MaxContentMetaDBEntries = 8;
@@ -60,58 +75,35 @@ namespace sts::ncm {
             ContentMetaDBEntry content_meta_entries[MaxContentMetaDBEntries];
             u32 num_content_storage_entries;
             u32 num_content_meta_entries;
-
-        private:
-            enum class CommandId {
-                CreateContentStorage = 0,
-                CreateContentMetaDatabase = 1,
-                VerifyContentStorage = 2,
-                VerifyContentMetaDatabase = 3,
-                OpenContentStorage = 4,
-                OpenContentMetaDatabase = 5,
-                CloseContentStorageForcibly = 6,
-                CloseContentMetaDatabaseForcibly = 7,
-                CleanupContentMetaDatabase = 8,
-                ActivateContentStorage = 9,
-                InactivateContentStorage = 10,
-                ActivateContentMetaDatabase = 11,
-                InactivateContentMetaDatabase = 12,
-            };
-
-            Result CreateContentStorage(StorageId storage_id);
-            Result CreateContentMetaDatabase(StorageId storage_id);
-            Result VerifyContentStorage(StorageId storage_id);
-            Result VerifyContentMetaDatabase(StorageId storage_id);
-            Result OpenContentStorage(Out<std::shared_ptr<ContentStorageInterface>> out, StorageId storage_id);
-            Result OpenContentMetaDatabase(Out<std::shared_ptr<ContentMetaDatabaseInterface>> out, StorageId storage_id);
-            Result CloseContentStorageForcibly(StorageId storage_id);
-            Result CloseContentMetaDatabaseForcibly(StorageId storage_id);
-            Result CleanupContentMetaDatabase(StorageId storage_id);
-            Result ActivateContentStorage(StorageId storage_id);
-            Result InactivateContentStorage(StorageId storage_id);
-            Result ActivateContentMetaDatabase(StorageId storage_id);
-            Result InactivateContentMetaDatabase(StorageId storage_id);
-
+        public:
+            virtual Result CreateContentStorage(StorageId storage_id);
+            virtual Result CreateContentMetaDatabase(StorageId storage_id);
+            virtual Result VerifyContentStorage(StorageId storage_id);
+            virtual Result VerifyContentMetaDatabase(StorageId storage_id);
+            virtual Result OpenContentStorage(Out<std::shared_ptr<ContentStorageInterface>> out, StorageId storage_id);
+            virtual Result OpenContentMetaDatabase(Out<std::shared_ptr<ContentMetaDatabaseInterface>> out, StorageId storage_id);
+            virtual Result CloseContentStorageForcibly(StorageId storage_id);
+            virtual Result CloseContentMetaDatabaseForcibly(StorageId storage_id);
+            virtual Result CleanupContentMetaDatabase(StorageId storage_id);
+            virtual Result ActivateContentStorage(StorageId storage_id);
+            virtual Result InactivateContentStorage(StorageId storage_id);
+            virtual Result ActivateContentMetaDatabase(StorageId storage_id);
+            virtual Result InactivateContentMetaDatabase(StorageId storage_id);
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {
-                /* 1.0.0 only */
-                MakeServiceCommandMeta<CommandId::CloseContentStorageForcibly, &ContentManagerService::CloseContentStorageForcibly, FirmwareVersion_100, FirmwareVersion_100>(),
-                MakeServiceCommandMeta<CommandId::CloseContentMetaDatabaseForcibly, &ContentManagerService::CloseContentMetaDatabaseForcibly, FirmwareVersion_100, FirmwareVersion_100>(),
-
-                /* 1.0.0- */
-                MakeServiceCommandMeta<CommandId::CreateContentStorage, &ContentManagerService::CreateContentStorage>(),
-                MakeServiceCommandMeta<CommandId::CreateContentMetaDatabase, &ContentManagerService::CreateContentMetaDatabase>(),
-                MakeServiceCommandMeta<CommandId::VerifyContentStorage, &ContentManagerService::VerifyContentStorage>(),
-                MakeServiceCommandMeta<CommandId::VerifyContentMetaDatabase, &ContentManagerService::VerifyContentMetaDatabase>(),
-                MakeServiceCommandMeta<CommandId::OpenContentStorage, &ContentManagerService::OpenContentStorage>(),
-                MakeServiceCommandMeta<CommandId::OpenContentMetaDatabase, &ContentManagerService::OpenContentMetaDatabase>(),
-                MakeServiceCommandMeta<CommandId::CleanupContentMetaDatabase, &ContentManagerService::CleanupContentMetaDatabase>(),
-            
-                /* 2.0.0- */
-                MakeServiceCommandMeta<CommandId::ActivateContentStorage, &ContentManagerService::ActivateContentStorage, FirmwareVersion_200>(),
-                MakeServiceCommandMeta<CommandId::InactivateContentStorage, &ContentManagerService::InactivateContentStorage, FirmwareVersion_200>(),
-                MakeServiceCommandMeta<CommandId::ActivateContentMetaDatabase, &ContentManagerService::ActivateContentMetaDatabase, FirmwareVersion_200>(),
-                MakeServiceCommandMeta<CommandId::InactivateContentMetaDatabase, &ContentManagerService::InactivateContentMetaDatabase, FirmwareVersion_200>(),
+                MAKE_SERVICE_COMMAND_META(ContentManagerService, CloseContentStorageForcibly,      FirmwareVersion_100, FirmwareVersion_100),
+                MAKE_SERVICE_COMMAND_META(ContentManagerService, CloseContentMetaDatabaseForcibly, FirmwareVersion_100, FirmwareVersion_100),
+                MAKE_SERVICE_COMMAND_META(ContentManagerService, CreateContentStorage),
+                MAKE_SERVICE_COMMAND_META(ContentManagerService, CreateContentMetaDatabase),
+                MAKE_SERVICE_COMMAND_META(ContentManagerService, VerifyContentStorage),
+                MAKE_SERVICE_COMMAND_META(ContentManagerService, VerifyContentMetaDatabase),
+                MAKE_SERVICE_COMMAND_META(ContentManagerService, OpenContentStorage),
+                MAKE_SERVICE_COMMAND_META(ContentManagerService, OpenContentMetaDatabase),
+                MAKE_SERVICE_COMMAND_META(ContentManagerService, CleanupContentMetaDatabase),
+                MAKE_SERVICE_COMMAND_META(ContentManagerService, ActivateContentStorage,           FirmwareVersion_200),
+                MAKE_SERVICE_COMMAND_META(ContentManagerService, InactivateContentStorage,         FirmwareVersion_200),
+                MAKE_SERVICE_COMMAND_META(ContentManagerService, ActivateContentMetaDatabase,      FirmwareVersion_200),
+                MAKE_SERVICE_COMMAND_META(ContentManagerService, InactivateContentMetaDatabase,    FirmwareVersion_200),
             };
     };
 

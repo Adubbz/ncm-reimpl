@@ -24,17 +24,6 @@ namespace sts::lr {
 
     class LocationResolverService : public IServiceObject {
         protected:
-            std::list<std::shared_ptr<reg::LocationListEntry>> program_location_list;
-            std::list<std::shared_ptr<reg::LocationListEntry>> app_control_location_list;
-            std::list<std::shared_ptr<reg::LocationListEntry>> html_docs_location_list;
-            std::list<std::shared_ptr<reg::LocationListEntry>> legal_info_location_list;
-            ncm::StorageId storage_id;
-            u64* content_meta_database;
-            u64* content_storage;
-
-            LocationResolverService(ncm::StorageId storage_id);
-
-        protected:
             enum class CommandId {
                 ResolveProgramPath = 0,
                 RedirectProgramPath = 1,
@@ -53,7 +42,17 @@ namespace sts::lr {
                 EraseApplicationHtmlDocumentRedirection = 14,
                 EraseApplicationLegalInformationRedirection = 15,
             };
-        
+        private:
+            std::list<std::shared_ptr<reg::LocationListEntry>> program_location_list;
+            std::list<std::shared_ptr<reg::LocationListEntry>> app_control_location_list;
+            std::list<std::shared_ptr<reg::LocationListEntry>> html_docs_location_list;
+            std::list<std::shared_ptr<reg::LocationListEntry>> legal_info_location_list;
+            ncm::StorageId storage_id;
+            u64* content_meta_database;
+            u64* content_storage;
+        protected:
+            LocationResolverService(ncm::StorageId storage_id);
+        public:
             virtual Result RedirectProgramPath(u64 tid, InPointer<const char> path);
             virtual Result ResolveApplicationControlPath(OutPointerWithClientSize<char> out, u64 tid);
             virtual Result ResolveApplicationHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid);
@@ -71,28 +70,24 @@ namespace sts::lr {
             virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) = 0;
             virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) = 0;
             virtual Result Refresh() = 0;
-
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {
-                /* 1.0.0- */
-                MakeServiceCommandMeta<CommandId::ResolveProgramPath, &LocationResolverService::ResolveProgramPath>(),
-                MakeServiceCommandMeta<CommandId::RedirectProgramPath, &LocationResolverService::RedirectProgramPath>(),
-                MakeServiceCommandMeta<CommandId::ResolveApplicationControlPath, &LocationResolverService::ResolveApplicationControlPath>(),
-                MakeServiceCommandMeta<CommandId::ResolveApplicationHtmlDocumentPath, &LocationResolverService::ResolveApplicationHtmlDocumentPath>(),
-                MakeServiceCommandMeta<CommandId::ResolveDataPath, &LocationResolverService::ResolveDataPath>(),
-                MakeServiceCommandMeta<CommandId::RedirectApplicationControlPath, &LocationResolverService::RedirectApplicationControlPath>(),
-                MakeServiceCommandMeta<CommandId::RedirectApplicationHtmlDocumentPath, &LocationResolverService::RedirectApplicationHtmlDocumentPath>(),
-                MakeServiceCommandMeta<CommandId::ResolveApplicationLegalInformationPath, &LocationResolverService::ResolveApplicationLegalInformationPath>(),
-                MakeServiceCommandMeta<CommandId::RedirectApplicationLegalInformationPath, &LocationResolverService::RedirectApplicationLegalInformationPath>(),
-                MakeServiceCommandMeta<CommandId::Refresh, &LocationResolverService::Refresh>(),
-
-                /* 5.0.0- */
-                MakeServiceCommandMeta<CommandId::RedirectApplicationProgramPath, &LocationResolverService::RedirectApplicationProgramPath, FirmwareVersion_500>(),
-                MakeServiceCommandMeta<CommandId::ClearApplicationRedirection, &LocationResolverService::ClearApplicationRedirection>(),
-                MakeServiceCommandMeta<CommandId::EraseProgramRedirection, &LocationResolverService::EraseProgramRedirection>(),
-                MakeServiceCommandMeta<CommandId::EraseApplicationControlRedirection, &LocationResolverService::EraseApplicationControlRedirection>(),
-                MakeServiceCommandMeta<CommandId::EraseApplicationHtmlDocumentRedirection, &LocationResolverService::EraseApplicationHtmlDocumentRedirection>(),
-                MakeServiceCommandMeta<CommandId::EraseApplicationLegalInformationRedirection, &LocationResolverService::EraseApplicationLegalInformationRedirection>(),
+                MAKE_SERVICE_COMMAND_META(LocationResolverService, ResolveProgramPath),
+                MAKE_SERVICE_COMMAND_META(LocationResolverService, RedirectProgramPath),
+                MAKE_SERVICE_COMMAND_META(LocationResolverService, ResolveApplicationControlPath),
+                MAKE_SERVICE_COMMAND_META(LocationResolverService, ResolveApplicationHtmlDocumentPath),
+                MAKE_SERVICE_COMMAND_META(LocationResolverService, ResolveDataPath),
+                MAKE_SERVICE_COMMAND_META(LocationResolverService, RedirectApplicationControlPath),
+                MAKE_SERVICE_COMMAND_META(LocationResolverService, RedirectApplicationHtmlDocumentPath),
+                MAKE_SERVICE_COMMAND_META(LocationResolverService, ResolveApplicationLegalInformationPath),
+                MAKE_SERVICE_COMMAND_META(LocationResolverService, RedirectApplicationLegalInformationPath),
+                MAKE_SERVICE_COMMAND_META(LocationResolverService, Refresh),
+                MAKE_SERVICE_COMMAND_META(LocationResolverService, RedirectApplicationProgramPath,              FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(LocationResolverService, ClearApplicationRedirection,                 FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(LocationResolverService, EraseProgramRedirection,                     FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(LocationResolverService, EraseApplicationControlRedirection,          FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(LocationResolverService, EraseApplicationHtmlDocumentRedirection,     FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(LocationResolverService, EraseApplicationLegalInformationRedirection, FirmwareVersion_500),
             };
     };
 

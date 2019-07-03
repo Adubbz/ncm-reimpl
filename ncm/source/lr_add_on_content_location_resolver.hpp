@@ -21,23 +21,21 @@
 namespace sts::lr {
 
     class AddOnContentLocationResolverInterface : public IServiceObject {
-        private:
+        protected:
             enum class CommandId {
                 ResolveAddOnContentPath = 0,
                 RegisterAddOnContentStorage = 1,
                 UnregisterAllAddOnContentPath = 2,
             };
-
-            Result ResolveAddOnContentPath(OutPointerWithClientSize<char> out, u64 tid);
-            Result RegisterAddOnContentStorage(ncm::StorageId storage_id, u64 tid);
-            Result UnregisterAllAddOnContentPath();
-
+        public:
+            virtual Result ResolveAddOnContentPath(OutPointerWithClientSize<char> out, u64 tid);
+            virtual Result RegisterAddOnContentStorage(ncm::StorageId storage_id, u64 tid);
+            virtual Result UnregisterAllAddOnContentPath();
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {
-                /* 1.0.0- */
-                MakeServiceCommandMeta<CommandId::ResolveAddOnContentPath, &AddOnContentLocationResolverInterface::ResolveAddOnContentPath>(),
-                MakeServiceCommandMeta<CommandId::RegisterAddOnContentStorage, &AddOnContentLocationResolverInterface::RegisterAddOnContentStorage>(),
-                MakeServiceCommandMeta<CommandId::UnregisterAllAddOnContentPath, &AddOnContentLocationResolverInterface::UnregisterAllAddOnContentPath>(),
+                MAKE_SERVICE_COMMAND_META(AddOnContentLocationResolverInterface, ResolveAddOnContentPath),
+                MAKE_SERVICE_COMMAND_META(AddOnContentLocationResolverInterface, RegisterAddOnContentStorage),
+                MAKE_SERVICE_COMMAND_META(AddOnContentLocationResolverInterface, UnregisterAllAddOnContentPath),
             };
     };
 

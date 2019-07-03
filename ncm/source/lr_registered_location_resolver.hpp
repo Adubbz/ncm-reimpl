@@ -21,7 +21,7 @@
 namespace sts::lr {
 
     class RegisteredLocationResolverInterface final : public IServiceObject {
-        private:
+        protected:
             enum class CommandId {
                 ResolveProgramPath = 0,
                 RegisterProgramPath = 1,
@@ -33,7 +33,7 @@ namespace sts::lr {
                 RedirectHtmlDocumentPath = 7,
                 Refresh = 8,
             };
-
+        public:
             Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid);
             Result RegisterProgramPath(u64 tid, InPointer<const char> path);
             Result UnregisterProgramPath(u64 tid);
@@ -43,23 +43,17 @@ namespace sts::lr {
             Result UnregisterHtmlDocumentPath(u64 tid);
             Result RedirectHtmlDocumentPath(u64 tid, InPointer<const char> path);
             Result Refresh();
-        
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {
-                /* 1.0.0- */
-                MakeServiceCommandMeta<CommandId::ResolveProgramPath, &RegisteredLocationResolverInterface::ResolveProgramPath>(),
-                MakeServiceCommandMeta<CommandId::RegisterProgramPath, &RegisteredLocationResolverInterface::RegisterProgramPath>(),
-                MakeServiceCommandMeta<CommandId::UnregisterProgramPath, &RegisteredLocationResolverInterface::UnregisterProgramPath>(),
-                MakeServiceCommandMeta<CommandId::RedirectProgramPath, &RegisteredLocationResolverInterface::RedirectProgramPath>(),
-                    
-                /* 2.0.0- */
-                MakeServiceCommandMeta<CommandId::ResolveHtmlDocumentPath, &RegisteredLocationResolverInterface::ResolveHtmlDocumentPath, FirmwareVersion_200>(),
-                MakeServiceCommandMeta<CommandId::RegisterHtmlDocumentPath, &RegisteredLocationResolverInterface::RegisterHtmlDocumentPath, FirmwareVersion_200>(),
-                MakeServiceCommandMeta<CommandId::UnregisterHtmlDocumentPath, &RegisteredLocationResolverInterface::UnregisterHtmlDocumentPath, FirmwareVersion_200>(),
-                MakeServiceCommandMeta<CommandId::RedirectHtmlDocumentPath, &RegisteredLocationResolverInterface::RedirectHtmlDocumentPath, FirmwareVersion_200>(),
-            
-                /* 7.0.0- */
-                MakeServiceCommandMeta<CommandId::Refresh, &RegisteredLocationResolverInterface::Refresh, FirmwareVersion_700>(),
+                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverInterface, ResolveProgramPath),
+                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverInterface, RegisterProgramPath),
+                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverInterface, UnregisterProgramPath),
+                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverInterface, RedirectProgramPath),
+                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverInterface, ResolveHtmlDocumentPath,    FirmwareVersion_200),
+                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverInterface, RegisterHtmlDocumentPath,   FirmwareVersion_200),
+                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverInterface, UnregisterHtmlDocumentPath, FirmwareVersion_200),
+                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverInterface, RedirectHtmlDocumentPath,   FirmwareVersion_200),
+                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverInterface, Refresh,                    FirmwareVersion_700),
             };
     };
 
