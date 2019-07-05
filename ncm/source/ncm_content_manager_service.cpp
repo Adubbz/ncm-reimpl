@@ -21,21 +21,21 @@ namespace sts::ncm {
 
     Result ContentManagerService::CreateContentStorage(StorageId storage_id) {
         std::scoped_lock<HosMutex> lk(this->mutex);
+
+        if (storage_id == StorageId::None || static_cast<u8>(storage_id) == 6) {
+            return ResultNcmUnknownStorage;
+        }
+        
         ContentStorageEntry* found_entry = nullptr;
         FsFileSystem fs;
 
-        if (storage_id != StorageId::None && static_cast<u8>(storage_id) != 6) {
-            for (size_t i = 0; i < ContentManagerService::MaxContentStorageEntries; i++) {
-                ContentStorageEntry* entry = &this->content_storage_entries[i];
+        for (size_t i = 0; i < ContentManagerService::MaxContentStorageEntries; i++) {
+            ContentStorageEntry* entry = &this->content_storage_entries[i];
 
-                if (entry->storage_id == storage_id) {
-                    R_TRY(fsOpenContentStorageFileSystem(&fs, entry->content_storage_id));
-                    if (fsdevMountDevice(entry->mount_point, fs) == -1) {
-                        std::abort();
-                    }
-                    found_entry = entry;
-                    break;
-                }
+            if (entry->storage_id == storage_id) {
+                R_TRY(fsOpenContentStorageFileSystem(&fs, entry->content_storage_id));
+                found_entry = entry;
+                break;
             }
         }
 
@@ -43,7 +43,11 @@ namespace sts::ncm {
             return ResultNcmUnknownStorage;
         }
 
-        auto fs_guard = SCOPE_GUARD {
+        if (fsdevMountDevice(found_entry->mount_point, fs) == -1) {
+            std::abort();
+        }
+
+        ON_SCOPE_EXIT {
             if (fsdevUnmountDevice(found_entry->mount_point) == -1) {
                 std::abort();
             }
@@ -52,12 +56,49 @@ namespace sts::ncm {
         R_TRY(EnsureDirectoryRecursively(found_entry->root_path));
         R_TRY(EnsureContentAndPlaceHolderRoot(found_entry->root_path));
 
-        fs_guard.Cancel();
         return ResultSuccess;
     }
 
     Result ContentManagerService::CreateContentMetaDatabase(StorageId storage_id) {
-        return ResultKernelConnectionClosed;
+        if (storage_id == StorageId::None || storage_id == StorageId::GameCard || static_cast<u8>(storage_id) == 6) {
+            return ResultNcmUnknownStorage;
+        }
+
+        ContentMetaDBEntry* found_entry = nullptr;
+
+        for (size_t i = 0; i < ContentManagerService::MaxContentStorageEntries; i++) {
+            ContentMetaDBEntry* entry = &this->content_meta_entries[i];
+
+            if (entry->storage_id == storage_id) {
+                found_entry = entry;
+                break;
+            }
+        }
+
+        if (!found_entry) {
+            return ResultNcmUnknownStorage;
+        }
+
+        /* N doesn't bother checking the result of this. */
+        fsDisableAutoSaveDataCreation();
+
+        R_TRY_CATCH(MountSystemSaveData(found_entry->mount_point, found_entry->save_meta.space_id, found_entry->save_meta.id)) {
+            R_CATCH(ResultFsTargetNotFound ) {
+                R_TRY(fsCreate_SystemSaveData(found_entry->save_meta.space_id, found_entry->save_meta.id, found_entry->save_meta.size, found_entry->save_meta.journal_size, found_entry->save_meta.flags));
+                R_TRY(MountSystemSaveData(found_entry->mount_point, found_entry->save_meta.space_id, found_entry->save_meta.id));
+            }
+        } R_END_TRY_CATCH;
+
+        ON_SCOPE_EXIT {
+            if (fsdevUnmountDevice(found_entry->mount_point) == -1) {
+                std::abort();
+            }
+        };
+
+        R_TRY(EnsureDirectoryRecursively(found_entry->mount_point));
+        R_TRY(fsdevCommitDevice(found_entry->mount_point));
+
+        return ResultSuccess;
     }
 
     Result ContentManagerService::VerifyContentStorage(StorageId storage_id) {

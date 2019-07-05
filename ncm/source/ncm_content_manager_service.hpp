@@ -53,11 +53,13 @@ namespace sts::ncm {
                 u64 size;
                 u64 journal_size;
                 u32 flags;
-                u32 space_id;
-            };
+                FsSaveDataSpaceId space_id;
+            } PACKED;
+
+            static_assert(sizeof(SaveDataMeta) == 0x20, "SaveDataMeta definition!");
 
             struct ContentMetaDBEntry {
-                char mount_name[16];
+                char mount_point[16];
                 char meta_path[128];
                 StorageId storage_id;
                 SaveDataMeta save_meta;
