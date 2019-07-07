@@ -20,6 +20,10 @@
 
 namespace sts::ncm {
 
+    struct MountName {
+        char name[0x10];
+    };
+
     struct Uuid {
         u8 uuid[0x10];
     };
@@ -90,7 +94,9 @@ namespace sts::ncm {
     typedef void (*MakePlaceHolderPathFunc)(char* out, PlaceHolderId placeholder_id, const char* root);
 
     // TODO: Move to libstrat
+    static constexpr Result ResultNcmStoragePathNotFound              = MAKERESULT(Module_Ncm, 1);
     static constexpr Result ResultNcmInvalidPlaceHolderDirectoryEntry = MAKERESULT(Module_Ncm, 170);
+    static constexpr Result ResultNcmStorageRootNotFound              = MAKERESULT(Module_Ncm, 310);
 
     inline Result MountSystemSaveData(const char* mount_point, FsSaveDataSpaceId space_id, u64 save_id) {
         FsSave save = {

@@ -24,6 +24,7 @@
 
 namespace sts::ncm {
 
+    Result CheckContentStorageDirectoriesExist(const char* root_path);
     Result EnsureContentAndPlaceHolderRoot(const char* root_path);
 
     class ContentStorageInterface : public IServiceObject {

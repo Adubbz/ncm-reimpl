@@ -39,7 +39,7 @@ namespace sts::ncm {
                 ActivateContentMetaDatabase = 11,
                 InactivateContentMetaDatabase = 12,
             };
-        private:
+        public:
             struct ContentStorageEntry {
                 char mount_point[16];
                 char root_path[128];
@@ -77,6 +77,9 @@ namespace sts::ncm {
             ContentMetaDBEntry content_meta_entries[MaxContentMetaDBEntries];
             u32 num_content_storage_entries;
             u32 num_content_meta_entries;
+        private:
+            ContentStorageEntry* FindContentStorageEntry(StorageId storage_id);
+            ContentMetaDBEntry* FindContentMetaDBEntry(StorageId storage_id);
         public:
             virtual Result CreateContentStorage(StorageId storage_id);
             virtual Result CreateContentMetaDatabase(StorageId storage_id);

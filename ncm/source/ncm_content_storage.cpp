@@ -21,6 +21,43 @@
 
 namespace sts::ncm {
 
+    Result CheckContentStorageDirectoriesExist(const char* root_path) {
+        char content_root[FS_MAX_PATH] = {0};
+        char placeholder_root[FS_MAX_PATH] = {0};
+
+        errno = 0;
+
+        if (access(root_path, F_OK) == -1) {
+            if (errno == ENOENT || errno == ENOTDIR) {
+                return ResultNcmStorageRootNotFound;
+            }
+
+            return fsdevGetLastResult();
+        }
+        
+        path::GetContentRootPath(content_root, root_path);
+
+        if (access(content_root, F_OK) == -1) {
+            if (errno == ENOENT || errno == ENOTDIR) {
+                return ResultNcmStoragePathNotFound;
+            }
+
+            return fsdevGetLastResult();
+        }
+
+        path::GetPlaceHolderRootPath(placeholder_root, root_path);
+
+        if (access(placeholder_root, F_OK) == -1) {
+            if (errno == ENOENT || errno == ENOTDIR) {
+                return ResultNcmStoragePathNotFound;
+            }
+
+            return fsdevGetLastResult();
+        }
+
+        return ResultSuccess;
+    }
+
     Result EnsureContentAndPlaceHolderRoot(const char* root_path) {
         char content_root[FS_MAX_PATH] = {0};
         char placeholder_root[FS_MAX_PATH] = {0};

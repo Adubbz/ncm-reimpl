@@ -122,4 +122,15 @@ namespace sts::ncm {
         return EnsureRecursively(path, false);
     }
 
+    static u32 g_mount_index = 0;
+    static HosMutex g_mount_index_lock;
+
+    MountName CreateUniqueMountName() {
+        std::scoped_lock<HosMutex> lk(g_mount_index_lock);
+        MountName mount_name;
+        g_mount_index++;
+        snprintf(mount_name.name, sizeof(MountName), "@ncm%08x", g_mount_index);
+        return mount_name;
+    }
+
 }

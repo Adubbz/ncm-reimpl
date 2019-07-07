@@ -34,6 +34,8 @@ namespace sts::ncm {
     /* Create all parent directories for a file path */
     Result EnsureParentDirectoryRecursively(const char* path);
 
+    MountName CreateUniqueMountName();
+
     template<typename F>
     Result TraverseDirectory(const char* root_path, int max_level, F f) {
         bool should_continue = false;
