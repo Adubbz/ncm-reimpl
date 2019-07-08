@@ -76,6 +76,8 @@ namespace sts::ncm {
     }
 
     Result ContentManagerService::CreateContentMetaDatabase(StorageId storage_id) {
+        std::scoped_lock<HosMutex> lk(this->mutex);
+
         if (storage_id == StorageId::None || storage_id == StorageId::GameCard || static_cast<u8>(storage_id) == 6) {
             return ResultNcmUnknownStorage;
         }
@@ -145,7 +147,44 @@ namespace sts::ncm {
     }
 
     Result ContentManagerService::VerifyContentMetaDatabase(StorageId storage_id) {
-        return ResultKernelConnectionClosed;
+        std::scoped_lock<HosMutex> lk(this->mutex);
+
+        if (storage_id == StorageId::GameCard) {
+            return ResultSuccess;
+        }
+
+        if (storage_id == StorageId::None || static_cast<u8>(storage_id) == 6) {
+            return ResultNcmUnknownStorage;
+        }
+
+        ContentMetaDBEntry* entry = this->FindContentMetaDBEntry(storage_id);
+
+        if (!entry) {
+            return ResultNcmUnknownStorage;
+        }
+
+        bool mounted_save_data = false;
+
+        if (!entry->content_meta_database) {
+            R_TRY(MountSystemSaveData(entry->mount_point, entry->save_meta.space_id, entry->save_meta.id));
+            mounted_save_data = true;
+        }
+
+        if (access(entry->meta_path, F_OK) == -1) {
+            if (errno == ENOENT || errno == ENOTDIR) {
+                return ResultNcmInvalidContentMetaDatabase;
+            }
+
+            return fsdevGetLastResult();
+        }
+
+        if (mounted_save_data) {
+            if (fsdevUnmountDevice(entry->mount_point) == -1) {
+                std::abort();
+            }
+        }
+
+        return ResultSuccess;
     }
 
     Result ContentManagerService::OpenContentStorage(Out<std::shared_ptr<ContentStorageInterface>> out, StorageId storage_id) {
