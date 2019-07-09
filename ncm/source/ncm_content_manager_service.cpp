@@ -263,9 +263,32 @@ namespace sts::ncm {
         return ResultSuccess;
     }
 
-    /* TODO: 1.0.0 only */
     Result ContentManagerService::CloseContentStorageForcibly(StorageId storage_id) {
-        return ResultKernelConnectionClosed;
+        std::scoped_lock<HosMutex> lk(this->mutex);
+
+        if (storage_id == StorageId::None) {
+            return ResultNcmUnknownStorage;
+        }
+        
+        ContentStorageEntry* entry = this->FindContentStorageEntry(storage_id);
+
+        if (!entry) {
+            return ResultNcmUnknownStorage;
+        }
+
+        if (!entry->content_storage) {
+            return ResultSuccess;
+        }
+
+        /* N doesn't bother checking the result of this */
+        entry->content_storage->DisableForcibly();
+
+        if (fsdevUnmountDevice(entry->mount_point) == -1) {
+            std::abort();
+        }
+
+        entry->content_storage = nullptr;
+        return ResultSuccess;
     }
 
     /* TODO: 1.0.0 only */
