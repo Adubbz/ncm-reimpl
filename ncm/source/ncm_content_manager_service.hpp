@@ -45,7 +45,7 @@ namespace sts::ncm {
                 char root_path[128];
                 StorageId storage_id;
                 FsContentStorageId content_storage_id;
-                ContentStorageInterface* content_storage;
+                std::shared_ptr<ContentStorageInterface> content_storage;
             };
 
             struct SaveDataMeta {
@@ -63,7 +63,7 @@ namespace sts::ncm {
                 char meta_path[128];
                 StorageId storage_id;
                 SaveDataMeta save_meta;
-                ContentMetaDatabaseInterface* content_meta_database;
+                std::shared_ptr<ContentMetaDatabaseInterface> content_meta_database;
                 void* kvdb_store; // TODO: Replace this when implemented
                 u32 max_content_metas;
             };

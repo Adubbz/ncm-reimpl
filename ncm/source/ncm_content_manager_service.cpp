@@ -188,17 +188,53 @@ namespace sts::ncm {
     }
 
     Result ContentManagerService::OpenContentStorage(Out<std::shared_ptr<ContentStorageInterface>> out, StorageId storage_id) {
-        return ResultKernelConnectionClosed;
+        std::scoped_lock<HosMutex> lk(this->mutex);
+
+        if (storage_id == StorageId::None || static_cast<u8>(storage_id) == 6) {
+            return ResultNcmUnknownStorage;
+        }
+        
+        ContentStorageEntry* entry = this->FindContentStorageEntry(storage_id);
+
+        if (!entry) {
+            return ResultNcmUnknownStorage;
+        }
+        
+        std::shared_ptr<ContentStorageInterface> content_storage = entry->content_storage;
+
+        if (!content_storage) {
+            switch (storage_id) {
+                case StorageId::GameCard:
+                    return ResultNcmGameCardContentStorageNotActive;
+
+                case StorageId::NandSystem:
+                    return ResultNcmNandSystemContentStorageNotActive;
+
+                case StorageId::NandUser:
+                    return ResultNcmNandUserContentStorageNotActive;
+
+                case StorageId::SdCard:
+                    return ResultNcmSdCardContentStorageNotActive;
+
+                default:
+                    return ResultNcmUnknownContentStorageNotActive;
+            }
+        } 
+
+        out.SetValue(std::move(content_storage));
+        return ResultSuccess;
     }
 
     Result ContentManagerService::OpenContentMetaDatabase(Out<std::shared_ptr<ContentMetaDatabaseInterface>> out, StorageId storage_id) {
         return ResultKernelConnectionClosed;
     }
 
+    /* TODO: 1.0.0 only */
     Result ContentManagerService::CloseContentStorageForcibly(StorageId storage_id) {
         return ResultKernelConnectionClosed;
     }
 
+    /* TODO: 1.0.0 only */
     Result ContentManagerService::CloseContentMetaDatabaseForcibly(StorageId storage_id) {
         return ResultKernelConnectionClosed;
     }
