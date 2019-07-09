@@ -226,7 +226,41 @@ namespace sts::ncm {
     }
 
     Result ContentManagerService::OpenContentMetaDatabase(Out<std::shared_ptr<ContentMetaDatabaseInterface>> out, StorageId storage_id) {
-        return ResultKernelConnectionClosed;
+        std::scoped_lock<HosMutex> lk(this->mutex);
+
+        if (storage_id == StorageId::None || static_cast<u8>(storage_id) == 6) {
+            return ResultNcmUnknownStorage;
+        }
+        
+        ContentMetaDBEntry* entry = this->FindContentMetaDBEntry(storage_id);
+
+        if (!entry) {
+            return ResultNcmUnknownStorage;
+        }
+        
+        std::shared_ptr<ContentMetaDatabaseInterface> content_meta_db = entry->content_meta_database;
+
+        if (!content_meta_db) {
+            switch (storage_id) {
+                case StorageId::GameCard:
+                    return ResultNcmGameCardContentMetaDatabaseNotActive;
+
+                case StorageId::NandSystem:
+                    return ResultNcmNandSystemContentMetaDatabaseNotActive;
+
+                case StorageId::NandUser:
+                    return ResultNcmNandUserContentMetaDatabaseNotActive;
+
+                case StorageId::SdCard:
+                    return ResultNcmSdCardContentMetaDatabaseNotActive;
+
+                default:
+                    return ResultNcmUnknownContentMetaDatabaseNotActive;
+            }
+        } 
+
+        out.SetValue(std::move(content_meta_db));
+        return ResultSuccess;
     }
 
     /* TODO: 1.0.0 only */
