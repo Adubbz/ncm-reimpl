@@ -275,8 +275,10 @@ namespace sts::ncm {
         }
 
         char content_path[FS_MAX_PATH] = {0};
+        char common_path[FS_MAX_PATH] = {0};
         this->GetContentPath(content_path, content_id);
-        memcpy(out.pointer, content_path, FS_MAX_PATH-1);
+        R_TRY(ConvertToFsCommonPath(common_path, FS_MAX_PATH-1, content_path));
+        memcpy(out.pointer, common_path, FS_MAX_PATH-1);
 
         return ResultSuccess;
     }
@@ -287,8 +289,10 @@ namespace sts::ncm {
         }
 
         char placeholder_path[FS_MAX_PATH] = {0};
+        char common_path[FS_MAX_PATH] = {0};
         this->placeholder_accessor.GetPlaceHolderPathUncached(placeholder_path, placeholder_id);
-        memcpy(out.pointer, placeholder_path, FS_MAX_PATH-1);
+        R_TRY(ConvertToFsCommonPath(common_path, FS_MAX_PATH-1, placeholder_path));
+        memcpy(out.pointer, common_path, FS_MAX_PATH-1);
 
         return ResultSuccess;
     }
@@ -516,8 +520,10 @@ namespace sts::ncm {
         u8 key_generation = 0;
 
         char placeholder_path[FS_MAX_PATH] = {0};
+        char common_path[FS_MAX_PATH] = {0};
         this->placeholder_accessor.GetPlaceHolderPathUncached(placeholder_path, placeholder_id);
-        R_TRY(fsGetRightsIdAndKeyGenerationByPath(placeholder_path, &key_generation, &rights_id));
+        R_TRY(ConvertToFsCommonPath(common_path, FS_MAX_PATH-1, placeholder_path));
+        R_TRY(fsGetRightsIdAndKeyGenerationByPath(common_path, &key_generation, &rights_id));
 
         out_rights_id.SetValue(rights_id);
         out_key_generation.SetValue(static_cast<u64>(key_generation));
@@ -552,8 +558,10 @@ namespace sts::ncm {
         FsRightsId rights_id = {0};
         u8 key_generation = 0;
         char content_path[FS_MAX_PATH] = {0};
+        char common_path[FS_MAX_PATH] = {0};
         this->GetContentPath(content_path, content_id);
-        R_TRY(fsGetRightsIdAndKeyGenerationByPath(content_path, &key_generation, &rights_id));
+        R_TRY(ConvertToFsCommonPath(common_path, FS_MAX_PATH-1, content_path));
+        R_TRY(fsGetRightsIdAndKeyGenerationByPath(common_path, &key_generation, &rights_id));
 
         {
             std::scoped_lock<HosMutex> lk(rights_id_cache->mutex);
@@ -748,8 +756,10 @@ namespace sts::ncm {
         FsRightsId rights_id = {0};
         u8 key_generation = 0;
         char placeholder_path[FS_MAX_PATH] = {0};
+        char common_path[FS_MAX_PATH] = {0};
         this->placeholder_accessor.GetPlaceHolderPathUncached(placeholder_path, placeholder_id);
-        R_TRY(fsGetRightsIdAndKeyGenerationByPath(placeholder_path, &key_generation, &rights_id));
+        R_TRY(ConvertToFsCommonPath(common_path, FS_MAX_PATH-1, placeholder_path));
+        R_TRY(fsGetRightsIdAndKeyGenerationByPath(common_path, &key_generation, &rights_id));
 
         {
             std::scoped_lock<HosMutex> lk(rights_id_cache->mutex);

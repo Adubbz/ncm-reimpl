@@ -32,6 +32,7 @@ namespace sts::ncm {
     Result MountSystemSaveData(const char* mount_point, FsSaveDataSpaceId space_id, u64 save_id);
     Result MountContentStorage(const char* mount_point, FsContentStorageId id);
     Result Unmount(const char* mount_point);
+    Result ConvertToFsCommonPath(char* out_common_path, size_t len, const char* path);
 
     template<typename F>
     Result TraverseDirectory(const char* root_path, int max_level, F f) {

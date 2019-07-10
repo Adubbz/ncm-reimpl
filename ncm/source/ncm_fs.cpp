@@ -25,6 +25,10 @@ namespace sts::ncm {
     }
 
     Result EnsureRecursively(const char* path, bool is_dir) {
+        if (!path) {
+            return ResultFsNullptrArgument;
+        }
+
         size_t path_len = strlen(path);
         char working_path_buf[FS_MAX_PATH] = {0};
 
@@ -76,6 +80,10 @@ namespace sts::ncm {
     }
 
     Result MountSystemSaveData(const char* mount_point, FsSaveDataSpaceId space_id, u64 save_id) {
+        if (!mount_point) {
+            return ResultFsNullptrArgument;
+        }
+        
         FsSave save = {
             .saveID = save_id,
             .saveDataType = FsSaveDataType_SystemSaveData,
@@ -94,6 +102,10 @@ namespace sts::ncm {
     std::map<std::string, FsContentStorageId> g_mount_content_storage;
 
     Result MountContentStorage(const char* mount_point, FsContentStorageId id) {
+        if (!mount_point) {
+            return ResultFsNullptrArgument;
+        }
+
         FsFileSystem fs;
         R_TRY(fsOpenContentStorageFileSystem(&fs, id));
 
@@ -106,6 +118,10 @@ namespace sts::ncm {
     }
 
     Result Unmount(const char* mount_point) {
+        if (!mount_point) {
+            return ResultFsNullptrArgument;
+        }
+
         /* Erase any content storage mappings which may potentially exist. */
         g_mount_content_storage.erase(mount_point);
 
@@ -116,8 +132,56 @@ namespace sts::ncm {
         return ResultSuccess;
     }
 
-    /*"@SystemContent"
-    "@UserContent"
-    "@SdCardContent"*/
+    constexpr const char* SystemContentMountName = "@SystemContent";
+    constexpr const char* UserContentMountName = "@UserContent";
+    constexpr const char* SdCardContentMountName = "@SdCardContent";
+
+    Result ConvertToFsCommonPath(char* out_common_path, size_t out_len, const char* path) {
+        if (!out_common_path || !path) {
+            return ResultFsNullptrArgument;
+        }
+
+        MountName mount_name = {0};
+        const char* unqual_path = strchr(path, ':');
+
+        /* We should be given a qualified path. */
+        if (!unqual_path || unqual_path > path + 0xf) {
+            return ResultFsUnqualifiedPath;
+        }
+
+        strncpy(mount_name.name, path, unqual_path - path);
+    
+        if (!fsdevGetDeviceFileSystem(mount_name.name) || g_mount_content_storage.find(mount_name.name) == g_mount_content_storage.end()) {
+            return ResultFsMountNameNotFound;
+        }
+
+        FsContentStorageId content_storage_id = g_mount_content_storage[mount_name.name];
+        char translated_path[FS_MAX_PATH] = {0};
+        const char* common_mount_name;
+
+        switch (content_storage_id) {
+            case FS_CONTENTSTORAGEID_NandSystem:
+                common_mount_name = SystemContentMountName;
+                break;
+            
+            case FS_CONTENTSTORAGEID_NandUser:
+                common_mount_name = UserContentMountName;
+                break;
+
+            case FS_CONTENTSTORAGEID_SdCard:
+                common_mount_name = SdCardContentMountName;
+                break;
+
+            default:
+                std::abort();
+        };
+
+        if (fsdevTranslatePath(path, NULL, translated_path) == -1) {
+            std::abort();
+        }
+
+        snprintf(out_common_path, out_len, "%s:/%s", common_mount_name, translated_path);
+        return ResultSuccess;
+    }
 
 }
