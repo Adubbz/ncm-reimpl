@@ -15,6 +15,7 @@
  */
 
 #include "ncm_placeholder_accessor.hpp"
+#include "../ncm_fs.hpp"
 #include "../ncm_utils.hpp"
 #include "../ncm_make_path.hpp"
 #include "../ncm_path_utils.hpp"

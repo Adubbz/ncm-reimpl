@@ -18,6 +18,7 @@
 #include <switch.h>
 #include <stratosphere.hpp>
 
+#include "ncm_fs.hpp"
 #include "ncm_path_utils.hpp"
 #include "ncm_types.hpp"
 #include "impl/ncm_placeholder_accessor.hpp"
@@ -73,14 +74,14 @@ namespace sts::ncm {
             Result OpenCachedContentFile(ContentId content_id);
 
             inline void GetContentRootPath(char* out_content_root) {
-                path::GetPlaceHolderRootPath(out_content_root, this->root_path);
+                path::GetContentRootPath(out_content_root, this->root_path);
             }
 
-            inline void GetContentPath(char* out_content_root, ContentId content_id) {
+            inline void GetContentPath(char* out_content_path, ContentId content_id) {
                 char content_root_path[FS_MAX_PATH] = {0};
 
                 this->GetContentRootPath(content_root_path);
-                this->make_content_path_func(out_content_root, content_id, content_root_path);
+                this->make_content_path_func(out_content_path, content_id, content_root_path);
             }
         public:
             virtual Result GeneratePlaceHolderId(OutPointerWithServerSize<PlaceHolderId, 0x1> out);

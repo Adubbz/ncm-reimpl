@@ -98,20 +98,4 @@ namespace sts::ncm {
     static constexpr Result ResultNcmInvalidPlaceHolderDirectoryEntry = MAKERESULT(Module_Ncm, 170);
     static constexpr Result ResultNcmStorageRootNotFound              = MAKERESULT(Module_Ncm, 310);
 
-    inline Result MountSystemSaveData(const char* mount_point, FsSaveDataSpaceId space_id, u64 save_id) {
-        FsSave save = {
-            .saveID = save_id,
-            .saveDataType = FsSaveDataType_SystemSaveData,
-        };
-
-        FsFileSystem fs;
-        R_TRY(fsMountSystemSaveData(&fs, space_id, &save));
-
-        if (fsdevMountDevice(mount_point, fs) == -1) {
-            std::abort();
-        }
-
-        return ResultSuccess;
-    }
-
 }

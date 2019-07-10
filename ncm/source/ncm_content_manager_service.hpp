@@ -96,14 +96,14 @@ namespace sts::ncm {
             virtual Result InactivateContentMetaDatabase(StorageId storage_id);
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {
-                MAKE_SERVICE_COMMAND_META(ContentManagerService, CloseContentStorageForcibly,      FirmwareVersion_100, FirmwareVersion_100),
-                MAKE_SERVICE_COMMAND_META(ContentManagerService, CloseContentMetaDatabaseForcibly, FirmwareVersion_100, FirmwareVersion_100),
                 MAKE_SERVICE_COMMAND_META(ContentManagerService, CreateContentStorage),
                 MAKE_SERVICE_COMMAND_META(ContentManagerService, CreateContentMetaDatabase),
                 MAKE_SERVICE_COMMAND_META(ContentManagerService, VerifyContentStorage),
                 MAKE_SERVICE_COMMAND_META(ContentManagerService, VerifyContentMetaDatabase),
                 MAKE_SERVICE_COMMAND_META(ContentManagerService, OpenContentStorage),
                 MAKE_SERVICE_COMMAND_META(ContentManagerService, OpenContentMetaDatabase),
+                MAKE_SERVICE_COMMAND_META(ContentManagerService, CloseContentStorageForcibly,      FirmwareVersion_100, FirmwareVersion_100),
+                MAKE_SERVICE_COMMAND_META(ContentManagerService, CloseContentMetaDatabaseForcibly, FirmwareVersion_100, FirmwareVersion_100),
                 MAKE_SERVICE_COMMAND_META(ContentManagerService, CleanupContentMetaDatabase),
                 MAKE_SERVICE_COMMAND_META(ContentManagerService, ActivateContentStorage,           FirmwareVersion_200),
                 MAKE_SERVICE_COMMAND_META(ContentManagerService, InactivateContentStorage,         FirmwareVersion_200),

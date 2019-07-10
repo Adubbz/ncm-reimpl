@@ -56,17 +56,10 @@ namespace sts::ncm {
             return ResultNcmUnknownStorage;
         }
 
-        FsFileSystem fs;
-        R_TRY(fsOpenContentStorageFileSystem(&fs, entry->content_storage_id));
-
-        if (fsdevMountDevice(entry->mount_point, fs) == -1) {
-            std::abort();
-        }
+        R_TRY(MountContentStorage(entry->mount_point, entry->content_storage_id));
 
         ON_SCOPE_EXIT {
-            if (fsdevUnmountDevice(entry->mount_point) == -1) {
-                std::abort();
-            }
+            Unmount(entry->mount_point);
         };
 
         R_TRY(EnsureDirectoryRecursively(entry->root_path));
@@ -99,9 +92,7 @@ namespace sts::ncm {
         } R_END_TRY_CATCH;
 
         ON_SCOPE_EXIT {
-            if (fsdevUnmountDevice(entry->mount_point) == -1) {
-                std::abort();
-            }
+            Unmount(entry->mount_point);
         };
 
         R_TRY(EnsureDirectoryRecursively(entry->mount_point));
@@ -127,18 +118,10 @@ namespace sts::ncm {
         char mount_root[128] = {0};
         strcpy(mount_root, mount_name.name);
         strcat(mount_root, strchr(entry->root_path, ':'));
-
-        FsFileSystem fs;
-        R_TRY(fsOpenContentStorageFileSystem(&fs, entry->content_storage_id));
-
-        if (fsdevMountDevice(mount_name.name, fs) == -1) {
-            std::abort();
-        }
+        R_TRY(MountContentStorage(mount_name.name, entry->content_storage_id));
 
         ON_SCOPE_EXIT {
-            if (fsdevUnmountDevice(mount_name.name) == -1) {
-                std::abort();
-            }
+            Unmount(mount_name.name);
         };
 
         R_TRY(CheckContentStorageDirectoriesExist(mount_root));
@@ -179,9 +162,7 @@ namespace sts::ncm {
         }
 
         if (mounted_save_data) {
-            if (fsdevUnmountDevice(entry->mount_point) == -1) {
-                std::abort();
-            }
+            Unmount(entry->mount_point);
         }
 
         return ResultSuccess;
@@ -282,11 +263,7 @@ namespace sts::ncm {
 
         /* N doesn't bother checking the result of this */
         entry->content_storage->DisableForcibly();
-
-        if (fsdevUnmountDevice(entry->mount_point) == -1) {
-            std::abort();
-        }
-
+        Unmount(entry->mount_point);
         entry->content_storage = nullptr;
         return ResultSuccess;
     }
