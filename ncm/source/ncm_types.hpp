@@ -69,6 +69,48 @@ namespace sts::ncm {
         ContentMetaType meta_type;
         ContentMetaAttribute attributes;
         u8 padding[2];
+
+        bool operator<(const ContentMetaKey& other) {
+            if (this->id < other.id) {
+                return true;
+            } else if (this->id != other.id) {
+                return false;
+            }
+            
+            if (this->version < other.version) {
+                return true;
+            } else if (this->version != other.version) {
+                return false;
+            }
+            
+            if (this->meta_type < other.meta_type) {
+                return true;
+            } else if (this->meta_type != other.meta_type) {
+                return false;
+            }
+            
+            return this->attributes < other.attributes;
+        }
+
+        bool operator==(const ContentMetaKey& other) {
+            if (this->id != other.id) {
+                return false;
+            }
+
+            if (this->version != other.version) {
+                return false;
+            }
+
+            if (this->meta_type != other.meta_type) {
+                return false;
+            }
+
+            if (this->attributes != other.attributes) {
+                return false;
+            }
+            
+            return true;
+        }
     } PACKED;
 
     static_assert(sizeof(ContentMetaKey) == 0x10, "ContentMetaKey definition!");

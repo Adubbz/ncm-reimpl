@@ -18,6 +18,7 @@
 #include <switch.h>
 #include <stratosphere.hpp>
 
+#include "ncm_kvdb.hpp"
 #include "ncm_types.hpp"
 
 namespace sts::ncm {
@@ -47,6 +48,10 @@ namespace sts::ncm {
                 GetRequiredApplicationVersion = 19,
                 GetContentIdByTypeAndIdOffset = 20,
             };
+        private:
+            KvdbStore<ContentMetaKey, void>* store;
+            char mount_name[16];
+            bool disabled;
         public:
             virtual Result Set(ContentMetaKey key, InBuffer<u8> value);
             virtual Result Get(Out<u64> out_size_read, ContentMetaKey key, OutBuffer<u8> out_val_buf);
