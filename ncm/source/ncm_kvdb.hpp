@@ -28,7 +28,7 @@ namespace sts::ncm {
             class KeyValue {
                 public:
                     Key key;
-                    Value* value_buf;
+                    Value* value;
                     u64 value_size;
             };
 
@@ -55,6 +55,8 @@ namespace sts::ncm {
             KeyValueArchive archive;
     };
 
-    typedef FlatMapKeyValueStore<ContentMetaKey, void>::KeyValue ContentMetaKeyValue;
+    typedef FlatMapKeyValueStore<ContentMetaKey, void>::KeyValue FlatMapContentMetaKeyValue;
+    typedef FlatMapKeyValueStore<ContentMetaKey, void>           FlatMapContentMetaStore;
+    typedef KvdbStore<ContentMetaKey, void>                      ContentMetaKvdbStore;
 
 }

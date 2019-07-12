@@ -17,8 +17,11 @@
 #pragma once
 #include <switch.h>
 #include <stratosphere.hpp>
+#include <optional>
+
 #include "ncm_content_meta_database.hpp"
 #include "ncm_content_storage.hpp"
+#include "ncm_kvdb.hpp"
 
 namespace sts::ncm {
 
@@ -64,7 +67,7 @@ namespace sts::ncm {
                 StorageId storage_id;
                 SaveDataMeta save_meta;
                 std::shared_ptr<ContentMetaDatabaseInterface> content_meta_database;
-                void* kvdb_store; // TODO: Replace this when implemented
+                std::optional<ContentMetaKvdbStore> store;
                 u32 max_content_metas;
             };
         private:

@@ -268,9 +268,49 @@ namespace sts::ncm {
         return ResultSuccess;
     }
 
-    /* TODO: 1.0.0 only */
     Result ContentManagerService::CloseContentMetaDatabaseForcibly(StorageId storage_id) {
-        return ResultKernelConnectionClosed;
+        std::scoped_lock<HosMutex> lk(this->mutex);
+
+        if (storage_id == StorageId::None) {
+            return ResultNcmUnknownStorage;
+        }
+        
+        ContentMetaDBEntry* entry = this->FindContentMetaDBEntry(storage_id);
+
+        if (!entry) {
+            return ResultNcmUnknownStorage;
+        }
+        
+        std::shared_ptr<ContentMetaDatabaseInterface> content_meta_db = entry->content_meta_database;
+
+        if (!content_meta_db) {
+            return ResultSuccess;
+        }
+
+        /* N doesn't bother checking the result of this */
+        content_meta_db->DisableForcibly();
+
+        if (storage_id != StorageId::GameCard) {
+            Unmount(entry->mount_point);
+        }
+
+        entry->content_meta_database = nullptr;
+        FlatMapContentMetaStore::Index* index = &entry->store->flat_map_store.index;
+
+        if (entry->store && index->entries) {
+            if (index->count > 0) {
+                for (size_t i = 0; i < index->count; i++) {
+                    free(index->entries[i].value);
+                }
+            }
+
+            index->count = 0;
+            free(index->entries);
+            index->entries = nullptr;
+        }
+
+        entry->store.reset();
+        return ResultSuccess;
     }
 
     Result ContentManagerService::CleanupContentMetaDatabase(StorageId storage_id) {
