@@ -22,7 +22,7 @@
 
 namespace sts::lr {
 
-    class LocationResolverService : public IServiceObject {
+    class LocationResolverBase : public IServiceObject {
         protected:
             enum class CommandId {
                 ResolveProgramPath = 0,
@@ -41,6 +41,10 @@ namespace sts::lr {
                 EraseApplicationControlRedirection = 13,
                 EraseApplicationHtmlDocumentRedirection = 14,
                 EraseApplicationLegalInformationRedirection = 15,
+                ResolveProgramPathForDebug = 16,
+                RedirectProgramPathForDebug = 17,
+                RedirectApplicationProgramPathForDebug = 18,
+                EraseProgramRedirectionForDebug = 19,
             };
         private:
             std::list<std::shared_ptr<reg::LocationListEntry>> program_location_list;
@@ -51,25 +55,42 @@ namespace sts::lr {
             u64* content_meta_database;
             u64* content_storage;
         protected:
-            LocationResolverService(ncm::StorageId storage_id);
+            LocationResolverBase(ncm::StorageId storage_id);
         public:
+            virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid);
             virtual Result RedirectProgramPath(u64 tid, InPointer<const char> path);
             virtual Result ResolveApplicationControlPath(OutPointerWithClientSize<char> out, u64 tid);
             virtual Result ResolveApplicationHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid);
+            virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid);
             virtual Result RedirectApplicationControlPath(u64 tid, InPointer<const char> path);
             virtual Result RedirectApplicationHtmlDocumentPath(u64 tid, InPointer<const char> path);
             virtual Result ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid);
             virtual Result RedirectApplicationLegalInformationPath(u64 tid, InPointer<const char> path);
+            virtual Result Refresh();
             virtual Result RedirectApplicationProgramPath(u64 tid, InPointer<const char> path);
             virtual Result ClearApplicationRedirection();
             virtual Result EraseProgramRedirection(u64 tid);
             virtual Result EraseApplicationControlRedirection(u64 tid);
             virtual Result EraseApplicationHtmlDocumentRedirection(u64 tid);
             virtual Result EraseApplicationLegalInformationRedirection(u64 tid);
+        public:
+            // Compile error without this
+            DEFINE_SERVICE_DISPATCH_TABLE {
+                /* No entries, because ShellServiceBase is abstract. */
+            };
+    };
 
-            virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) = 0;
-            virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) = 0;
-            virtual Result Refresh() = 0;
+    class LocationResolverService : public LocationResolverBase {
+        public:
+            u32 unk_0x60 = 1;
+
+            LocationResolverService(ncm::StorageId storage_id);
+
+            Result RefreshImpl();
+        protected:
+            virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) override;
+            virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) override;
+            virtual Result Refresh() override;
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {
                 MAKE_SERVICE_COMMAND_META(LocationResolverService, ResolveProgramPath),
@@ -91,28 +112,32 @@ namespace sts::lr {
             };
     };
 
-    class LocationResolverInterface : public LocationResolverService {
+    class HostLocationResolverService : public LocationResolverBase {
         public:
-            u32 unk_0x60 = 1;
-
-            LocationResolverInterface(ncm::StorageId storage_id);
-
-            Result RefreshImpl();
-            
+            HostLocationResolverService(ncm::StorageId storage_id);
         protected:
             virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) override;
             virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) override;
             virtual Result Refresh() override;
-    };
-
-    class HostLocationResolverInterface : public LocationResolverService {
         public:
-            HostLocationResolverInterface(ncm::StorageId storage_id);
-
-        protected:
-            virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) override;
-            virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) override;
-            virtual Result Refresh() override;
+            DEFINE_SERVICE_DISPATCH_TABLE {
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, ResolveProgramPath),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, RedirectProgramPath),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, ResolveApplicationControlPath),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, ResolveApplicationHtmlDocumentPath),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, ResolveDataPath),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, RedirectApplicationControlPath),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, RedirectApplicationHtmlDocumentPath),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, ResolveApplicationLegalInformationPath),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, RedirectApplicationLegalInformationPath),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, Refresh),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, RedirectApplicationProgramPath,              FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, ClearApplicationRedirection,                 FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, EraseProgramRedirection,                     FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, EraseApplicationControlRedirection,          FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, EraseApplicationHtmlDocumentRedirection,     FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, EraseApplicationLegalInformationRedirection, FirmwareVersion_500),
+            };
     };
 
 }

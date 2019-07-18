@@ -20,7 +20,7 @@
 
 namespace sts::lr {
 
-    class AddOnContentLocationResolverInterface : public IServiceObject {
+    class AddOnContentLocationResolverService : public IServiceObject {
         protected:
             enum class CommandId {
                 ResolveAddOnContentPath = 0,
@@ -33,9 +33,9 @@ namespace sts::lr {
             virtual Result UnregisterAllAddOnContentPath();
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {
-                MAKE_SERVICE_COMMAND_META(AddOnContentLocationResolverInterface, ResolveAddOnContentPath),
-                MAKE_SERVICE_COMMAND_META(AddOnContentLocationResolverInterface, RegisterAddOnContentStorage),
-                MAKE_SERVICE_COMMAND_META(AddOnContentLocationResolverInterface, UnregisterAllAddOnContentPath),
+                MAKE_SERVICE_COMMAND_META(AddOnContentLocationResolverService, ResolveAddOnContentPath),
+                MAKE_SERVICE_COMMAND_META(AddOnContentLocationResolverService, RegisterAddOnContentStorage),
+                MAKE_SERVICE_COMMAND_META(AddOnContentLocationResolverService, UnregisterAllAddOnContentPath),
             };
     };
 

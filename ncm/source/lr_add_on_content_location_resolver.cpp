@@ -18,15 +18,15 @@
 
 namespace sts::lr {
 
-    Result AddOnContentLocationResolverInterface::ResolveAddOnContentPath(OutPointerWithClientSize<char> out, u64 tid) {
+    Result AddOnContentLocationResolverService::ResolveAddOnContentPath(OutPointerWithClientSize<char> out, u64 tid) {
         return ResultKernelConnectionClosed;
     }
 
-    Result AddOnContentLocationResolverInterface::RegisterAddOnContentStorage(ncm::StorageId storage_id, u64 tid) {
+    Result AddOnContentLocationResolverService::RegisterAddOnContentStorage(ncm::StorageId storage_id, u64 tid) {
         return ResultKernelConnectionClosed;
     }
 
-    Result AddOnContentLocationResolverInterface::UnregisterAllAddOnContentPath() {
+    Result AddOnContentLocationResolverService::UnregisterAllAddOnContentPath() {
         return ResultKernelConnectionClosed;
     }
 

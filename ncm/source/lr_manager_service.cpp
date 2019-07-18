@@ -18,7 +18,7 @@
 
 namespace sts::lr {
 
-    std::shared_ptr<LocationResolverService>* LocationResolverManagerService::GetLocationResolverPtr(ncm::StorageId storage_id) {
+    std::shared_ptr<LocationResolverBase>* LocationResolverManagerService::GetLocationResolverPtr(ncm::StorageId storage_id) {
         int highest_active_index = -1;
 
         for (unsigned int i = 0; i < 5; i++) {
@@ -42,9 +42,9 @@ namespace sts::lr {
         return &this->location_resolvers[highest_active_index + 1];
     }
 
-    Result LocationResolverManagerService::OpenLocationResolver(Out<std::shared_ptr<LocationResolverService>> out, ncm::StorageId storage_id) {
+    Result LocationResolverManagerService::OpenLocationResolver(Out<std::shared_ptr<LocationResolverBase>> out, ncm::StorageId storage_id) {
         std::scoped_lock lk{this->mutex};
-        std::shared_ptr<LocationResolverService> resolver = nullptr;
+        std::shared_ptr<LocationResolverBase> resolver = nullptr;
 
         ON_SCOPE_EXIT {
             out.SetValue(std::move(resolver));
@@ -61,12 +61,12 @@ namespace sts::lr {
         }
 
         if (storage_id == ncm::StorageId::Host) {
-            auto location_resolver = std::make_shared<HostLocationResolverInterface>(storage_id);
+            auto location_resolver = std::make_shared<HostLocationResolverService>(storage_id);
             auto* lr_ptr = this->GetLocationResolverPtr(storage_id);
             *lr_ptr = location_resolver;
             resolver = location_resolver;
         } else {
-            auto location_resolver = std::make_shared<LocationResolverInterface>(storage_id);
+            auto location_resolver = std::make_shared<LocationResolverService>(storage_id);
             R_TRY(location_resolver->RefreshImpl());
 
             auto* lr_ptr = this->GetLocationResolverPtr(storage_id);
@@ -88,7 +88,7 @@ namespace sts::lr {
         return ResultSuccess;
     }
 
-    Result LocationResolverManagerService::OpenRegisteredLocationResolver(Out<std::shared_ptr<RegisteredLocationResolverInterface>> out) {
+    Result LocationResolverManagerService::OpenRegisteredLocationResolver(Out<std::shared_ptr<RegisteredLocationResolverService>> out) {
         return ResultKernelConnectionClosed;
     }
 
@@ -96,7 +96,7 @@ namespace sts::lr {
         return ResultKernelConnectionClosed;
     }
 
-    Result LocationResolverManagerService::OpenAddOnContentLocationResolver(Out<std::shared_ptr<AddOnContentLocationResolverInterface>> out) {
+    Result LocationResolverManagerService::OpenAddOnContentLocationResolver(Out<std::shared_ptr<AddOnContentLocationResolverService>> out) {
         return ResultKernelConnectionClosed;
     }
 

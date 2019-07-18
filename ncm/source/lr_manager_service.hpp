@@ -39,16 +39,16 @@ namespace sts::lr {
             };
 
             LocationResolverEntry entries[5] = {0};
-            std::shared_ptr<LocationResolverService> location_resolvers[5] = {0};
+            std::shared_ptr<LocationResolverBase> location_resolvers[5] = {0};
             HosMutex mutex;
         private:
-            std::shared_ptr<LocationResolverService>* GetLocationResolverPtr(ncm::StorageId storage_id);
+            std::shared_ptr<LocationResolverBase>* GetLocationResolverPtr(ncm::StorageId storage_id);
         public:
             /* Actual commands. */
-            virtual Result OpenLocationResolver(Out<std::shared_ptr<LocationResolverService>> out, ncm::StorageId storage_id);
-            virtual Result OpenRegisteredLocationResolver(Out<std::shared_ptr<RegisteredLocationResolverInterface>> out);
+            virtual Result OpenLocationResolver(Out<std::shared_ptr<LocationResolverBase>> out, ncm::StorageId storage_id);
+            virtual Result OpenRegisteredLocationResolver(Out<std::shared_ptr<RegisteredLocationResolverService>> out);
             virtual Result RefreshLocationResolver(ncm::StorageId storage_id);
-            virtual Result OpenAddOnContentLocationResolver(Out<std::shared_ptr<AddOnContentLocationResolverInterface>> out);
+            virtual Result OpenAddOnContentLocationResolver(Out<std::shared_ptr<AddOnContentLocationResolverService>> out);
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {
                 MAKE_SERVICE_COMMAND_META(LocationResolverManagerService, OpenLocationResolver),
