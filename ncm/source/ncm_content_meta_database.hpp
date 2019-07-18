@@ -17,8 +17,8 @@
 #pragma once
 #include <switch.h>
 #include <stratosphere.hpp>
+#include <stratosphere/kvdb/kvdb_memory_key_value_store.hpp>
 
-#include "ncm_kvdb.hpp"
 #include "ncm_types.hpp"
 
 namespace sts::ncm {
@@ -49,7 +49,7 @@ namespace sts::ncm {
                 GetContentIdByTypeAndIdOffset = 20,
             };
         private:
-            KvdbStore<ContentMetaKey, void>* store;
+            sts::kvdb::MemoryKeyValueStore<ContentMetaKey>* store;
             char mount_name[16];
             bool disabled;
         public:

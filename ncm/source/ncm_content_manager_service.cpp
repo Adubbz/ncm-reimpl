@@ -295,20 +295,6 @@ namespace sts::ncm {
         }
 
         entry->content_meta_database = nullptr;
-        FlatMapContentMetaStore::Index* index = &entry->store->flat_map_store.index;
-
-        if (entry->store && index->entries) {
-            if (index->count > 0) {
-                for (size_t i = 0; i < index->count; i++) {
-                    free(index->entries[i].value);
-                }
-            }
-
-            index->count = 0;
-            free(index->entries);
-            index->entries = nullptr;
-        }
-
         entry->store.reset();
         return ResultSuccess;
     }
