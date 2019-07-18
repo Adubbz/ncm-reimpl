@@ -28,8 +28,8 @@ namespace sts::lr {
                 UnregisterAllAddOnContentPath = 2,
             };
         public:
-            virtual Result ResolveAddOnContentPath(OutPointerWithClientSize<char> out, u64 tid);
-            virtual Result RegisterAddOnContentStorage(ncm::StorageId storage_id, u64 tid);
+            virtual Result ResolveAddOnContentPath(OutPointerWithClientSize<char> out, ncm::TitleId tid);
+            virtual Result RegisterAddOnContentStorage(ncm::StorageId storage_id, ncm::TitleId tid);
             virtual Result UnregisterAllAddOnContentPath();
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {

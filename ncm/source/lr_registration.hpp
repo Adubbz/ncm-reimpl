@@ -23,14 +23,14 @@
 namespace sts::lr::reg {
 
     struct LocationListEntry {
-        u64 tid;
+        ncm::TitleId tid;
         char content_path[FS_MAX_PATH];
         u8 is_application;
     };
 
-    char* RedirectPath(std::list<std::shared_ptr<LocationListEntry>>* list, u64 tid, const char* path, bool is_application);
-    bool ResolvePath(std::list<std::shared_ptr<LocationListEntry>>* list, char* path_out, u64 tid);
-    void EraseRedirectionWithTid(std::list<std::shared_ptr<LocationListEntry>>* list, u64 tid);
+    char* RedirectPath(std::list<std::shared_ptr<LocationListEntry>>* list, ncm::TitleId tid, const char* path, bool is_application);
+    bool ResolvePath(std::list<std::shared_ptr<LocationListEntry>>* list, char* path_out, ncm::TitleId tid);
+    void EraseRedirectionWithTid(std::list<std::shared_ptr<LocationListEntry>>* list, ncm::TitleId tid);
     void EraseRedirectionWithMask(std::list<std::shared_ptr<LocationListEntry>>* list, int mask);
 
 };

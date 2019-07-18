@@ -57,22 +57,22 @@ namespace sts::lr {
         protected:
             LocationResolverBase(ncm::StorageId storage_id);
         public:
-            virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid);
-            virtual Result RedirectProgramPath(u64 tid, InPointer<const char> path);
-            virtual Result ResolveApplicationControlPath(OutPointerWithClientSize<char> out, u64 tid);
-            virtual Result ResolveApplicationHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid);
-            virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid);
-            virtual Result RedirectApplicationControlPath(u64 tid, InPointer<const char> path);
-            virtual Result RedirectApplicationHtmlDocumentPath(u64 tid, InPointer<const char> path);
-            virtual Result ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid);
-            virtual Result RedirectApplicationLegalInformationPath(u64 tid, InPointer<const char> path);
+            virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, ncm::TitleId tid);
+            virtual Result RedirectProgramPath(ncm::TitleId tid, InPointer<const char> path);
+            virtual Result ResolveApplicationControlPath(OutPointerWithClientSize<char> out, ncm::TitleId tid);
+            virtual Result ResolveApplicationHtmlDocumentPath(OutPointerWithClientSize<char> out, ncm::TitleId tid);
+            virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, ncm::TitleId tid);
+            virtual Result RedirectApplicationControlPath(ncm::TitleId tid, InPointer<const char> path);
+            virtual Result RedirectApplicationHtmlDocumentPath(ncm::TitleId tid, InPointer<const char> path);
+            virtual Result ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, ncm::TitleId tid);
+            virtual Result RedirectApplicationLegalInformationPath(ncm::TitleId tid, InPointer<const char> path);
             virtual Result Refresh();
-            virtual Result RedirectApplicationProgramPath(u64 tid, InPointer<const char> path);
+            virtual Result RedirectApplicationProgramPath(ncm::TitleId tid, InPointer<const char> path);
             virtual Result ClearApplicationRedirection();
-            virtual Result EraseProgramRedirection(u64 tid);
-            virtual Result EraseApplicationControlRedirection(u64 tid);
-            virtual Result EraseApplicationHtmlDocumentRedirection(u64 tid);
-            virtual Result EraseApplicationLegalInformationRedirection(u64 tid);
+            virtual Result EraseProgramRedirection(ncm::TitleId tid);
+            virtual Result EraseApplicationControlRedirection(ncm::TitleId tid);
+            virtual Result EraseApplicationHtmlDocumentRedirection(ncm::TitleId tid);
+            virtual Result EraseApplicationLegalInformationRedirection(ncm::TitleId tid);
         public:
             // Compile error without this
             DEFINE_SERVICE_DISPATCH_TABLE {
@@ -88,8 +88,8 @@ namespace sts::lr {
 
             Result RefreshImpl();
         protected:
-            virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) override;
-            virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) override;
+            virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) override;
+            virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) override;
             virtual Result Refresh() override;
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {
@@ -116,8 +116,8 @@ namespace sts::lr {
         public:
             HostLocationResolverService(ncm::StorageId storage_id);
         protected:
-            virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) override;
-            virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) override;
+            virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) override;
+            virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) override;
             virtual Result Refresh() override;
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {

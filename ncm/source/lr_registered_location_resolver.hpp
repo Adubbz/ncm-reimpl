@@ -34,14 +34,14 @@ namespace sts::lr {
                 Refresh = 8,
             };
         public:
-            Result ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid);
-            Result RegisterProgramPath(u64 tid, InPointer<const char> path);
-            Result UnregisterProgramPath(u64 tid);
-            Result RedirectProgramPath(u64 tid, InPointer<const char> path);
-            Result ResolveHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid);
-            Result RegisterHtmlDocumentPath(u64 tid, InPointer<const char> path);
-            Result UnregisterHtmlDocumentPath(u64 tid);
-            Result RedirectHtmlDocumentPath(u64 tid, InPointer<const char> path);
+            Result ResolveProgramPath(OutPointerWithClientSize<char> out, ncm::TitleId tid);
+            Result RegisterProgramPath(ncm::TitleId tid, InPointer<const char> path);
+            Result UnregisterProgramPath(ncm::TitleId tid);
+            Result RedirectProgramPath(ncm::TitleId tid, InPointer<const char> path);
+            Result ResolveHtmlDocumentPath(OutPointerWithClientSize<char> out, ncm::TitleId tid);
+            Result RegisterHtmlDocumentPath(ncm::TitleId tid, InPointer<const char> path);
+            Result UnregisterHtmlDocumentPath(ncm::TitleId tid);
+            Result RedirectHtmlDocumentPath(ncm::TitleId tid, InPointer<const char> path);
             Result Refresh();
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {

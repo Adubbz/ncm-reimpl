@@ -18,35 +18,35 @@
 
 namespace sts::lr {
 
-    Result RegisteredLocationResolverService::ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) {
+    Result RegisteredLocationResolverService::ResolveProgramPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
         return ResultKernelConnectionClosed;
     }
 
-    Result RegisteredLocationResolverService::RegisterProgramPath(u64 tid, InPointer<const char> path) {
+    Result RegisteredLocationResolverService::RegisterProgramPath(ncm::TitleId tid, InPointer<const char> path) {
         return ResultKernelConnectionClosed;
     }
 
-    Result RegisteredLocationResolverService::UnregisterProgramPath(u64 tid) {
+    Result RegisteredLocationResolverService::UnregisterProgramPath(ncm::TitleId tid) {
         return ResultKernelConnectionClosed;
     }
 
-    Result RegisteredLocationResolverService::RedirectProgramPath(u64 tid, InPointer<const char> path) {
+    Result RegisteredLocationResolverService::RedirectProgramPath(ncm::TitleId tid, InPointer<const char> path) {
         return ResultKernelConnectionClosed;
     }
 
-    Result RegisteredLocationResolverService::ResolveHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid) {
+    Result RegisteredLocationResolverService::ResolveHtmlDocumentPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
         return ResultKernelConnectionClosed;
     }
 
-    Result RegisteredLocationResolverService::RegisterHtmlDocumentPath(u64 tid, InPointer<const char> path) {
+    Result RegisteredLocationResolverService::RegisterHtmlDocumentPath(ncm::TitleId tid, InPointer<const char> path) {
         return ResultKernelConnectionClosed;
     }
 
-    Result RegisteredLocationResolverService::UnregisterHtmlDocumentPath(u64 tid) {
+    Result RegisteredLocationResolverService::UnregisterHtmlDocumentPath(ncm::TitleId tid) {
         return ResultKernelConnectionClosed;
     }
 
-    Result RegisteredLocationResolverService::RedirectHtmlDocumentPath(u64 tid, InPointer<const char> path) {
+    Result RegisteredLocationResolverService::RedirectHtmlDocumentPath(ncm::TitleId tid, InPointer<const char> path) {
         return ResultKernelConnectionClosed;
     }
 

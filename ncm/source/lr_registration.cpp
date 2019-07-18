@@ -18,7 +18,7 @@
 
 namespace sts::lr::reg {
 
-    char* RedirectPath(std::list<std::shared_ptr<LocationListEntry>>* list, u64 tid, const char* path, bool is_application) {
+    char* RedirectPath(std::list<std::shared_ptr<LocationListEntry>>* list, ncm::TitleId tid, const char* path, bool is_application) {
         char* out = NULL;
 
         // Remove any existing entries with the current tid
@@ -39,7 +39,7 @@ namespace sts::lr::reg {
         return out;
     }
 
-    bool ResolvePath(std::list<std::shared_ptr<LocationListEntry>>* list, char* path_out, u64 tid) {
+    bool ResolvePath(std::list<std::shared_ptr<LocationListEntry>>* list, char* path_out, ncm::TitleId tid) {
         if (list->empty()) {
             return false;
         }
@@ -59,7 +59,7 @@ namespace sts::lr::reg {
         return true;
     }
 
-    void EraseRedirectionWithTid(std::list<std::shared_ptr<LocationListEntry>>* list, u64 tid) {
+    void EraseRedirectionWithTid(std::list<std::shared_ptr<LocationListEntry>>* list, ncm::TitleId tid) {
         if (list->empty()) {
             return;
         }

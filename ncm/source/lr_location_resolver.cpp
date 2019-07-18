@@ -24,12 +24,12 @@ namespace sts::lr {
         // TODO: CreateContentStorage
     }
 
-    Result LocationResolverBase::RedirectProgramPath(u64 tid, InPointer<const char> path) {
+    Result LocationResolverBase::RedirectProgramPath(ncm::TitleId tid, InPointer<const char> path) {
         reg::RedirectPath(&this->program_location_list, tid, path.pointer, false);
         return ResultSuccess;
     }
 
-    Result LocationResolverBase::ResolveApplicationControlPath(OutPointerWithClientSize<char> out, u64 tid) {
+    Result LocationResolverBase::ResolveApplicationControlPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
         char path[FS_MAX_PATH] = {0};
 
         if (!reg::ResolvePath(&this->app_control_location_list, path, tid))
@@ -39,7 +39,7 @@ namespace sts::lr {
         return ResultSuccess;
     }
 
-    Result LocationResolverBase::ResolveApplicationHtmlDocumentPath(OutPointerWithClientSize<char> out, u64 tid) {
+    Result LocationResolverBase::ResolveApplicationHtmlDocumentPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
         char path[FS_MAX_PATH] = {0};
 
         if (!reg::ResolvePath(&this->html_docs_location_list, path, tid))
@@ -49,17 +49,17 @@ namespace sts::lr {
         return ResultSuccess;
     }
 
-    Result LocationResolverBase::RedirectApplicationControlPath(u64 tid, InPointer<const char> path) {
+    Result LocationResolverBase::RedirectApplicationControlPath(ncm::TitleId tid, InPointer<const char> path) {
         reg::RedirectPath(&this->app_control_location_list, tid, path.pointer, true);
         return ResultSuccess;
     }
 
-    Result LocationResolverBase::RedirectApplicationHtmlDocumentPath(u64 tid, InPointer<const char> path) {
+    Result LocationResolverBase::RedirectApplicationHtmlDocumentPath(ncm::TitleId tid, InPointer<const char> path) {
         reg::RedirectPath(&this->html_docs_location_list, tid, path.pointer, true);
         return ResultSuccess;
     }
 
-    Result LocationResolverBase::ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, u64 tid) {
+    Result LocationResolverBase::ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
         char path[FS_MAX_PATH] = {0};
 
         if (!reg::ResolvePath(&this->legal_info_location_list, path, tid))
@@ -69,12 +69,12 @@ namespace sts::lr {
         return ResultSuccess;
     }
 
-    Result LocationResolverBase::RedirectApplicationLegalInformationPath(u64 tid, InPointer<const char> path) {
+    Result LocationResolverBase::RedirectApplicationLegalInformationPath(ncm::TitleId tid, InPointer<const char> path) {
         reg::RedirectPath(&this->legal_info_location_list, tid, path.pointer, true);
         return ResultSuccess;
     }
 
-    Result LocationResolverBase::RedirectApplicationProgramPath(u64 tid, InPointer<const char> path) {
+    Result LocationResolverBase::RedirectApplicationProgramPath(ncm::TitleId tid, InPointer<const char> path) {
         reg::RedirectPath(&this->program_location_list, tid, path.pointer, true);
         return ResultSuccess;
     }
@@ -87,31 +87,31 @@ namespace sts::lr {
         return ResultSuccess;
     }
 
-    Result LocationResolverBase::EraseProgramRedirection(u64 tid) {
+    Result LocationResolverBase::EraseProgramRedirection(ncm::TitleId tid) {
         reg::EraseRedirectionWithTid(&this->program_location_list, tid);
         return ResultSuccess;
     }
 
-    Result LocationResolverBase::EraseApplicationControlRedirection(u64 tid) {
+    Result LocationResolverBase::EraseApplicationControlRedirection(ncm::TitleId tid) {
         reg::EraseRedirectionWithTid(&this->app_control_location_list, tid);
         return ResultSuccess;
     }
 
-    Result LocationResolverBase::EraseApplicationHtmlDocumentRedirection(u64 tid) {
+    Result LocationResolverBase::EraseApplicationHtmlDocumentRedirection(ncm::TitleId tid) {
         reg::EraseRedirectionWithTid(&this->html_docs_location_list, tid);
         return ResultSuccess;
     }
 
-    Result LocationResolverBase::EraseApplicationLegalInformationRedirection(u64 tid) {
+    Result LocationResolverBase::EraseApplicationLegalInformationRedirection(ncm::TitleId tid) {
         reg::EraseRedirectionWithTid(&this->legal_info_location_list, tid);
         return ResultSuccess;
     }
 
-    Result LocationResolverBase::ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) {
+    Result LocationResolverBase::ResolveProgramPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
         return ResultKernelConnectionClosed; // Overridden
     }
 
-    Result LocationResolverBase::ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) {
+    Result LocationResolverBase::ResolveDataPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
         return ResultKernelConnectionClosed;// Overridden
     }
 
@@ -127,11 +127,11 @@ namespace sts::lr {
         return ResultKernelConnectionClosed;
     }
 
-    Result LocationResolverService::ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) {
+    Result LocationResolverService::ResolveProgramPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
         return ResultKernelConnectionClosed;
     }
 
-    Result LocationResolverService::ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) {
+    Result LocationResolverService::ResolveDataPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
         return ResultKernelConnectionClosed;
     }
 
@@ -143,11 +143,11 @@ namespace sts::lr {
         LocationResolverBase(storage_id) {
     }
 
-    Result HostLocationResolverService::ResolveProgramPath(OutPointerWithClientSize<char> out, u64 tid) {
+    Result HostLocationResolverService::ResolveProgramPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
         return ResultKernelConnectionClosed;
     }
 
-    Result HostLocationResolverService::ResolveDataPath(OutPointerWithClientSize<char> out, u64 tid) {
+    Result HostLocationResolverService::ResolveDataPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
         return ResultKernelConnectionClosed; // Unsupported operation for context
     }
 
