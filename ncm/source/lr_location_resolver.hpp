@@ -76,7 +76,7 @@ namespace sts::lr {
         public:
             // Compile error without this
             DEFINE_SERVICE_DISPATCH_TABLE {
-                /* No entries, because ShellServiceBase is abstract. */
+                /* No entries, because LocationResolverBase is abstract. */
             };
     };
 
