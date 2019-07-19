@@ -54,7 +54,7 @@ namespace sts::ncm {
             bool disabled;
         public:
             virtual Result Set(ContentMetaKey key, InBuffer<u8> value);
-            virtual Result Get(Out<u64> out_size_read, ContentMetaKey key, OutBuffer<u8> out_val_buf);
+            virtual Result Get(Out<u64> out_size, ContentMetaKey key, OutBuffer<u8> out_value);
             virtual Result Remove(ContentMetaKey key);
             virtual Result GetContentIdByType(Out<ContentId> out_content_id, ContentMetaKey key, ContentType type);
             virtual Result ListContentInfo(Out<u32> out_entries_read, OutBuffer<ContentInfo> out_info, ContentMetaKey key, u32 start_index);

@@ -70,7 +70,7 @@ namespace sts::ncm {
         ContentMetaAttribute attributes;
         u8 padding[2];
 
-        bool operator<(const ContentMetaKey& other) {
+        bool operator<(const ContentMetaKey& other) const {
             if (this->id < other.id) {
                 return true;
             } else if (this->id != other.id) {
@@ -92,7 +92,7 @@ namespace sts::ncm {
             return this->attributes < other.attributes;
         }
 
-        bool operator==(const ContentMetaKey& other) {
+        bool operator==(const ContentMetaKey& other) const {
             if (this->id != other.id) {
                 return false;
             }

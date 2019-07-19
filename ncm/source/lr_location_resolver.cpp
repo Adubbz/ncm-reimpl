@@ -119,39 +119,39 @@ namespace sts::lr {
         return ResultKernelConnectionClosed; // Overridden
     }
 
-    LocationResolverService::LocationResolverService(ncm::StorageId storage_id) :
+    LocationResolverInterface::LocationResolverInterface(ncm::StorageId storage_id) :
         LocationResolverBase(storage_id) {
     }
 
-    Result LocationResolverService::RefreshImpl() {
+    Result LocationResolverInterface::RefreshImpl() {
         return ResultKernelConnectionClosed;
     }
 
-    Result LocationResolverService::ResolveProgramPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
+    Result LocationResolverInterface::ResolveProgramPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
         return ResultKernelConnectionClosed;
     }
 
-    Result LocationResolverService::ResolveDataPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
+    Result LocationResolverInterface::ResolveDataPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
         return ResultKernelConnectionClosed;
     }
 
-    Result LocationResolverService::Refresh() {
+    Result LocationResolverInterface::Refresh() {
         return ResultKernelConnectionClosed;
     }
 
-    HostLocationResolverService::HostLocationResolverService(ncm::StorageId storage_id) :
+    HostLocationResolverInterface::HostLocationResolverInterface(ncm::StorageId storage_id) :
         LocationResolverBase(storage_id) {
     }
 
-    Result HostLocationResolverService::ResolveProgramPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
+    Result HostLocationResolverInterface::ResolveProgramPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
         return ResultKernelConnectionClosed;
     }
 
-    Result HostLocationResolverService::ResolveDataPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
+    Result HostLocationResolverInterface::ResolveDataPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
         return ResultKernelConnectionClosed; // Unsupported operation for context
     }
 
-    Result HostLocationResolverService::Refresh() {
+    Result HostLocationResolverInterface::Refresh() {
         return ResultKernelConnectionClosed;
     }
 

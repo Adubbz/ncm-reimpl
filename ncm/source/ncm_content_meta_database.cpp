@@ -20,15 +20,30 @@
 namespace sts::ncm {
 
     Result ContentMetaDatabaseInterface::Set(ContentMetaKey key, InBuffer<u8> value) {
-        return ResultKernelConnectionClosed;
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+
+        R_TRY(this->store->Set(key, value.buffer, value.num_elements));
+        return ResultSuccess;
     }
 
-    Result ContentMetaDatabaseInterface::Get(Out<u64> out_size_read, ContentMetaKey key, OutBuffer<u8> out_val_buf) {
-        return ResultKernelConnectionClosed;
+    Result ContentMetaDatabaseInterface::Get(Out<u64> out_size, ContentMetaKey key, OutBuffer<u8> out_value) {
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+        
+        R_TRY(this->store->Get(out_size.GetPointer(), out_value.buffer, out_value.num_elements, key));
+        return ResultSuccess;
     }
 
     Result ContentMetaDatabaseInterface::Remove(ContentMetaKey key) {
-        return ResultKernelConnectionClosed;
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+
+        R_TRY(this->store->Remove(key));
+        return ResultSuccess;
     }
 
     Result ContentMetaDatabaseInterface::GetContentIdByType(Out<ContentId> out_content_id, ContentMetaKey key, ContentType type) {

@@ -61,12 +61,12 @@ namespace sts::lr {
         }
 
         if (storage_id == ncm::StorageId::Host) {
-            auto location_resolver = std::make_shared<HostLocationResolverService>(storage_id);
+            auto location_resolver = std::make_shared<HostLocationResolverInterface>(storage_id);
             auto* lr_ptr = this->GetLocationResolverPtr(storage_id);
             *lr_ptr = location_resolver;
             resolver = location_resolver;
         } else {
-            auto location_resolver = std::make_shared<LocationResolverService>(storage_id);
+            auto location_resolver = std::make_shared<LocationResolverInterface>(storage_id);
             R_TRY(location_resolver->RefreshImpl());
 
             auto* lr_ptr = this->GetLocationResolverPtr(storage_id);

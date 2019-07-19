@@ -80,11 +80,11 @@ namespace sts::lr {
             };
     };
 
-    class LocationResolverService : public LocationResolverBase {
+    class LocationResolverInterface : public LocationResolverBase {
         public:
             u32 unk_0x60 = 1;
 
-            LocationResolverService(ncm::StorageId storage_id);
+            LocationResolverInterface(ncm::StorageId storage_id);
 
             Result RefreshImpl();
         protected:
@@ -93,50 +93,50 @@ namespace sts::lr {
             virtual Result Refresh() override;
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {
-                MAKE_SERVICE_COMMAND_META(LocationResolverService, ResolveProgramPath),
-                MAKE_SERVICE_COMMAND_META(LocationResolverService, RedirectProgramPath),
-                MAKE_SERVICE_COMMAND_META(LocationResolverService, ResolveApplicationControlPath),
-                MAKE_SERVICE_COMMAND_META(LocationResolverService, ResolveApplicationHtmlDocumentPath),
-                MAKE_SERVICE_COMMAND_META(LocationResolverService, ResolveDataPath),
-                MAKE_SERVICE_COMMAND_META(LocationResolverService, RedirectApplicationControlPath),
-                MAKE_SERVICE_COMMAND_META(LocationResolverService, RedirectApplicationHtmlDocumentPath),
-                MAKE_SERVICE_COMMAND_META(LocationResolverService, ResolveApplicationLegalInformationPath),
-                MAKE_SERVICE_COMMAND_META(LocationResolverService, RedirectApplicationLegalInformationPath),
-                MAKE_SERVICE_COMMAND_META(LocationResolverService, Refresh),
-                MAKE_SERVICE_COMMAND_META(LocationResolverService, RedirectApplicationProgramPath,              FirmwareVersion_500),
-                MAKE_SERVICE_COMMAND_META(LocationResolverService, ClearApplicationRedirection,                 FirmwareVersion_500),
-                MAKE_SERVICE_COMMAND_META(LocationResolverService, EraseProgramRedirection,                     FirmwareVersion_500),
-                MAKE_SERVICE_COMMAND_META(LocationResolverService, EraseApplicationControlRedirection,          FirmwareVersion_500),
-                MAKE_SERVICE_COMMAND_META(LocationResolverService, EraseApplicationHtmlDocumentRedirection,     FirmwareVersion_500),
-                MAKE_SERVICE_COMMAND_META(LocationResolverService, EraseApplicationLegalInformationRedirection, FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(LocationResolverInterface, ResolveProgramPath),
+                MAKE_SERVICE_COMMAND_META(LocationResolverInterface, RedirectProgramPath),
+                MAKE_SERVICE_COMMAND_META(LocationResolverInterface, ResolveApplicationControlPath),
+                MAKE_SERVICE_COMMAND_META(LocationResolverInterface, ResolveApplicationHtmlDocumentPath),
+                MAKE_SERVICE_COMMAND_META(LocationResolverInterface, ResolveDataPath),
+                MAKE_SERVICE_COMMAND_META(LocationResolverInterface, RedirectApplicationControlPath),
+                MAKE_SERVICE_COMMAND_META(LocationResolverInterface, RedirectApplicationHtmlDocumentPath),
+                MAKE_SERVICE_COMMAND_META(LocationResolverInterface, ResolveApplicationLegalInformationPath),
+                MAKE_SERVICE_COMMAND_META(LocationResolverInterface, RedirectApplicationLegalInformationPath),
+                MAKE_SERVICE_COMMAND_META(LocationResolverInterface, Refresh),
+                MAKE_SERVICE_COMMAND_META(LocationResolverInterface, RedirectApplicationProgramPath,              FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(LocationResolverInterface, ClearApplicationRedirection,                 FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(LocationResolverInterface, EraseProgramRedirection,                     FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(LocationResolverInterface, EraseApplicationControlRedirection,          FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(LocationResolverInterface, EraseApplicationHtmlDocumentRedirection,     FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(LocationResolverInterface, EraseApplicationLegalInformationRedirection, FirmwareVersion_500),
             };
     };
 
-    class HostLocationResolverService : public LocationResolverBase {
+    class HostLocationResolverInterface : public LocationResolverBase {
         public:
-            HostLocationResolverService(ncm::StorageId storage_id);
+            HostLocationResolverInterface(ncm::StorageId storage_id);
         protected:
             virtual Result ResolveProgramPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) override;
             virtual Result ResolveDataPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) override;
             virtual Result Refresh() override;
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {
-                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, ResolveProgramPath),
-                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, RedirectProgramPath),
-                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, ResolveApplicationControlPath),
-                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, ResolveApplicationHtmlDocumentPath),
-                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, ResolveDataPath),
-                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, RedirectApplicationControlPath),
-                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, RedirectApplicationHtmlDocumentPath),
-                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, ResolveApplicationLegalInformationPath),
-                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, RedirectApplicationLegalInformationPath),
-                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, Refresh),
-                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, RedirectApplicationProgramPath,              FirmwareVersion_500),
-                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, ClearApplicationRedirection,                 FirmwareVersion_500),
-                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, EraseProgramRedirection,                     FirmwareVersion_500),
-                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, EraseApplicationControlRedirection,          FirmwareVersion_500),
-                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, EraseApplicationHtmlDocumentRedirection,     FirmwareVersion_500),
-                MAKE_SERVICE_COMMAND_META(HostLocationResolverService, EraseApplicationLegalInformationRedirection, FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverInterface, ResolveProgramPath),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverInterface, RedirectProgramPath),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverInterface, ResolveApplicationControlPath),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverInterface, ResolveApplicationHtmlDocumentPath),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverInterface, ResolveDataPath),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverInterface, RedirectApplicationControlPath),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverInterface, RedirectApplicationHtmlDocumentPath),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverInterface, ResolveApplicationLegalInformationPath),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverInterface, RedirectApplicationLegalInformationPath),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverInterface, Refresh),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverInterface, RedirectApplicationProgramPath,              FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverInterface, ClearApplicationRedirection,                 FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverInterface, EraseProgramRedirection,                     FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverInterface, EraseApplicationControlRedirection,          FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverInterface, EraseApplicationHtmlDocumentRedirection,     FirmwareVersion_500),
+                MAKE_SERVICE_COMMAND_META(HostLocationResolverInterface, EraseApplicationLegalInformationRedirection, FirmwareVersion_500),
             };
     };
 
