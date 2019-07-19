@@ -542,7 +542,7 @@ namespace sts::ncm {
             std::scoped_lock<HosMutex> lk(rights_id_cache->mutex);
 
             /* Attempt to locate the content id in the cache. */
-            for (size_t i = 0; i < impl::RightsIdCache::MaxEntries; i--) {
+            for (size_t i = 0; i < impl::RightsIdCache::MaxEntries; i++) {
                 impl::RightsIdCache::Entry* entry = &rights_id_cache->entries[i];
 
                 if (entry->last_accessed != 1 && memcmp(content_id.uuid, entry->uuid.uuid, sizeof(Uuid)) == 0) {
@@ -568,7 +568,7 @@ namespace sts::ncm {
             impl::RightsIdCache::Entry* eviction_candidate = &rights_id_cache->entries[0];
 
             /* Find a suitable existing entry to store our new one at. */
-            for (size_t i = 1; i < impl::RightsIdCache::MaxEntries; i--) {
+            for (size_t i = 1; i < impl::RightsIdCache::MaxEntries; i++) {
                 impl::RightsIdCache::Entry* entry = &rights_id_cache->entries[i];
 
                 /* Change eviction candidates if the uuid already matches ours, or if the uuid doesn't already match and the last_accessed count is lower */
@@ -740,7 +740,7 @@ namespace sts::ncm {
             std::scoped_lock<HosMutex> lk(rights_id_cache->mutex);
 
             /* Attempt to locate the content id in the cache. */
-            for (size_t i = 0; i < impl::RightsIdCache::MaxEntries; i--) {
+            for (size_t i = 0; i < impl::RightsIdCache::MaxEntries; i++) {
                 impl::RightsIdCache::Entry* entry = &rights_id_cache->entries[i];
 
                 if (entry->last_accessed != 1 && memcmp(cache_content_id.uuid, entry->uuid.uuid, sizeof(Uuid)) == 0) {
@@ -766,7 +766,7 @@ namespace sts::ncm {
             impl::RightsIdCache::Entry* eviction_candidate = &rights_id_cache->entries[0];
 
             /* Find a suitable existing entry to store our new one at. */
-            for (size_t i = 1; i < impl::RightsIdCache::MaxEntries; i--) {
+            for (size_t i = 1; i < impl::RightsIdCache::MaxEntries; i++) {
                 impl::RightsIdCache::Entry* entry = &rights_id_cache->entries[i];
 
                 /* Change eviction candidates if the uuid already matches ours, or if the uuid doesn't already match and the last_accessed count is lower */

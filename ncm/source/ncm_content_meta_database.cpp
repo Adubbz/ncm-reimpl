@@ -19,6 +19,90 @@
 
 namespace sts::ncm {
 
+    namespace {
+
+        struct InstallContentMetaHeader {
+            u16 extended_header_size;
+            u16 content_count;
+            u16 content_meta_count;
+            u16 padding;
+        };
+
+        static_assert(sizeof(InstallContentMetaHeader) == 0x8, "InstallContentMetaHeader definition!");
+
+        Result GetContentMetaSize(size_t *out, const ContentMetaKey &key, const kvdb::MemoryKeyValueStore<ContentMetaKey> *kvs) {
+            R_TRY_CATCH(kvs->GetValueSize(out, key)) {
+                R_CATCH(ResultKvdbKeyNotFound) {
+                    return ResultNcmContentMetaNotFound;
+                }
+            } R_END_TRY_CATCH;
+            
+            return ResultSuccess;
+        }
+
+        Result GetContentMetaValuePointer(const void **out_value_ptr, size_t *out_size, const ContentMetaKey &key, const kvdb::MemoryKeyValueStore<ContentMetaKey> *kvs) {
+            R_TRY(GetContentMetaSize(out_size, key, kvs));
+            R_TRY(kvs->GetValuePointer(out_value_ptr, key));
+            return ResultSuccess;
+        }
+
+    }
+
+    Result ContentMetaDatabaseInterface::GetContentIdByTypeImpl(ContentId* out, const ContentMetaKey& key, ContentType type, std::optional<u8> id_offset) {
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+
+        const auto it = this->store->lower_bound(key);
+        if (it == this->store->end() || it->GetKey().id != key.id) {
+            return ResultNcmContentMetaNotFound;
+        }
+
+        const auto stored_key = it->GetKey();
+        const u8* value = nullptr;
+        size_t value_size;
+
+        R_TRY(GetContentMetaValuePointer(reinterpret_cast<const void**>(&value), &value_size, stored_key, this->store));
+        const auto header = reinterpret_cast<const InstallContentMetaHeader*>(value);
+
+        if (header->content_count == 0) {
+            return ResultNcmContentNotFound;
+        }
+
+        const ContentInfo* content_infos = reinterpret_cast<const ContentInfo*>(value + sizeof(InstallContentMetaHeader) + header->extended_header_size);
+        const ContentInfo* found_content_info = nullptr;
+
+        if (id_offset) {
+            for (size_t i = 0; i < header->content_count; i++) {
+                const ContentInfo* content_info = &content_infos[i];
+
+                if (content_info->content_type == type && content_info->id_offset == *id_offset) {
+                    found_content_info = content_info;
+                    break;
+                }
+            }
+        } else {
+            const ContentInfo* lowest_id_offset_info = nullptr;
+
+            for (size_t i = 0; i < header->content_count; i++) {
+                const ContentInfo* content_info = &content_infos[i];
+
+                if (content_info->content_type == type && (!lowest_id_offset_info || lowest_id_offset_info->id_offset > content_info->id_offset)) {
+                    lowest_id_offset_info = content_info;
+                }
+            }
+
+            found_content_info = lowest_id_offset_info;
+        }
+
+        if (!found_content_info) {
+            return ResultNcmContentNotFound;
+        }
+
+        *out = found_content_info->content_id;
+        return ResultSuccess;
+    }
+
     Result ContentMetaDatabaseInterface::Set(ContentMetaKey key, InBuffer<u8> value) {
         if (this->disabled) {
             return ResultNcmInvalidContentMetaDatabase;
@@ -47,7 +131,10 @@ namespace sts::ncm {
     }
 
     Result ContentMetaDatabaseInterface::GetContentIdByType(Out<ContentId> out_content_id, ContentMetaKey key, ContentType type) {
-        return ResultKernelConnectionClosed;
+        ContentId content_id;
+        R_TRY(this->GetContentIdByTypeImpl(&content_id, key, type, std::nullopt));
+        out_content_id.SetValue(content_id);
+        return ResultSuccess;
     }
 
     Result ContentMetaDatabaseInterface::ListContentInfo(Out<u32> out_entries_read, OutBuffer<ContentInfo> out_info, ContentMetaKey key, u32 start_index) {
@@ -115,7 +202,10 @@ namespace sts::ncm {
     }
 
     Result ContentMetaDatabaseInterface::GetContentIdByTypeAndIdOffset(Out<ContentId> out_content_id, ContentMetaKey key, ContentType type, u8 id_offset) {
-        return ResultKernelConnectionClosed;
+        ContentId content_id;
+        R_TRY(this->GetContentIdByTypeImpl(&content_id, key, type, std::optional(id_offset)));
+        out_content_id.SetValue(content_id);
+        return ResultSuccess;
     }
 
 }
