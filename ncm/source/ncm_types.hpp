@@ -26,6 +26,14 @@ namespace sts::ncm {
 
     struct Uuid {
         u8 uuid[0x10];
+
+        bool operator==(const Uuid& other) const {
+            return memcmp(this->uuid, other.uuid, sizeof(Uuid)) == 0;
+        }
+
+        bool operator!=(const Uuid& other) const {
+            return !(*this == other);
+        }
     };
 
     static_assert(sizeof(Uuid) == 0x10, "Uuid definition!");

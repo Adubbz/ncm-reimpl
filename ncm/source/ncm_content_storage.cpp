@@ -71,7 +71,7 @@ namespace sts::ncm {
     }
 
     void ContentStorageInterface::ClearContentCache() {
-        if (memcmp(this->cached_content_id.uuid, InvalidUuid.uuid, sizeof(ContentId)) != 0) {
+        if (this->cached_content_id != InvalidUuid) {
             fclose(this->content_cache_file_handle);
             this->cached_content_id = InvalidUuid;
         }
@@ -92,7 +92,7 @@ namespace sts::ncm {
     }
 
     Result ContentStorageInterface::OpenCachedContentFile(ContentId content_id) {
-        if (memcmp(this->cached_content_id.uuid, content_id.uuid, sizeof(ContentId)) == 0) {
+        if (this->cached_content_id == content_id) {
             return ResultSuccess;
         }
 
@@ -545,7 +545,7 @@ namespace sts::ncm {
             for (size_t i = 0; i < impl::RightsIdCache::MaxEntries; i++) {
                 impl::RightsIdCache::Entry* entry = &rights_id_cache->entries[i];
 
-                if (entry->last_accessed != 1 && memcmp(content_id.uuid, entry->uuid.uuid, sizeof(Uuid)) == 0) {
+                if (entry->last_accessed != 1 && content_id == entry->uuid) {
                     entry->last_accessed = rights_id_cache->counter;
                     rights_id_cache->counter++;
                     out_rights_id.SetValue(entry->rights_id);
@@ -572,7 +572,7 @@ namespace sts::ncm {
                 impl::RightsIdCache::Entry* entry = &rights_id_cache->entries[i];
 
                 /* Change eviction candidates if the uuid already matches ours, or if the uuid doesn't already match and the last_accessed count is lower */
-                if (memcmp(content_id.uuid, entry->uuid.uuid, sizeof(Uuid)) == 0 || (memcmp(content_id.uuid, eviction_candidate->uuid.uuid, sizeof(Uuid)) != 0 && entry->last_accessed < eviction_candidate->last_accessed)) {
+                if (content_id == entry->uuid || (content_id != eviction_candidate->uuid && entry->last_accessed < eviction_candidate->last_accessed)) {
                     eviction_candidate = entry;
                 }
             }
@@ -743,7 +743,7 @@ namespace sts::ncm {
             for (size_t i = 0; i < impl::RightsIdCache::MaxEntries; i++) {
                 impl::RightsIdCache::Entry* entry = &rights_id_cache->entries[i];
 
-                if (entry->last_accessed != 1 && memcmp(cache_content_id.uuid, entry->uuid.uuid, sizeof(Uuid)) == 0) {
+                if (entry->last_accessed != 1 && cache_content_id == entry->uuid) {
                     entry->last_accessed = rights_id_cache->counter;
                     rights_id_cache->counter++;
                     out_rights_id.SetValue(entry->rights_id);
@@ -770,7 +770,7 @@ namespace sts::ncm {
                 impl::RightsIdCache::Entry* entry = &rights_id_cache->entries[i];
 
                 /* Change eviction candidates if the uuid already matches ours, or if the uuid doesn't already match and the last_accessed count is lower */
-                if (memcmp(cache_content_id.uuid, entry->uuid.uuid, sizeof(Uuid)) == 0 || (memcmp(cache_content_id.uuid, eviction_candidate->uuid.uuid, sizeof(Uuid)) != 0 && entry->last_accessed < eviction_candidate->last_accessed)) {
+                if (cache_content_id == entry->uuid || (cache_content_id != eviction_candidate->uuid && entry->last_accessed < eviction_candidate->last_accessed)) {
                     eviction_candidate = entry;
                 }
             }

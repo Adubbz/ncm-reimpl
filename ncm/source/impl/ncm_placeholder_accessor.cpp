@@ -35,13 +35,13 @@ namespace sts::ncm::impl {
     void PlaceHolderAccessor::GetPlaceHolderPathUncached(char* placeholder_path_out, PlaceHolderId placeholder_id) {
         std::scoped_lock<HosMutex> lock(this->cache_mutex);
 
-        if (memcmp(placeholder_id.uuid, InvalidUuid.uuid, sizeof(PlaceHolderId)) != 0) {
+        if (placeholder_id != InvalidUuid) {
             CacheEntry* found_cache = NULL;
             
             for (size_t i = 0; i < PlaceHolderAccessor::MaxCaches; i++) {
                 CacheEntry* cache = &this->caches[i];
 
-                if (memcmp(placeholder_id.uuid, cache->id.uuid, sizeof(PlaceHolderId)) == 0) {
+                if (placeholder_id == cache->id) {
                     found_cache = cache;
                     break;
                 }
@@ -128,7 +128,7 @@ namespace sts::ncm::impl {
         {
             std::scoped_lock<HosMutex> lock(this->cache_mutex);
             
-            if (memcmp(placeholder_id.uuid, InvalidUuid.uuid, sizeof(PlaceHolderId)) == 0) {
+            if (placeholder_id == InvalidUuid) {
                 *found_in_cache = false;
                 return ResultSuccess;
             }
@@ -179,11 +179,11 @@ namespace sts::ncm::impl {
     }
 
     PlaceHolderAccessor::CacheEntry *PlaceHolderAccessor::FindInCache(PlaceHolderId placeholder_id) {
-        if (memcmp(placeholder_id.uuid, InvalidUuid.uuid, sizeof(PlaceHolderId)) == 0) {
+        if (placeholder_id == InvalidUuid) {
             return nullptr;
         }
         for (size_t i = 0; i < MaxCaches; i++) {
-            if (memcmp(placeholder_id.uuid, this->caches[i].id.uuid, sizeof(PlaceHolderId)) == 0) {
+            if (placeholder_id == this->caches[i].id) {
                 return &this->caches[i];
             }
         }
@@ -196,7 +196,7 @@ namespace sts::ncm::impl {
 
         /* Find an empty cache */
         for (size_t i = 0; i < MaxCaches; i++) {
-            if (memcmp(placeholder_id.uuid, InvalidUuid.uuid, sizeof(PlaceHolderId)) != 0) {
+            if (placeholder_id != InvalidUuid) {
                 cache = &this->caches[i];
                 break;
             }
@@ -222,7 +222,7 @@ namespace sts::ncm::impl {
         for (size_t i = 0; i < MaxCaches; i++) {
             CacheEntry* cache = &this->caches[i];
 
-            if (memcmp(cache->id.uuid, InvalidUuid.uuid, sizeof(PlaceHolderId)) != 0) {
+            if (cache->id != InvalidUuid) {
                 fsync(fileno(cache->handle));
                 fclose(cache->handle);
                 cache->id = InvalidUuid;

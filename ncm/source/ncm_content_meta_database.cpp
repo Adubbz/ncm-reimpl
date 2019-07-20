@@ -390,7 +390,7 @@ namespace sts::ncm {
                 for (size_t j = 0; j < content_ids.num_elements; j++) {
                     const ContentId content_id = content_ids[j];
 
-                    if (memcmp(content_id.uuid, content_info->content_id.uuid, sizeof(ContentId)) == 0) {
+                    if (content_id == content_info->content_id) {
                         out_orphaned[j] = false;
                         break;
                     }
@@ -412,7 +412,25 @@ namespace sts::ncm {
     }
 
     Result ContentMetaDatabaseInterface::HasContent(Out<bool> out, ContentMetaKey key, ContentId content_id) {
-        return ResultKernelConnectionClosed;
+        const void* value = nullptr;
+        size_t value_size = 0;
+        R_TRY(GetContentMetaValuePointer(&value, &value_size, key, this->kvs));
+        const auto header = GetValueHeader(value);
+        const ContentInfo* content_infos = GetValueContentInfos(value);
+
+        if (header->content_count > 0) {
+            for (size_t i = 0; i < header->content_count; i++) {
+                const ContentInfo* content_info = &content_infos[i];
+
+                if (content_id == content_info->content_id) {
+                    out.SetValue(false);
+                    return ResultSuccess;
+                }
+            }
+        }
+
+        out.SetValue(false);
+        return ResultSuccess;
     }
 
     Result ContentMetaDatabaseInterface::ListContentMetaInfo(Out<u32> out_entries_written, OutBuffer<ContentMetaInfo> out_info, ContentMetaKey key, u32 start_index) {
