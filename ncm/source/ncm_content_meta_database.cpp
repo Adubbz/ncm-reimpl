@@ -350,7 +350,20 @@ namespace sts::ncm {
     }
 
     Result ContentMetaDatabaseInterface::GetPatchId(Out<TitleId> out_patch_id, ContentMetaKey key) {
-        return ResultKernelConnectionClosed;
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+
+        if (key.meta_type != ContentMetaType::Application) {
+            return ResultNcmInvalidContentMetaKey;
+        }
+
+        const void* value = nullptr;
+        size_t value_size = 0;
+        R_TRY(GetContentMetaValuePointer(&value, &value_size, key, this->kvs));
+        const auto ext_header = GetValueExtendedHeader<ApplicationMetaExtendedHeader>(value);
+        out_patch_id.SetValue(ext_header->patch_id);
+        return ResultSuccess;
     }
 
     Result ContentMetaDatabaseInterface::DisableForcibly() {
