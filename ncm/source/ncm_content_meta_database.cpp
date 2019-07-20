@@ -283,13 +283,12 @@ namespace sts::ncm {
         return ResultSuccess;
     }
 
-    Result ContentMetaDatabaseInterface::GetLatestContentMetaKey(Out<ContentMetaKey> out_key, TitleId title_id) {
-        ContentMetaKey key;
-        
+    Result ContentMetaDatabaseInterface::GetLatestContentMetaKey(Out<ContentMetaKey> out_key, TitleId title_id) {        
         if (this->disabled) {
             return ResultNcmInvalidContentMetaDatabase;
         }
-        
+
+        ContentMetaKey key;        
         R_TRY(this->GetLatestContentMetaKeyImpl(&key, title_id));
         out_key.SetValue(key);
         return ResultSuccess;
@@ -320,7 +319,8 @@ namespace sts::ncm {
     }
 
     Result ContentMetaDatabaseInterface::DisableForcibly() {
-        return ResultKernelConnectionClosed;
+        this->disabled = true;
+        return ResultSuccess;
     }
 
     Result ContentMetaDatabaseInterface::LookupOrphanContent(OutBuffer<bool> out_orphaned, InBuffer<ContentId> content_ids) {
@@ -328,7 +328,13 @@ namespace sts::ncm {
     }
 
     Result ContentMetaDatabaseInterface::Commit() {
-        return ResultKernelConnectionClosed;
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+
+        R_TRY(this->kvs->Save());
+        R_TRY(fsdevCommitDevice(this->mount_name));
+        return ResultSuccess;
     }
 
     Result ContentMetaDatabaseInterface::HasContent(Out<bool> out, ContentMetaKey key, ContentId content_id) {
