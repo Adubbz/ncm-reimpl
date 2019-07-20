@@ -34,6 +34,11 @@ namespace sts::ncm {
             return reinterpret_cast<const InstallContentMetaHeader*>(value);
         }
 
+        template<typename ExtendedHeaderType>
+        inline const ExtendedHeaderType* GetValueExtendedHeader(const void* value) {
+            return reinterpret_cast<const ExtendedHeaderType*>(reinterpret_cast<const u8*>(value) + sizeof(InstallContentMetaHeader));
+        }
+
         inline const ContentInfo* GetValueContentInfos(const void* value) {
             return reinterpret_cast<const ContentInfo*>(reinterpret_cast<const u8*>(value) + sizeof(InstallContentMetaHeader) + GetValueHeader(value)->extended_header_size);
         }
@@ -178,8 +183,64 @@ namespace sts::ncm {
         return ResultSuccess;
     }
 
-    Result ContentMetaDatabaseInterface::List(Out<u32> out_entries_total, Out<u32> out_entries_written, OutBuffer<ContentInfo> out_info, ContentMetaType meta_type, TitleId application_title_id, TitleId title_id_min, TitleId title_id_max, ContentMetaAttribute attributes) {
-        return ResultKernelConnectionClosed;
+    Result ContentMetaDatabaseInterface::List(Out<u32> out_entries_total, Out<u32> out_entries_written, OutBuffer<ContentMetaKey> out_info, ContentMetaType meta_type, TitleId application_title_id, TitleId title_id_min, TitleId title_id_max, ContentMetaAttribute attributes) {
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+        
+        const size_t entry_count = this->store->GetCount();
+        size_t entries_total = 0;
+        size_t entries_written = 0;
+
+        if (entry_count > 0) {
+            auto begin = this->store->begin();
+
+            for (size_t i = 0; i < entry_count; i++) {
+                auto entry = begin[i];
+                ContentMetaKey key = entry.GetKey();
+
+                /* Check if this entry is suitable for writing. */
+                if ((static_cast<u8>(meta_type) == 0 || key.meta_type == meta_type) && (title_id_min <= key.id && key.id <= title_id_max) && (static_cast<u8>(attributes) == 0x7 || key.attributes == attributes)) {
+                    bool write_entry = false;
+                    
+                    if (static_cast<u64>(application_title_id) != 0) {
+                        const void* value = nullptr;
+                        size_t value_size = 0;
+                        R_TRY(GetContentMetaValuePointer(&value, &value_size, key, this->store));
+
+                        if (key.meta_type == ContentMetaType::Application || key.meta_type == ContentMetaType::Patch || key.meta_type == ContentMetaType::AddOnContent || key.meta_type == ContentMetaType::Delta) {
+                            TitleId tid = key.id;
+                            
+                            switch (key.meta_type) {
+                                case ContentMetaType::Application:
+                                    break;
+                                default:
+                                    /* The first u64 of all non-application extended headers is the application title id. */
+                                    tid = *GetValueExtendedHeader<TitleId>(value);
+                            }
+
+                            if (tid == application_title_id) {
+                                write_entry = true;
+                            }
+                        }
+                    } else {
+                        write_entry = true;
+                    }
+
+                    /* Write the entry to the output buffer. */
+                    if (write_entry && entries_written < out_info.num_elements) {
+                        out_info[entries_written] = key;
+                        entries_written++;
+                    }
+                }
+
+                entries_total++;
+            }
+        }
+
+        out_entries_total.SetValue(entries_total);
+        out_entries_written.SetValue(entries_written);
+        return ResultSuccess;
     }
 
     Result ContentMetaDatabaseInterface::GetLatestContentMetaKey(Out<ContentMetaKey> out_key, TitleId title_id) {
