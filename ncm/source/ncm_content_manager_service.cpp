@@ -300,7 +300,20 @@ namespace sts::ncm {
     }
 
     Result ContentManagerService::CleanupContentMetaDatabase(StorageId storage_id) {
-        return ResultKernelConnectionClosed;
+        std::scoped_lock<HosMutex> lk(this->mutex);
+
+        if (storage_id == StorageId::None || static_cast<u8>(storage_id) == 6) {
+            return ResultNcmUnknownStorage;
+        }
+        
+        ContentMetaDBEntry* entry = this->FindContentMetaDBEntry(storage_id);
+
+        if (!entry) {
+            return ResultNcmUnknownStorage;
+        }
+
+        R_TRY(fsDeleteSaveDataFileSystemBySaveDataSpaceId(entry->save_meta.space_id, entry->save_meta.id));
+        return ResultSuccess;
     }
 
     Result ContentManagerService::ActivateContentStorage(StorageId storage_id) {
