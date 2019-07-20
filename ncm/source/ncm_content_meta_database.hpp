@@ -60,7 +60,7 @@ namespace sts::ncm {
             virtual Result Get(Out<u64> out_size, ContentMetaKey key, OutBuffer<u8> out_value);
             virtual Result Remove(ContentMetaKey key);
             virtual Result GetContentIdByType(Out<ContentId> out_content_id, ContentMetaKey key, ContentType type);
-            virtual Result ListContentInfo(Out<u32> out_entries_read, OutBuffer<ContentInfo> out_info, ContentMetaKey key, u32 start_index);
+            virtual Result ListContentInfo(Out<u32> out_entries_written, OutBuffer<ContentInfo> out_info, ContentMetaKey key, u32 start_index);
             virtual Result List(Out<u32> out_entries_total, Out<u32> out_entries_written, OutBuffer<ContentMetaKey> out_info, ContentMetaType meta_type, TitleId application_title_id, TitleId title_id_min, TitleId title_id_max, ContentMetaAttribute attributes);
             virtual Result GetLatestContentMetaKey(Out<ContentMetaKey> out_key, TitleId title_id);
             virtual Result ListApplication(Out<u32> out_entries_total, Out<u32> out_entries_written, OutBuffer<ApplicationContentMetaKey> out_keys, ContentMetaType meta_type);
@@ -73,7 +73,7 @@ namespace sts::ncm {
             virtual Result LookupOrphanContent(OutBuffer<bool> out_orphaned, InBuffer<ContentId> content_ids);
             virtual Result Commit();
             virtual Result HasContent(Out<bool> out, ContentMetaKey key, ContentId content_id);
-            virtual Result ListContentMetaInfo(Out<u32> out_entries_written, OutBuffer<ContentMetaInfo> out_info, ContentMetaKey key, u32 start_index);
+            virtual Result ListContentMetaInfo(Out<u32> out_entries_written, OutBuffer<ContentMetaInfo> out_meta_info, ContentMetaKey key, u32 start_index);
             virtual Result GetAttributes(Out<ContentMetaAttribute> out_attributes, ContentMetaKey key);
             virtual Result GetRequiredApplicationVersion(Out<u32> out_version, ContentMetaKey key);
             virtual Result GetContentIdByTypeAndIdOffset(Out<ContentId> out_content_id, ContentMetaKey key, ContentType type, u8 id_offset);

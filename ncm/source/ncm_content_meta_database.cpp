@@ -69,6 +69,11 @@ namespace sts::ncm {
             return reinterpret_cast<const ContentInfo*>(reinterpret_cast<const u8*>(value) + sizeof(InstallContentMetaHeader) + GetValueHeader(value)->extended_header_size);
         }
 
+        inline const ContentMetaInfo* GetValueContentMetaInfos(const void* value) {
+            auto header = GetValueHeader(value);
+            return reinterpret_cast<const ContentMetaInfo*>(reinterpret_cast<const u8*>(GetValueContentInfos(value)) + sizeof(ContentInfo) * header->content_count);
+        }
+
         Result GetContentMetaSize(size_t *out, const ContentMetaKey &key, const kvdb::MemoryKeyValueStore<ContentMetaKey> *kvs) {
             R_TRY_CATCH(kvs->GetValueSize(out, key)) {
                 R_CATCH(ResultKvdbKeyNotFound) {
@@ -214,7 +219,7 @@ namespace sts::ncm {
         return ResultSuccess;
     }
 
-    Result ContentMetaDatabaseInterface::ListContentInfo(Out<u32> out_entries_read, OutBuffer<ContentInfo> out_info, ContentMetaKey key, u32 start_index) {
+    Result ContentMetaDatabaseInterface::ListContentInfo(Out<u32> out_entries_written, OutBuffer<ContentInfo> out_info, ContentMetaKey key, u32 start_index) {
         if (start_index >> 0x1f != 0) {
             return ResultNcmInvalidOffset;
         }
@@ -225,25 +230,27 @@ namespace sts::ncm {
         
         const void* value = nullptr;
         size_t value_size = 0;
-
         R_TRY(GetContentMetaValuePointer(&value, &value_size, key, this->kvs));
         const auto header = GetValueHeader(value);
         const auto content_infos = GetValueContentInfos(value);
-        size_t entries_read = 0;
+        size_t entries_written = 0;
 
-        if (out_info.num_elements > 0) {
-            for (size_t i = 0; i < out_info.num_elements; i++) {
-                /* We have no more entries we can read out. */
-                if (header->content_count <= start_index + i) {
-                    break;
-                }
-
-                out_info[i] = content_infos[i];
-                entries_read = i + 1;
-            }
+        if (out_info.num_elements == 0) {
+            out_entries_written.SetValue(0);
+            return ResultSuccess;
         }
 
-        out_entries_read.SetValue(entries_read);
+        for (size_t i = start_index; i < out_info.num_elements; i++) {
+            /* We have no more entries we can read out. */
+            if (header->content_count <= start_index + i) {
+                break;
+            }
+
+            out_info[i] = content_infos[i];
+            entries_written = i + 1;
+        }
+
+        out_entries_written.SetValue(entries_written);
         return ResultSuccess;
     }
 
@@ -433,8 +440,39 @@ namespace sts::ncm {
         return ResultSuccess;
     }
 
-    Result ContentMetaDatabaseInterface::ListContentMetaInfo(Out<u32> out_entries_written, OutBuffer<ContentMetaInfo> out_info, ContentMetaKey key, u32 start_index) {
-        return ResultKernelConnectionClosed;
+    Result ContentMetaDatabaseInterface::ListContentMetaInfo(Out<u32> out_entries_written, OutBuffer<ContentMetaInfo> out_meta_info, ContentMetaKey key, u32 start_index) {
+        if (start_index >> 0x1f != 0) {
+            return ResultNcmInvalidOffset;
+        }
+
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+        
+        const void* value = nullptr;
+        size_t value_size = 0;
+        R_TRY(GetContentMetaValuePointer(&value, &value_size, key, this->kvs));
+        const auto header = GetValueHeader(value);
+        const auto content_meta_infos = GetValueContentMetaInfos(value);
+        size_t entries_written = 0;
+
+        if (out_meta_info.num_elements == 0) {
+            out_entries_written.SetValue(0);
+            return ResultSuccess;
+        }
+
+        for (size_t i = start_index; i < out_meta_info.num_elements; i++) {
+            /* We have no more entries we can read out. */
+            if (header->content_meta_count <= start_index + i) {
+                break;
+            }
+
+            out_meta_info[i] = content_meta_infos[i];
+            entries_written = i + 1;
+        }
+
+        out_entries_written.SetValue(entries_written);
+        return ResultSuccess;
     }
 
     Result ContentMetaDatabaseInterface::GetAttributes(Out<ContentMetaAttribute> out_attributes, ContentMetaKey key) {
