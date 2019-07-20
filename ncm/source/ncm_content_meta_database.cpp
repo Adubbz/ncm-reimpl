@@ -334,11 +334,47 @@ namespace sts::ncm {
     }
 
     Result ContentMetaDatabaseInterface::Has(Out<bool> out, ContentMetaKey key) {
-        return ResultKernelConnectionClosed;
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+
+        if (this->kvs->GetCount() == 0) {
+            out.SetValue(false);
+            return ResultSuccess;
+        }
+
+        bool has = false;
+        const auto it = this->kvs->lower_bound(key);
+        if (it != this->kvs->end()) {
+            has = it->GetKey() == key;
+        }
+
+        out.SetValue(has);
+        return ResultSuccess;
     }
 
     Result ContentMetaDatabaseInterface::HasAll(Out<bool> out, InBuffer<ContentMetaKey> keys) {
-        return ResultKernelConnectionClosed;
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+
+        if (keys.num_elements == 0) {
+            out.SetValue(true);
+            return ResultSuccess;
+        }
+
+        for (size_t i = 0; i < keys.num_elements; i++) {
+            bool has = false;
+            R_TRY(this->Has(&has, keys[i]));
+
+            if (!has) {
+                out.SetValue(false);
+                return ResultSuccess;
+            }
+        }
+
+        out.SetValue(true);
+        return ResultSuccess;
     }
 
     Result ContentMetaDatabaseInterface::GetSize(Out<u64> out_size, ContentMetaKey key) {
