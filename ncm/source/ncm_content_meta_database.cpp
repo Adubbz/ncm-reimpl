@@ -226,12 +226,11 @@ namespace sts::ncm {
             return ResultNcmInvalidContentMetaDatabase;
         }
         
-        const size_t entry_count = this->kvs->GetCount();
         size_t entries_total = 0;
         size_t entries_written = 0;
 
         /* If there are no entries then we've already successfully listed them all. */
-        if (entry_count == 0) {
+        if (this->kvs->GetCount() == 0) {
             out_entries_total.SetValue(entries_total);
             out_entries_written.SetValue(entries_written);
             return ResultSuccess;
@@ -239,43 +238,46 @@ namespace sts::ncm {
 
         for (auto entry = this->kvs->begin(); entry != this->kvs->end(); entry++) {
             ContentMetaKey key = entry->GetKey();
+            entries_total++;
 
             /* Check if this entry is suitable for writing. */
-            if ((static_cast<u8>(meta_type) == 0 || key.meta_type == meta_type) && (title_id_min <= key.id && key.id <= title_id_max) && (static_cast<u8>(attributes) == 0x7 || key.attributes == attributes)) {
-                bool write_entry = false;
-                
-                if (static_cast<u64>(application_title_id) != 0) {
-                    const void* value = nullptr;
-                    size_t value_size = 0;
-                    R_TRY(GetContentMetaValuePointer(&value, &value_size, key, this->kvs));
-
-                    if (key.meta_type == ContentMetaType::Application || key.meta_type == ContentMetaType::Patch || key.meta_type == ContentMetaType::AddOnContent || key.meta_type == ContentMetaType::Delta) {
-                        TitleId tid = key.id;
-                        
-                        switch (key.meta_type) {
-                            case ContentMetaType::Application:
-                                break;
-                            default:
-                                /* The first u64 of all non-application extended headers is the application title id. */
-                                tid = *GetValueExtendedHeader<TitleId>(value);
-                        }
-
-                        if (tid == application_title_id) {
-                            write_entry = true;
-                        }
-                    }
-                } else {
-                    write_entry = true;
-                }
-
-                /* Write the entry to the output buffer. */
-                if (write_entry && entries_written < out_info.num_elements) {
-                    out_info[entries_written] = key;
-                    entries_written++;
-                }
+            if (!((static_cast<u8>(meta_type) == 0 || key.meta_type == meta_type) && (title_id_min <= key.id && key.id <= title_id_max) && (static_cast<u8>(attributes) == 0x7 || key.attributes == attributes))) {
+                continue;
             }
 
-            entries_total++;
+            bool write_entry = false;
+            
+            if (static_cast<u64>(application_title_id) != 0) {
+                const void* value = nullptr;
+                size_t value_size = 0;
+                R_TRY(GetContentMetaValuePointer(&value, &value_size, key, this->kvs));
+
+                if (key.meta_type != ContentMetaType::Application && key.meta_type != ContentMetaType::Patch && key.meta_type != ContentMetaType::AddOnContent && key.meta_type != ContentMetaType::Delta) {
+                    continue;
+                }
+
+                TitleId tid = key.id;
+                
+                switch (key.meta_type) {
+                    case ContentMetaType::Application:
+                        break;
+                    default:
+                        /* The first u64 of all non-application extended headers is the application title id. */
+                        tid = *GetValueExtendedHeader<TitleId>(value);
+                }
+
+                if (tid == application_title_id) {
+                    write_entry = true;
+                }
+            } else {
+                write_entry = true;
+            }
+
+            /* Write the entry to the output buffer. */
+            if (write_entry && entries_written < out_info.num_elements) {
+                out_info[entries_written] = key;
+                entries_written++;
+            }
         }
 
         out_entries_total.SetValue(entries_total);
@@ -324,7 +326,53 @@ namespace sts::ncm {
     }
 
     Result ContentMetaDatabaseInterface::LookupOrphanContent(OutBuffer<bool> out_orphaned, InBuffer<ContentId> content_ids) {
-        return ResultKernelConnectionClosed;
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+        
+        if (out_orphaned.num_elements < content_ids.num_elements) {
+            return ResultNcmBufferInsufficient;
+        }
+
+        /* Default to orphaned for all content ids. */
+        if (out_orphaned.num_elements > 0) {
+            std::fill_n(out_orphaned.buffer, out_orphaned.num_elements, true);
+        }
+        
+        if (this->kvs->GetCount() == 0) {
+            return ResultSuccess;
+        }
+        
+        for (auto entry = this->kvs->begin(); entry != this->kvs->end(); entry++) {
+            const auto value = entry->GetValuePointer();
+            const auto header = GetValueHeader(value);
+
+            if (header->content_count == 0) {
+                continue;
+            }
+
+            if (content_ids.num_elements == 0) {
+                continue;
+            }
+
+            const ContentInfo* content_infos = GetValueContentInfos(value);
+            for (size_t i = 0; i < header->content_count; i++) {
+                const ContentInfo* content_info = &content_infos[i];
+
+                /* Check if any of this entry's content infos matches one of the provided content ids.
+                   If they do, then the content id isn't orphaned. */
+                for (size_t j = 0; j < content_ids.num_elements; j++) {
+                    const ContentId content_id = content_ids[j];
+
+                    if (memcmp(content_id.uuid, content_info->content_id.uuid, sizeof(ContentId)) == 0) {
+                        out_orphaned[j] = false;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return ResultSuccess;
     }
 
     Result ContentMetaDatabaseInterface::Commit() {
