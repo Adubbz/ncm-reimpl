@@ -119,6 +119,10 @@ namespace sts::ncm {
             
             return true;
         }
+
+        bool operator!=(const ContentMetaKey& other) const {
+            return !(*this == other);
+        }
     } PACKED;
 
     static_assert(sizeof(ContentMetaKey) == 0x10, "ContentMetaKey definition!");

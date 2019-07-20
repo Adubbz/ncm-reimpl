@@ -378,7 +378,21 @@ namespace sts::ncm {
     }
 
     Result ContentMetaDatabaseInterface::GetSize(Out<u64> out_size, ContentMetaKey key) {
-        return ResultKernelConnectionClosed;
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+
+        if (this->kvs->GetCount() == 0) {
+            return ResultNcmContentMetaNotFound;
+        }
+
+        const auto it = this->kvs->lower_bound(key);
+        if (it == this->kvs->end() || it->GetKey() != key) {
+            return ResultNcmContentMetaNotFound;
+        }
+
+        out_size.SetValue(it->GetValueSize());
+        return ResultSuccess;
     }
 
     Result ContentMetaDatabaseInterface::GetRequiredSystemVersion(Out<u32> out_version, ContentMetaKey key) {
