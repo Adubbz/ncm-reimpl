@@ -28,6 +28,29 @@ namespace sts::ncm {
             u16 padding;
         };
 
+        struct ApplicationMetaExtendedHeader {
+            TitleId patch_id;
+            u32 required_system_version;
+            u32 padding;
+        };
+
+        struct PatchMetaExtendedHeader {
+            TitleId application_id;
+            u32 required_system_version;
+            u32 extended_data_size;
+            u8 reserved[0x8];
+        };
+
+        struct AddOnContentMetaExtendedHeader {
+            TitleId application_id;
+            u32 required_application_version;
+            u32 padding;
+        };
+
+        struct SystemUpdateMetaExtendedHeader {
+            u32 extended_data_size;
+        };
+
         static_assert(sizeof(InstallContentMetaHeader) == 0x8, "InstallContentMetaHeader definition!");
 
         inline const InstallContentMetaHeader* GetValueHeader(const void* value) {
@@ -398,7 +421,20 @@ namespace sts::ncm {
     }
 
     Result ContentMetaDatabaseInterface::GetRequiredApplicationVersion(Out<u32> out_version, ContentMetaKey key) {
-        return ResultKernelConnectionClosed;
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+
+        if (key.meta_type != ContentMetaType::AddOnContent) {
+            return ResultNcmInvalidContentMetaKey;
+        }
+
+        const void* value = nullptr;
+        size_t value_size = 0;
+        R_TRY(GetContentMetaValuePointer(&value, &value_size, key, this->kvs));
+        const auto ext_header = GetValueExtendedHeader<AddOnContentMetaExtendedHeader>(value);
+        out_version.SetValue(ext_header->required_application_version);
+        return ResultSuccess;
     }
 
     Result ContentMetaDatabaseInterface::GetContentIdByTypeAndIdOffset(Out<ContentId> out_content_id, ContentMetaKey key, ContentType type, u8 id_offset) {
