@@ -271,46 +271,43 @@ namespace sts::ncm {
 
         for (auto entry = this->kvs->begin(); entry != this->kvs->end(); entry++) {
             ContentMetaKey key = entry->GetKey();
-            entries_total++;
 
-            /* Check if this entry is suitable for writing. */
+            /* Check if this entry matches the given filters. */
             if (!((static_cast<u8>(meta_type) == 0 || key.meta_type == meta_type) && (title_id_min <= key.id && key.id <= title_id_max) && (static_cast<u8>(attributes) == 0x7 || key.attributes == attributes))) {
                 continue;
             }
 
-            bool write_entry = false;
-            
             if (static_cast<u64>(application_title_id) != 0) {
                 const void* value = nullptr;
                 size_t value_size = 0;
                 R_TRY(GetContentMetaValuePointer(&value, &value_size, key, this->kvs));
 
-                if (key.meta_type != ContentMetaType::Application && key.meta_type != ContentMetaType::Patch && key.meta_type != ContentMetaType::AddOnContent && key.meta_type != ContentMetaType::Delta) {
-                    continue;
-                }
+                /* Each of these types are owned by an application. We need to check if their owner application matches the filter. */
+                if (key.meta_type == ContentMetaType::Application || key.meta_type == ContentMetaType::Patch || key.meta_type == ContentMetaType::AddOnContent || key.meta_type == ContentMetaType::Delta) {
+                    TitleId entry_application_tid = key.id;
+                    
+                    switch (key.meta_type) {
+                        case ContentMetaType::Application:
+                            break;
+                        default:
+                            /* The first u64 of all non-application extended headers is the application title id. */
+                            entry_application_tid = *GetValueExtendedHeader<TitleId>(value);
+                    }
 
-                TitleId tid = key.id;
-                
-                switch (key.meta_type) {
-                    case ContentMetaType::Application:
-                        break;
-                    default:
-                        /* The first u64 of all non-application extended headers is the application title id. */
-                        tid = *GetValueExtendedHeader<TitleId>(value);
+                    /* Application tid doesn't match filter, skip this entry. */
+                    if (entry_application_tid != application_title_id) {
+                        continue;
+                    }
                 }
-
-                if (tid == application_title_id) {
-                    write_entry = true;
-                }
-            } else {
-                write_entry = true;
             }
 
             /* Write the entry to the output buffer. */
-            if (write_entry && entries_written < out_info.num_elements) {
+            if (entries_written < out_info.num_elements) {
                 out_info[entries_written] = key;
                 entries_written++;
             }
+
+            entries_total++;
         }
 
         out_entries_total.SetValue(entries_total);
@@ -330,7 +327,58 @@ namespace sts::ncm {
     }
 
     Result ContentMetaDatabaseInterface::ListApplication(Out<u32> out_entries_total, Out<u32> out_entries_written, OutBuffer<ApplicationContentMetaKey> out_keys, ContentMetaType meta_type) {
-        return ResultKernelConnectionClosed;
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+        
+        size_t entries_total = 0;
+        size_t entries_written = 0;
+
+        /* If there are no entries then we've already successfully listed them all. */
+        if (this->kvs->GetCount() == 0) {
+            out_entries_total.SetValue(entries_total);
+            out_entries_written.SetValue(entries_written);
+            return ResultSuccess;
+        }
+
+        for (auto entry = this->kvs->begin(); entry != this->kvs->end(); entry++) {
+            ContentMetaKey key = entry->GetKey();
+
+            /* Check if this entry matches the given filters. */
+            if (!((static_cast<u8>(meta_type) == 0 || key.meta_type == meta_type))) {
+                continue;
+            }
+
+            const void* value = nullptr;
+            size_t value_size = 0;
+            R_TRY(GetContentMetaValuePointer(&value, &value_size, key, this->kvs));
+
+            if (key.meta_type == ContentMetaType::Application || key.meta_type == ContentMetaType::Patch || key.meta_type == ContentMetaType::AddOnContent || key.meta_type == ContentMetaType::Delta) {
+                TitleId application_tid = key.id;
+                
+                switch (key.meta_type) {
+                    case ContentMetaType::Application:
+                        break;
+                    default:
+                        /* The first u64 of all non-application extended headers is the application title id. */
+                        application_tid = *GetValueExtendedHeader<TitleId>(value);
+                }
+
+                /* Write the entry to the output buffer. */
+                if (entries_written < out_keys.num_elements) {
+                    ApplicationContentMetaKey* out_app_key = &out_keys[entries_written];
+                    out_app_key->application_title_id = application_tid;
+                    out_app_key->key = key;
+                    entries_written++;
+                }
+
+                entries_total++;
+            }
+        }
+
+        out_entries_total.SetValue(entries_total);
+        out_entries_written.SetValue(entries_written);
+        return ResultSuccess;
     }
 
     Result ContentMetaDatabaseInterface::Has(Out<bool> out, ContentMetaKey key) {
