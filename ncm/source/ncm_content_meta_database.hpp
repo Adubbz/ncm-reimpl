@@ -49,11 +49,12 @@ namespace sts::ncm {
                 GetContentIdByTypeAndIdOffset = 20,
             };
         private:
-            sts::kvdb::MemoryKeyValueStore<ContentMetaKey>* store;
+            sts::kvdb::MemoryKeyValueStore<ContentMetaKey>* kvs;
             char mount_name[16];
             bool disabled;
         private:
             Result GetContentIdByTypeImpl(ContentId* out, const ContentMetaKey& key, ContentType type, std::optional<u8> id_offset);
+            Result GetLatestContentMetaKeyImpl(ContentMetaKey* out_key, TitleId tid);
         public:
             virtual Result Set(ContentMetaKey key, InBuffer<u8> value);
             virtual Result Get(Out<u64> out_size, ContentMetaKey key, OutBuffer<u8> out_value);

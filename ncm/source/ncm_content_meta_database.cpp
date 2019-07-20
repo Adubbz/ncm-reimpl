@@ -66,8 +66,8 @@ namespace sts::ncm {
             return ResultNcmInvalidContentMetaDatabase;
         }
 
-        const auto it = this->store->lower_bound(key);
-        if (it == this->store->end() || it->GetKey().id != key.id) {
+        const auto it = this->kvs->lower_bound(key);
+        if (it == this->kvs->end() || it->GetKey().id != key.id) {
             return ResultNcmContentMetaNotFound;
         }
 
@@ -75,7 +75,7 @@ namespace sts::ncm {
         const void* value = nullptr;
         size_t value_size = 0;
 
-        R_TRY(GetContentMetaValuePointer(&value, &value_size, stored_key, this->store));
+        R_TRY(GetContentMetaValuePointer(&value, &value_size, stored_key, this->kvs));
         const auto header = GetValueHeader(value);
 
         if (header->content_count == 0) {
@@ -116,12 +116,50 @@ namespace sts::ncm {
         return ResultSuccess;
     }
 
+    Result ContentMetaDatabaseInterface::GetLatestContentMetaKeyImpl(ContentMetaKey* out_key, TitleId tid) {
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+        
+        ContentMetaKey key = {0};
+        key.id = tid;
+
+        if (this->kvs->GetCount() == 0) {
+            return ResultNcmContentMetaNotFound; 
+        }
+
+        auto entry = this->kvs->lower_bound(key);
+        if (entry == this->kvs->end()) {
+            return ResultNcmContentMetaNotFound;
+        }
+
+        bool found_key = false;
+
+        for (; entry != this->kvs->end(); entry++) {
+            if (entry->GetKey().id != key.id) {
+                break;
+            }
+
+            if (entry->GetKey().attributes != ContentMetaAttribute::None) {
+                key = entry->GetKey();
+                found_key = true;
+            }
+        }
+
+        if (!found_key) {
+            return ResultNcmContentMetaNotFound;
+        }
+
+        *out_key = key;
+        return ResultSuccess;
+    }
+
     Result ContentMetaDatabaseInterface::Set(ContentMetaKey key, InBuffer<u8> value) {
         if (this->disabled) {
             return ResultNcmInvalidContentMetaDatabase;
         }
 
-        R_TRY(this->store->Set(key, value.buffer, value.num_elements));
+        R_TRY(this->kvs->Set(key, value.buffer, value.num_elements));
         return ResultSuccess;
     }
 
@@ -130,7 +168,7 @@ namespace sts::ncm {
             return ResultNcmInvalidContentMetaDatabase;
         }
         
-        R_TRY(this->store->Get(out_size.GetPointer(), out_value.buffer, out_value.num_elements, key));
+        R_TRY(this->kvs->Get(out_size.GetPointer(), out_value.buffer, out_value.num_elements, key));
         return ResultSuccess;
     }
 
@@ -139,7 +177,7 @@ namespace sts::ncm {
             return ResultNcmInvalidContentMetaDatabase;
         }
 
-        R_TRY(this->store->Remove(key));
+        R_TRY(this->kvs->Remove(key));
         return ResultSuccess;
     }
 
@@ -162,7 +200,7 @@ namespace sts::ncm {
         const void* value = nullptr;
         size_t value_size = 0;
 
-        R_TRY(GetContentMetaValuePointer(&value, &value_size, key, this->store));
+        R_TRY(GetContentMetaValuePointer(&value, &value_size, key, this->kvs));
         const auto header = GetValueHeader(value);
         const auto content_infos = GetValueContentInfos(value);
         size_t entries_read = 0;
@@ -188,54 +226,56 @@ namespace sts::ncm {
             return ResultNcmInvalidContentMetaDatabase;
         }
         
-        const size_t entry_count = this->store->GetCount();
+        const size_t entry_count = this->kvs->GetCount();
         size_t entries_total = 0;
         size_t entries_written = 0;
 
-        if (entry_count > 0) {
-            auto begin = this->store->begin();
+        /* If there are no entries then we've already successfully listed them all. */
+        if (entry_count == 0) {
+            out_entries_total.SetValue(entries_total);
+            out_entries_written.SetValue(entries_written);
+            return ResultSuccess;
+        }
 
-            for (size_t i = 0; i < entry_count; i++) {
-                auto entry = begin[i];
-                ContentMetaKey key = entry.GetKey();
+        for (auto entry = this->kvs->begin(); entry != this->kvs->end(); entry++) {
+            ContentMetaKey key = entry->GetKey();
 
-                /* Check if this entry is suitable for writing. */
-                if ((static_cast<u8>(meta_type) == 0 || key.meta_type == meta_type) && (title_id_min <= key.id && key.id <= title_id_max) && (static_cast<u8>(attributes) == 0x7 || key.attributes == attributes)) {
-                    bool write_entry = false;
-                    
-                    if (static_cast<u64>(application_title_id) != 0) {
-                        const void* value = nullptr;
-                        size_t value_size = 0;
-                        R_TRY(GetContentMetaValuePointer(&value, &value_size, key, this->store));
+            /* Check if this entry is suitable for writing. */
+            if ((static_cast<u8>(meta_type) == 0 || key.meta_type == meta_type) && (title_id_min <= key.id && key.id <= title_id_max) && (static_cast<u8>(attributes) == 0x7 || key.attributes == attributes)) {
+                bool write_entry = false;
+                
+                if (static_cast<u64>(application_title_id) != 0) {
+                    const void* value = nullptr;
+                    size_t value_size = 0;
+                    R_TRY(GetContentMetaValuePointer(&value, &value_size, key, this->kvs));
 
-                        if (key.meta_type == ContentMetaType::Application || key.meta_type == ContentMetaType::Patch || key.meta_type == ContentMetaType::AddOnContent || key.meta_type == ContentMetaType::Delta) {
-                            TitleId tid = key.id;
-                            
-                            switch (key.meta_type) {
-                                case ContentMetaType::Application:
-                                    break;
-                                default:
-                                    /* The first u64 of all non-application extended headers is the application title id. */
-                                    tid = *GetValueExtendedHeader<TitleId>(value);
-                            }
-
-                            if (tid == application_title_id) {
-                                write_entry = true;
-                            }
+                    if (key.meta_type == ContentMetaType::Application || key.meta_type == ContentMetaType::Patch || key.meta_type == ContentMetaType::AddOnContent || key.meta_type == ContentMetaType::Delta) {
+                        TitleId tid = key.id;
+                        
+                        switch (key.meta_type) {
+                            case ContentMetaType::Application:
+                                break;
+                            default:
+                                /* The first u64 of all non-application extended headers is the application title id. */
+                                tid = *GetValueExtendedHeader<TitleId>(value);
                         }
-                    } else {
-                        write_entry = true;
-                    }
 
-                    /* Write the entry to the output buffer. */
-                    if (write_entry && entries_written < out_info.num_elements) {
-                        out_info[entries_written] = key;
-                        entries_written++;
+                        if (tid == application_title_id) {
+                            write_entry = true;
+                        }
                     }
+                } else {
+                    write_entry = true;
                 }
 
-                entries_total++;
+                /* Write the entry to the output buffer. */
+                if (write_entry && entries_written < out_info.num_elements) {
+                    out_info[entries_written] = key;
+                    entries_written++;
+                }
             }
+
+            entries_total++;
         }
 
         out_entries_total.SetValue(entries_total);
@@ -244,7 +284,15 @@ namespace sts::ncm {
     }
 
     Result ContentMetaDatabaseInterface::GetLatestContentMetaKey(Out<ContentMetaKey> out_key, TitleId title_id) {
-        return ResultKernelConnectionClosed;
+        ContentMetaKey key;
+        
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+        
+        R_TRY(this->GetLatestContentMetaKeyImpl(&key, title_id));
+        out_key.SetValue(key);
+        return ResultSuccess;
     }
 
     Result ContentMetaDatabaseInterface::ListApplication(Out<u32> out_entries_total, Out<u32> out_entries_written, OutBuffer<ApplicationContentMetaKey> out_keys, ContentMetaType meta_type) {
