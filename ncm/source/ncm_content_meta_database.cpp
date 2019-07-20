@@ -346,7 +346,23 @@ namespace sts::ncm {
     }
 
     Result ContentMetaDatabaseInterface::GetRequiredSystemVersion(Out<u32> out_version, ContentMetaKey key) {
-        return ResultKernelConnectionClosed;
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+
+        if (key.meta_type != ContentMetaType::Application && key.meta_type != ContentMetaType::Patch) {
+            return ResultNcmInvalidContentMetaKey;
+        }
+
+        const void* value = nullptr;
+        size_t value_size = 0;
+        R_TRY(GetContentMetaValuePointer(&value, &value_size, key, this->kvs));
+
+        /* Required system version is at the same offset for the patch and application extended header.
+           We use the application header for convenience. */
+        const auto ext_header = GetValueExtendedHeader<ApplicationMetaExtendedHeader>(value);
+        out_version.SetValue(ext_header->required_system_version);
+        return ResultSuccess;
     }
 
     Result ContentMetaDatabaseInterface::GetPatchId(Out<TitleId> out_patch_id, ContentMetaKey key) {
