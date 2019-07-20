@@ -30,6 +30,14 @@ namespace sts::ncm {
 
         static_assert(sizeof(InstallContentMetaHeader) == 0x8, "InstallContentMetaHeader definition!");
 
+        inline const InstallContentMetaHeader* GetValueHeader(const void* value) {
+            return reinterpret_cast<const InstallContentMetaHeader*>(value);
+        }
+
+        inline const ContentInfo* GetValueContentInfos(const void* value) {
+            return reinterpret_cast<const ContentInfo*>(reinterpret_cast<const u8*>(value) + sizeof(InstallContentMetaHeader) + GetValueHeader(value)->extended_header_size);
+        }
+
         Result GetContentMetaSize(size_t *out, const ContentMetaKey &key, const kvdb::MemoryKeyValueStore<ContentMetaKey> *kvs) {
             R_TRY_CATCH(kvs->GetValueSize(out, key)) {
                 R_CATCH(ResultKvdbKeyNotFound) {
@@ -59,17 +67,17 @@ namespace sts::ncm {
         }
 
         const auto stored_key = it->GetKey();
-        const u8* value = nullptr;
-        size_t value_size;
+        const void* value = nullptr;
+        size_t value_size = 0;
 
-        R_TRY(GetContentMetaValuePointer(reinterpret_cast<const void**>(&value), &value_size, stored_key, this->store));
-        const auto header = reinterpret_cast<const InstallContentMetaHeader*>(value);
+        R_TRY(GetContentMetaValuePointer(&value, &value_size, stored_key, this->store));
+        const auto header = GetValueHeader(value);
 
         if (header->content_count == 0) {
             return ResultNcmContentNotFound;
         }
 
-        const ContentInfo* content_infos = reinterpret_cast<const ContentInfo*>(value + sizeof(InstallContentMetaHeader) + header->extended_header_size);
+        const ContentInfo* content_infos = GetValueContentInfos(value);
         const ContentInfo* found_content_info = nullptr;
 
         if (id_offset) {
@@ -138,7 +146,36 @@ namespace sts::ncm {
     }
 
     Result ContentMetaDatabaseInterface::ListContentInfo(Out<u32> out_entries_read, OutBuffer<ContentInfo> out_info, ContentMetaKey key, u32 start_index) {
-        return ResultKernelConnectionClosed;
+        if (start_index >> 0x1f != 0) {
+            return ResultNcmInvalidOffset;
+        }
+
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+        
+        const void* value = nullptr;
+        size_t value_size = 0;
+
+        R_TRY(GetContentMetaValuePointer(&value, &value_size, key, this->store));
+        const auto header = GetValueHeader(value);
+        const auto content_infos = GetValueContentInfos(value);
+        size_t entries_read = 0;
+
+        if (out_info.num_elements > 0) {
+            for (size_t i = 0; i < out_info.num_elements; i++) {
+                /* We have no more entries we can read out. */
+                if (header->content_count <= start_index + i) {
+                    break;
+                }
+
+                out_info[i] = content_infos[i];
+                entries_read = i + 1;
+            }
+        }
+
+        out_entries_read.SetValue(entries_read);
+        return ResultSuccess;
     }
 
     Result ContentMetaDatabaseInterface::List(Out<u32> out_entries_total, Out<u32> out_entries_written, OutBuffer<ContentInfo> out_info, ContentMetaType meta_type, TitleId application_title_id, TitleId title_id_min, TitleId title_id_max, ContentMetaAttribute attributes) {
