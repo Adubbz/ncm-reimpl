@@ -25,8 +25,11 @@ namespace sts::ncm {
             u16 extended_header_size;
             u16 content_count;
             u16 content_meta_count;
-            u16 padding;
+            ContentMetaAttribute attributes;
+            u8 padding;
         };
+
+        static_assert(sizeof(InstallContentMetaHeader) == 0x8, "InstallContentMetaHeader definition!");
 
         struct ApplicationMetaExtendedHeader {
             TitleId patch_id;
@@ -417,7 +420,16 @@ namespace sts::ncm {
     }
 
     Result ContentMetaDatabaseInterface::GetAttributes(Out<ContentMetaAttribute> out_attributes, ContentMetaKey key) {
-        return ResultKernelConnectionClosed;
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+
+        const void* value = nullptr;
+        size_t value_size = 0;
+        R_TRY(GetContentMetaValuePointer(&value, &value_size, key, this->kvs));
+        const auto header = GetValueHeader(value);
+        out_attributes.SetValue(header->attributes);
+        return ResultSuccess;
     }
 
     Result ContentMetaDatabaseInterface::GetRequiredApplicationVersion(Out<u32> out_version, ContentMetaKey key) {
