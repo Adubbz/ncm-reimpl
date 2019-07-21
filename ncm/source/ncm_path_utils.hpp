@@ -36,6 +36,7 @@ namespace sts::ncm::path {
         }
     }
 
+    void GetContentMetaPath(char* out, ContentId content_id, MakeContentPathFunc path_func, const char* root_path);
     void GetContentFileName(char* out, ContentId content_id);
     void GetPlaceHolderFileName(char* out, PlaceHolderId placeholder_id);
     bool IsNcaPath(const char* path);

@@ -20,6 +20,22 @@
 
 namespace sts::ncm {
 
+    Result HasFile(bool* out, const char* path) {
+        errno = 0;
+        struct stat st;
+
+        *out = false;
+        if (stat(path, &st) == 0 && S_ISREG(st.st_mode)) {
+            *out = true;
+        }
+
+        if (errno != 0) {
+            return fsdevGetLastResult();
+        }
+    
+        return ResultSuccess;
+    }
+
     Result EnsureDirectoryRecursively(const char* dir_path) {
         return EnsureRecursively(dir_path, true);
     }

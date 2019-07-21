@@ -19,6 +19,28 @@
 
 namespace sts::ncm::path {
 
+    void GetContentMetaPath(char* out, ContentId content_id, MakeContentPathFunc path_func, const char* root_path) {
+        char tmp_path[FS_MAX_PATH-1] = {0};
+        char content_path[FS_MAX_PATH-1] = {0};
+        path_func(content_path, content_id, root_path);
+        const size_t len = strnlen(content_path, FS_MAX_PATH-1);
+        const size_t len_no_extension = len - 4;
+
+        if (len_no_extension > len || len_no_extension >= FS_MAX_PATH-1) {
+            std::abort();
+        }
+
+        strncpy(tmp_path, content_path, len_no_extension);
+        memcpy(out, tmp_path, FS_MAX_PATH-1);
+        const size_t out_len = strnlen(out, FS_MAX_PATH-1);
+
+        if (out_len + 9 >= FS_MAX_PATH-1) {
+            std::abort();
+        }
+
+        strncat(out, ".cnmt.nca", 0x2ff - out_len);
+    }
+
     void GetContentFileName(char* out, ContentId content_id) {
         char content_name[sizeof(ContentId)*2+1] = {0};
         GetStringFromContentId(content_name, content_id);

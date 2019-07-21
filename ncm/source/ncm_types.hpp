@@ -150,6 +150,7 @@ namespace sts::ncm {
     // TODO: Move to libstrat
     static constexpr Result ResultNcmStoragePathNotFound              = MAKERESULT(Module_Ncm, 1);
     static constexpr Result ResultNcmInvalidPlaceHolderDirectoryEntry = MAKERESULT(Module_Ncm, 170);
+    static constexpr Result ResultNcmInvalidContentStorageOperation   = MAKERESULT(Module_Ncm, 190);
     static constexpr Result ResultNcmStorageRootNotFound              = MAKERESULT(Module_Ncm, 310);
     static constexpr Result ResultFsUnqualifiedPath                   = MAKERESULT(Module_Fs, 6065);
     static constexpr Result ResultFsMountNameNotFound                 = MAKERESULT(Module_Fs, 6905);

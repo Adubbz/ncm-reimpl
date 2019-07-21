@@ -54,8 +54,6 @@ namespace sts::ncm {
             u32 extended_data_size;
         };
 
-        static_assert(sizeof(InstallContentMetaHeader) == 0x8, "InstallContentMetaHeader definition!");
-
         inline const InstallContentMetaHeader* GetValueHeader(const void* value) {
             return reinterpret_cast<const InstallContentMetaHeader*>(value);
         }

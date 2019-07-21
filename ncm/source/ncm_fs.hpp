@@ -23,6 +23,8 @@
 
 namespace sts::ncm {
 
+    Result HasFile(bool* out, const char* path);
+
     Result EnsureDirectoryRecursively(const char* dir_path);
     Result EnsureRecursively(const char* path, bool is_dir);
     /* Create all parent directories for a file path */
