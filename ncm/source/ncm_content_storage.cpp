@@ -27,32 +27,26 @@ namespace sts::ncm {
 
         errno = 0;
 
-        if (access(root_path, F_OK) == -1) {
-            if (errno == ENOENT || errno == ENOTDIR) {
-                return ResultNcmStorageRootNotFound;
-            }
-
-            return fsdevGetLastResult();
+        bool has_root = false;
+        R_TRY(HasDirectory(&has_root, root_path));
+        if (!has_root) {
+            return ResultNcmStorageRootNotFound;
         }
         
         path::GetContentRootPath(content_root, root_path);
 
-        if (access(content_root, F_OK) == -1) {
-            if (errno == ENOENT || errno == ENOTDIR) {
-                return ResultNcmStoragePathNotFound;
-            }
-
-            return fsdevGetLastResult();
+        bool has_content_root = false;
+        R_TRY(HasDirectory(&has_content_root, content_root));
+        if (!has_content_root) {
+            return ResultNcmStoragePathNotFound;
         }
 
         path::GetPlaceHolderRootPath(placeholder_root, root_path);
 
-        if (access(placeholder_root, F_OK) == -1) {
-            if (errno == ENOENT || errno == ENOTDIR) {
-                return ResultNcmStoragePathNotFound;
-            }
-
-            return fsdevGetLastResult();
+        bool has_placeholder_root = false;
+        R_TRY(HasDirectory(&has_placeholder_root, placeholder_root));
+        if (!has_placeholder_root) {
+            return ResultNcmStoragePathNotFound;
         }
 
         return ResultSuccess;

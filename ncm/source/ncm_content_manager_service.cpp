@@ -153,12 +153,10 @@ namespace sts::ncm {
             mounted_save_data = true;
         }
 
-        if (access(entry->meta_path, F_OK) == -1) {
-            if (errno == ENOENT || errno == ENOTDIR) {
-                return ResultNcmInvalidContentMetaDatabase;
-            }
-
-            return fsdevGetLastResult();
+        bool has_meta_path = false;
+        R_TRY(HasDirectory(&has_meta_path, entry->meta_path));
+        if (!has_meta_path) {
+            return ResultNcmInvalidContentMetaDatabase;
         }
 
         if (mounted_save_data) {
