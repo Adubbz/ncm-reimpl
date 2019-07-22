@@ -428,7 +428,7 @@ namespace sts::ncm {
             entry->content_meta_database = std::move(content_meta_database);
             mount_guard.Cancel();
         } else {
-            R_TRY(entry->kvs->Initialize(entry->meta_path, entry->max_content_metas));
+            R_TRY(entry->kvs->Initialize(entry->max_content_metas));
             R_TRY(entry->kvs->Load());
             auto content_meta_database = std::make_shared<OnMemoryContentMetaDatabaseInterface>(&*entry->kvs);
             entry->content_meta_database = std::move(content_meta_database);
