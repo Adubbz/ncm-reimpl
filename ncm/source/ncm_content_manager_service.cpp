@@ -15,8 +15,11 @@
  */
 
 #include "ncm_content_manager_service.hpp"
+#include "ncm_contentstorage.hpp"
+#include "ncm_fs.hpp"
 #include "ncm_utils.hpp"
 #include "ncm_make_path.hpp"
+#include "ncm_readonlycontentstorage.hpp"
 
 namespace sts::ncm {
 

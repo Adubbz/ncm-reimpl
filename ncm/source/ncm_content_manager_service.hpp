@@ -21,7 +21,7 @@
 #include <optional>
 
 #include "ncm_content_meta_database.hpp"
-#include "ncm_content_storage.hpp"
+#include "ncm_icontentstorage.hpp"
 
 namespace sts::ncm {
 

@@ -17,6 +17,7 @@
 #include <map>
 
 #include "ncm_fs.hpp"
+#include "ncm_path_utils.hpp"
 
 namespace sts::ncm {
 
@@ -49,6 +50,49 @@ namespace sts::ncm {
             return fsdevGetLastResult();
         }
     
+        return ResultSuccess;
+    }
+
+    Result CheckContentStorageDirectoriesExist(const char* root_path) {
+        char content_root[FS_MAX_PATH] = {0};
+        char placeholder_root[FS_MAX_PATH] = {0};
+
+        errno = 0;
+
+        bool has_root = false;
+        R_TRY(HasDirectory(&has_root, root_path));
+        if (!has_root) {
+            return ResultNcmStorageRootNotFound;
+        }
+        
+        path::GetContentRootPath(content_root, root_path);
+
+        bool has_content_root = false;
+        R_TRY(HasDirectory(&has_content_root, content_root));
+        if (!has_content_root) {
+            return ResultNcmStoragePathNotFound;
+        }
+
+        path::GetPlaceHolderRootPath(placeholder_root, root_path);
+
+        bool has_placeholder_root = false;
+        R_TRY(HasDirectory(&has_placeholder_root, placeholder_root));
+        if (!has_placeholder_root) {
+            return ResultNcmStoragePathNotFound;
+        }
+
+        return ResultSuccess;
+    }
+
+    Result EnsureContentAndPlaceHolderRoot(const char* root_path) {
+        char content_root[FS_MAX_PATH] = {0};
+        char placeholder_root[FS_MAX_PATH] = {0};
+
+        path::GetContentRootPath(content_root, root_path);
+        R_TRY(EnsureDirectoryRecursively(content_root));
+        path::GetPlaceHolderRootPath(placeholder_root, root_path);
+        R_TRY(EnsureDirectoryRecursively(placeholder_root));
+
         return ResultSuccess;
     }
 
