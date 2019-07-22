@@ -20,7 +20,7 @@
 #include <stratosphere/kvdb/kvdb_memory_key_value_store.hpp>
 #include <optional>
 
-#include "ncm_contentmetadatabase.hpp"
+#include "ncm_icontentmetadatabase.hpp"
 #include "ncm_icontentstorage.hpp"
 
 namespace sts::ncm {
@@ -66,7 +66,7 @@ namespace sts::ncm {
                 char meta_path[128];
                 StorageId storage_id;
                 SaveDataMeta save_meta;
-                std::shared_ptr<ContentMetaDatabaseInterface> content_meta_database;
+                std::shared_ptr<IContentMetaDatabase> content_meta_database;
                 std::optional<kvdb::MemoryKeyValueStore<ContentMetaKey>> kvs;
                 u32 max_content_metas;
             };
@@ -89,7 +89,7 @@ namespace sts::ncm {
             virtual Result VerifyContentStorage(StorageId storage_id);
             virtual Result VerifyContentMetaDatabase(StorageId storage_id);
             virtual Result OpenContentStorage(Out<std::shared_ptr<IContentStorage>> out, StorageId storage_id);
-            virtual Result OpenContentMetaDatabase(Out<std::shared_ptr<ContentMetaDatabaseInterface>> out, StorageId storage_id);
+            virtual Result OpenContentMetaDatabase(Out<std::shared_ptr<IContentMetaDatabase>> out, StorageId storage_id);
             virtual Result CloseContentStorageForcibly(StorageId storage_id);
             virtual Result CloseContentMetaDatabaseForcibly(StorageId storage_id);
             virtual Result CleanupContentMetaDatabase(StorageId storage_id);

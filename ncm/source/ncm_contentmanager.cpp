@@ -15,6 +15,7 @@
  */
 
 #include "ncm_contentmanager.hpp"
+#include "ncm_contentmetadatabase.hpp"
 #include "ncm_contentstorage.hpp"
 #include "ncm_fs.hpp"
 #include "ncm_utils.hpp"
@@ -208,7 +209,7 @@ namespace sts::ncm {
         return ResultSuccess;
     }
 
-    Result ContentManagerService::OpenContentMetaDatabase(Out<std::shared_ptr<ContentMetaDatabaseInterface>> out, StorageId storage_id) {
+    Result ContentManagerService::OpenContentMetaDatabase(Out<std::shared_ptr<IContentMetaDatabase>> out, StorageId storage_id) {
         std::scoped_lock<HosMutex> lk(this->mutex);
 
         if (storage_id == StorageId::None || static_cast<u8>(storage_id) == 6) {
@@ -221,7 +222,7 @@ namespace sts::ncm {
             return ResultNcmUnknownStorage;
         }
         
-        std::shared_ptr<ContentMetaDatabaseInterface> content_meta_db = entry->content_meta_database;
+        std::shared_ptr<IContentMetaDatabase> content_meta_db = entry->content_meta_database;
 
         if (!content_meta_db) {
             switch (storage_id) {
@@ -283,7 +284,7 @@ namespace sts::ncm {
             return ResultNcmUnknownStorage;
         }
         
-        std::shared_ptr<ContentMetaDatabaseInterface> content_meta_db = entry->content_meta_database;
+        std::shared_ptr<IContentMetaDatabase> content_meta_db = entry->content_meta_database;
 
         if (!content_meta_db) {
             return ResultSuccess;
@@ -399,7 +400,39 @@ namespace sts::ncm {
     }
 
     Result ContentManagerService::ActivateContentMetaDatabase(StorageId storage_id) {
-        return ResultKernelConnectionClosed;
+        std::scoped_lock<HosMutex> lk(this->mutex);
+
+        if (storage_id == StorageId::None || static_cast<u8>(storage_id) == 6) {
+            return ResultNcmUnknownStorage;
+        }
+        
+        ContentMetaDBEntry* entry = this->FindContentMetaDBEntry(storage_id);
+
+        /* Already activated. */
+        if (entry->content_meta_database != nullptr) {
+            return ResultSuccess;
+        }
+
+        /* Make a brand new kvs. N doesn't quite do this, but we will for cleanliness. */
+        entry->kvs.emplace();
+
+        if (storage_id != StorageId::GameCard) {
+            R_TRY(MountSystemSaveData(entry->mount_point, entry->save_meta.space_id, entry->save_meta.id));
+            auto mount_guard = SCOPE_GUARD { Unmount(entry->mount_point); };
+            R_TRY(entry->kvs->Initialize(entry->meta_path, entry->max_content_metas));
+            R_TRY(entry->kvs->Load());
+
+            auto content_meta_database = std::make_shared<ContentMetaDatabaseInterface>(&*entry->kvs, entry->mount_point);
+            entry->content_meta_database = std::move(content_meta_database);
+            mount_guard.Cancel();
+        } else {
+            R_TRY(entry->kvs->Initialize(entry->meta_path, entry->max_content_metas));
+            R_TRY(entry->kvs->Load());
+            auto content_meta_database = std::make_shared<OnMemoryContentMetaDatabaseInterface>(&*entry->kvs);
+            entry->content_meta_database = std::move(content_meta_database);
+        }
+
+        return ResultSuccess;
     }
 
     Result ContentManagerService::InactivateContentMetaDatabase(StorageId storage_id) {
