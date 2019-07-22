@@ -20,7 +20,7 @@
 #include <stratosphere/kvdb/kvdb_memory_key_value_store.hpp>
 #include <optional>
 
-#include "ncm_content_meta_database.hpp"
+#include "ncm_contentmetadatabase.hpp"
 #include "ncm_icontentstorage.hpp"
 
 namespace sts::ncm {

@@ -18,7 +18,7 @@
 #include <stratosphere.hpp>
 
 #include "lr_manager_service.hpp"
-#include "ncm_content_manager_service.hpp"
+#include "ncm_contentmanager.hpp"
 
 extern "C" {
     extern u32 __start__;

@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ncm_content_manager_service.hpp"
+#include "ncm_contentmanager.hpp"
 #include "ncm_contentstorage.hpp"
 #include "ncm_fs.hpp"
 #include "ncm_utils.hpp"
