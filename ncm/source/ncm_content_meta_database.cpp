@@ -637,4 +637,45 @@ namespace sts::ncm {
         return ResultSuccess;
     }
 
+    Result OnMemoryContentMetaDatabaseInterface::GetLatestContentMetaKey(Out<ContentMetaKey> out_key, TitleId tid) {
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+        
+        ContentMetaKey key = {0};
+        key.id = tid;
+
+        if (this->kvs->GetCount() == 0) {
+            return ResultNcmContentMetaNotFound; 
+        }
+
+        auto entry = this->kvs->lower_bound(key);
+        if (entry == this->kvs->end() || entry->GetKey().id != key.id) {
+            return ResultNcmContentMetaNotFound;
+        }
+
+        for (; entry != this->kvs->end(); entry++) {
+            if (entry->GetKey().id != key.id) {
+                break;
+            }
+
+            key = entry->GetKey();
+        }
+
+        *out_key = key;
+        return ResultSuccess;
+    }
+
+    Result OnMemoryContentMetaDatabaseInterface::LookupOrphanContent(OutBuffer<bool> out_orphaned, InBuffer<ContentId> content_ids) {
+        return ResultNcmInvalidContentMetaDatabase;
+    }
+
+    Result OnMemoryContentMetaDatabaseInterface::Commit() {
+        if (this->disabled) {
+            return ResultNcmInvalidContentMetaDatabase;
+        }
+
+        return ResultSuccess;
+    }
+
 }

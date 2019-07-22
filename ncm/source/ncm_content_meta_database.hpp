@@ -48,7 +48,7 @@ namespace sts::ncm {
                 GetRequiredApplicationVersion = 19,
                 GetContentIdByTypeAndIdOffset = 20,
             };
-        private:
+        protected:
             sts::kvdb::MemoryKeyValueStore<ContentMetaKey>* kvs;
             char mount_name[16];
             bool disabled;
@@ -62,7 +62,7 @@ namespace sts::ncm {
             virtual Result GetContentIdByType(Out<ContentId> out_content_id, ContentMetaKey key, ContentType type);
             virtual Result ListContentInfo(Out<u32> out_entries_written, OutBuffer<ContentInfo> out_info, ContentMetaKey key, u32 start_index);
             virtual Result List(Out<u32> out_entries_total, Out<u32> out_entries_written, OutBuffer<ContentMetaKey> out_info, ContentMetaType meta_type, TitleId application_title_id, TitleId title_id_min, TitleId title_id_max, ContentMetaAttribute attributes);
-            virtual Result GetLatestContentMetaKey(Out<ContentMetaKey> out_key, TitleId title_id);
+            virtual Result GetLatestContentMetaKey(Out<ContentMetaKey> out_key, TitleId tid);
             virtual Result ListApplication(Out<u32> out_entries_total, Out<u32> out_entries_written, OutBuffer<ApplicationContentMetaKey> out_keys, ContentMetaType meta_type);
             virtual Result Has(Out<bool> out, ContentMetaKey key);
             virtual Result HasAll(Out<bool> out, InBuffer<ContentMetaKey> keys);
@@ -100,6 +100,37 @@ namespace sts::ncm {
                 MAKE_SERVICE_COMMAND_META(ContentMetaDatabaseInterface, GetAttributes),
                 MAKE_SERVICE_COMMAND_META(ContentMetaDatabaseInterface, GetRequiredApplicationVersion, FirmwareVersion_200),
                 MAKE_SERVICE_COMMAND_META(ContentMetaDatabaseInterface, GetContentIdByTypeAndIdOffset, FirmwareVersion_500),
+            };
+    };
+
+    class OnMemoryContentMetaDatabaseInterface : public ContentMetaDatabaseInterface {
+        public:
+            virtual Result GetLatestContentMetaKey(Out<ContentMetaKey> out_key, TitleId tid) override;
+            virtual Result LookupOrphanContent(OutBuffer<bool> out_orphaned, InBuffer<ContentId> content_ids) override;
+            virtual Result Commit() override;
+        public:
+            DEFINE_SERVICE_DISPATCH_TABLE {
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, Set),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, Get),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, Remove),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, GetContentIdByType),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, ListContentInfo),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, List),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, GetLatestContentMetaKey),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, ListApplication),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, Has),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, HasAll),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, GetSize),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, GetRequiredSystemVersion),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, GetPatchId),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, DisableForcibly),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, LookupOrphanContent),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, Commit),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, HasContent),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, ListContentMetaInfo),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, GetAttributes),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, GetRequiredApplicationVersion, FirmwareVersion_200),
+                MAKE_SERVICE_COMMAND_META(OnMemoryContentMetaDatabaseInterface, GetContentIdByTypeAndIdOffset, FirmwareVersion_500),
             };
     };
 
