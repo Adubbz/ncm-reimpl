@@ -21,6 +21,11 @@
 
 namespace sts::ncm {
 
+    ContentStorageInterface::~ContentStorageInterface() {
+        this->ClearContentCache();
+        this->placeholder_accessor.ClearAllCaches();
+    }
+
     Result CheckContentStorageDirectoriesExist(const char* root_path) {
         char content_root[FS_MAX_PATH] = {0};
         char placeholder_root[FS_MAX_PATH] = {0};

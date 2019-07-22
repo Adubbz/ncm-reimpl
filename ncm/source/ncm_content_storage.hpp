@@ -67,6 +67,8 @@ namespace sts::ncm {
             impl::PlaceHolderAccessor placeholder_accessor;
             ContentId cached_content_id;
             FILE* content_cache_file_handle;
+        public:
+            ~ContentStorageInterface();
         private:
             void ClearContentCache();
             unsigned int GetContentDirectoryDepth();
