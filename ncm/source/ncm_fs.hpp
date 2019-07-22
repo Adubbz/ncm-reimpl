@@ -31,9 +31,12 @@ namespace sts::ncm {
     /* Create all parent directories for a file path */
     Result EnsureParentDirectoryRecursively(const char* path);
 
+    Result GetGameCardHandle(FsGameCardHandle* out_handle);
+
     MountName CreateUniqueMountName();
     Result MountSystemSaveData(const char* mount_point, FsSaveDataSpaceId space_id, u64 save_id);
     Result MountContentStorage(const char* mount_point, FsContentStorageId id);
+    Result MountGameCardPartition(const char* mount_point, const FsGameCardHandle handle, FsGameCardPartiton partition);
     Result Unmount(const char* mount_point);
     Result ConvertToFsCommonPath(char* out_common_path, size_t len, const char* path);
 

@@ -21,11 +21,6 @@
 
 namespace sts::ncm {
 
-    ContentStorageInterface::~ContentStorageInterface() {
-        this->ClearContentCache();
-        this->placeholder_accessor.ClearAllCaches();
-    }
-
     Result CheckContentStorageDirectoriesExist(const char* root_path) {
         char content_root[FS_MAX_PATH] = {0};
         char placeholder_root[FS_MAX_PATH] = {0};
@@ -67,6 +62,35 @@ namespace sts::ncm {
         R_TRY(EnsureDirectoryRecursively(placeholder_root));
 
         return ResultSuccess;
+    }
+
+    ContentStorageInterface::~ContentStorageInterface() {
+        this->Finalize();
+    }
+
+    Result ContentStorageInterface::Initialize(const char* root_path, MakeContentPathFunc content_path_func, MakePlaceHolderPathFunc placeholder_path_func, bool delay_flush) {
+        if (this->disabled) {
+            return ResultNcmInvalidContentStorage;
+        }
+
+        R_TRY(CheckContentStorageDirectoriesExist(root_path));
+        const size_t root_path_len = strnlen(root_path, FS_MAX_PATH-1);
+
+        if (root_path_len >= FS_MAX_PATH-1) {
+            std::abort();
+        }
+
+        strncpy(this->root_path, root_path, FS_MAX_PATH-2);
+        this->make_content_path_func = *content_path_func;
+        this->placeholder_accessor.root_path = this->root_path;
+        this->placeholder_accessor.make_placeholder_path_func = *placeholder_path_func;
+        this->placeholder_accessor.delay_flush = delay_flush;
+        return ResultSuccess;
+    }
+
+    void ContentStorageInterface::Finalize() {
+        this->ClearContentCache();
+        this->placeholder_accessor.ClearAllCaches();
     }
 
     void ContentStorageInterface::ClearContentCache() {
@@ -776,6 +800,22 @@ namespace sts::ncm {
             out_key_generation.SetValue(key_generation);
         }
 
+        return ResultSuccess;
+    }
+
+    Result ReadOnlyContentStorageInterface::Initialize(const char* root_path, MakeContentPathFunc content_path_func) {
+        if (this->disabled) {
+            return ResultNcmInvalidContentStorage;
+        }
+
+        const size_t root_path_len = strnlen(root_path, FS_MAX_PATH-1);
+
+        if (root_path_len >= FS_MAX_PATH-1) {
+            std::abort();
+        }
+
+        strncpy(this->root_path, root_path, FS_MAX_PATH-2);
+        this->make_content_path_func = *content_path_func;
         return ResultSuccess;
     }
 

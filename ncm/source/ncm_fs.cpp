@@ -100,6 +100,17 @@ namespace sts::ncm {
         return EnsureRecursively(path, false);
     }
 
+    Result GetGameCardHandle(FsGameCardHandle* out_handle) {
+        FsDeviceOperator devop;
+        R_TRY(fsOpenDeviceOperator(&devop));
+
+        /* Ensure we close even on early return. */
+        ON_SCOPE_EXIT { fsDeviceOperatorClose(&devop); };
+
+        R_TRY(fsDeviceOperatorGetGameCardHandle(&devop, out_handle));
+        return ResultSuccess;
+    }
+
     static u32 g_mount_index = 0;
     static HosMutex g_mount_index_lock;
 
@@ -146,6 +157,17 @@ namespace sts::ncm {
         }
 
         g_mount_content_storage[mount_point] = id;
+        return ResultSuccess;
+    }
+
+    Result MountGameCardPartition(const char* mount_point, const FsGameCardHandle handle, FsGameCardPartiton partition) {
+        FsFileSystem fs;
+        R_TRY(fsOpenGameCardFileSystem(&fs, &handle, partition));
+
+        if (fsdevMountDevice(mount_point, fs) == -1) {
+            std::abort();
+        }
+
         return ResultSuccess;
     }
 

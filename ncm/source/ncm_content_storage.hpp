@@ -28,7 +28,7 @@ namespace sts::ncm {
     Result CheckContentStorageDirectoriesExist(const char* root_path);
     Result EnsureContentAndPlaceHolderRoot(const char* root_path);
 
-    class ContentStorageInterface : public IServiceObject {
+    class IContentStorage : public IServiceObject {
         protected:
             enum class CommandId {
                 GeneratePlaceHolderId = 0,
@@ -64,11 +64,49 @@ namespace sts::ncm {
             char root_path[FS_MAX_PATH-1];
             MakeContentPathFunc make_content_path_func;
             bool disabled;
+        public:
+            virtual Result GeneratePlaceHolderId(OutPointerWithServerSize<PlaceHolderId, 0x1> out) = 0;
+            virtual Result CreatePlaceHolder(PlaceHolderId placeholder_id, ContentId content_id, u64 size) = 0;
+            virtual Result DeletePlaceHolder(PlaceHolderId placeholder_id) = 0;
+            virtual Result HasPlaceHolder(Out<bool> out, PlaceHolderId placeholder_id) = 0;
+            virtual Result WritePlaceHolder(PlaceHolderId placeholder_id, u64 offset, InBuffer<u8> data) = 0;
+            virtual Result Register(PlaceHolderId placeholder_id, ContentId content_id) = 0;
+            virtual Result Delete(ContentId content_id) = 0;
+            virtual Result Has(Out<bool> out, ContentId content_id) = 0;
+            virtual Result GetPath(OutPointerWithClientSize<char> out, ContentId content_id) = 0;
+            virtual Result GetPlaceHolderPath(OutPointerWithClientSize<char> out, PlaceHolderId placeholder_id) = 0;
+            virtual Result CleanupAllPlaceHolder() = 0;
+            virtual Result ListPlaceHolder(Out<u32> out_count, OutBuffer<PlaceHolderId> out_buf) = 0;
+            virtual Result GetContentCount(Out<u32> out_count) = 0;
+            virtual Result ListContentId(Out<u32> out_count, OutBuffer<ContentId> out_buf, u32 start_offset) = 0;
+            virtual Result GetSizeFromContentId(Out<u64> out_size, ContentId content_id) = 0;
+            virtual Result DisableForcibly() = 0;
+            virtual Result RevertToPlaceHolder(PlaceHolderId placeholder_id, ContentId old_content_id, ContentId new_content_id) = 0;
+            virtual Result SetPlaceHolderSize(PlaceHolderId placeholder_id, u64 size) = 0;
+            virtual Result ReadContentIdFile(OutBuffer<u8> buf, ContentId content_id, u64 offset) = 0;
+            virtual Result GetRightsIdFromPlaceHolderId(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, PlaceHolderId placeholder_id) = 0;
+            virtual Result GetRightsIdFromContentId(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, ContentId content_id) = 0;
+            virtual Result WriteContentForDebug(ContentId content_id, u64 offset, InBuffer<u8> data) = 0;
+            virtual Result GetFreeSpaceSize(Out<u64> out_size) = 0;
+            virtual Result GetTotalSpaceSize(Out<u64> out_size) = 0;
+            virtual Result FlushPlaceHolder() = 0;
+            virtual Result GetSizeFromPlaceHolderId(Out<u64> out, PlaceHolderId placeholder_id) = 0;
+            virtual Result RepairInvalidFileAttribute() = 0;
+            virtual Result GetRightsIdFromPlaceHolderIdWithCache(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, PlaceHolderId placeholder_id, ContentId cache_content_id) = 0;
+        public:
+            DEFINE_SERVICE_DISPATCH_TABLE {};
+    };
+
+    class ContentStorageInterface : public IContentStorage {
+        protected:
             impl::PlaceHolderAccessor placeholder_accessor;
             ContentId cached_content_id;
             FILE* content_cache_file_handle;
         public:
             ~ContentStorageInterface();
+
+            Result Initialize(const char* root_path, MakeContentPathFunc content_path_func, MakePlaceHolderPathFunc placeholder_path_func, bool delay_flush);
+            void Finalize();
         private:
             void ClearContentCache();
             unsigned int GetContentDirectoryDepth();
@@ -85,34 +123,34 @@ namespace sts::ncm {
                 this->make_content_path_func(out_content_path, content_id, content_root_path);
             }
         public:
-            virtual Result GeneratePlaceHolderId(OutPointerWithServerSize<PlaceHolderId, 0x1> out);
-            virtual Result CreatePlaceHolder(PlaceHolderId placeholder_id, ContentId content_id, u64 size);
-            virtual Result DeletePlaceHolder(PlaceHolderId placeholder_id);
-            virtual Result HasPlaceHolder(Out<bool> out, PlaceHolderId placeholder_id);
-            virtual Result WritePlaceHolder(PlaceHolderId placeholder_id, u64 offset, InBuffer<u8> data);
-            virtual Result Register(PlaceHolderId placeholder_id, ContentId content_id);
-            virtual Result Delete(ContentId content_id);
-            virtual Result Has(Out<bool> out, ContentId content_id);
-            virtual Result GetPath(OutPointerWithClientSize<char> out, ContentId content_id);
-            virtual Result GetPlaceHolderPath(OutPointerWithClientSize<char> out, PlaceHolderId placeholder_id);
-            virtual Result CleanupAllPlaceHolder();
-            virtual Result ListPlaceHolder(Out<u32> out_count, OutBuffer<PlaceHolderId> out_buf);
-            virtual Result GetContentCount(Out<u32> out_count);
-            virtual Result ListContentId(Out<u32> out_count, OutBuffer<ContentId> out_buf, u32 start_offset);
-            virtual Result GetSizeFromContentId(Out<u64> out_size, ContentId content_id);
-            virtual Result DisableForcibly();
-            virtual Result RevertToPlaceHolder(PlaceHolderId placeholder_id, ContentId old_content_id, ContentId new_content_id);
-            virtual Result SetPlaceHolderSize(PlaceHolderId placeholder_id, u64 size);
-            virtual Result ReadContentIdFile(OutBuffer<u8> buf, ContentId content_id, u64 offset);
-            virtual Result GetRightsIdFromPlaceHolderId(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, PlaceHolderId placeholder_id);
-            virtual Result GetRightsIdFromContentId(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, ContentId content_id);
-            virtual Result WriteContentForDebug(ContentId content_id, u64 offset, InBuffer<u8> data);
-            virtual Result GetFreeSpaceSize(Out<u64> out_size);
-            virtual Result GetTotalSpaceSize(Out<u64> out_size);
-            virtual Result FlushPlaceHolder();
-            virtual Result GetSizeFromPlaceHolderId(Out<u64> out, PlaceHolderId placeholder_id);
-            virtual Result RepairInvalidFileAttribute();
-            virtual Result GetRightsIdFromPlaceHolderIdWithCache(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, PlaceHolderId placeholder_id, ContentId cache_content_id);
+            virtual Result GeneratePlaceHolderId(OutPointerWithServerSize<PlaceHolderId, 0x1> out) override;
+            virtual Result CreatePlaceHolder(PlaceHolderId placeholder_id, ContentId content_id, u64 size) override;
+            virtual Result DeletePlaceHolder(PlaceHolderId placeholder_id) override;
+            virtual Result HasPlaceHolder(Out<bool> out, PlaceHolderId placeholder_id) override;
+            virtual Result WritePlaceHolder(PlaceHolderId placeholder_id, u64 offset, InBuffer<u8> data) override;
+            virtual Result Register(PlaceHolderId placeholder_id, ContentId content_id) override;
+            virtual Result Delete(ContentId content_id) override;
+            virtual Result Has(Out<bool> out, ContentId content_id) override;
+            virtual Result GetPath(OutPointerWithClientSize<char> out, ContentId content_id) override;
+            virtual Result GetPlaceHolderPath(OutPointerWithClientSize<char> out, PlaceHolderId placeholder_id) override;
+            virtual Result CleanupAllPlaceHolder() override;
+            virtual Result ListPlaceHolder(Out<u32> out_count, OutBuffer<PlaceHolderId> out_buf) override;
+            virtual Result GetContentCount(Out<u32> out_count) override;
+            virtual Result ListContentId(Out<u32> out_count, OutBuffer<ContentId> out_buf, u32 start_offset) override;
+            virtual Result GetSizeFromContentId(Out<u64> out_size, ContentId content_id) override;
+            virtual Result DisableForcibly() override;
+            virtual Result RevertToPlaceHolder(PlaceHolderId placeholder_id, ContentId old_content_id, ContentId new_content_id) override;
+            virtual Result SetPlaceHolderSize(PlaceHolderId placeholder_id, u64 size) override;
+            virtual Result ReadContentIdFile(OutBuffer<u8> buf, ContentId content_id, u64 offset) override;
+            virtual Result GetRightsIdFromPlaceHolderId(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, PlaceHolderId placeholder_id) override;
+            virtual Result GetRightsIdFromContentId(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, ContentId content_id) override;
+            virtual Result WriteContentForDebug(ContentId content_id, u64 offset, InBuffer<u8> data) override;
+            virtual Result GetFreeSpaceSize(Out<u64> out_size) override;
+            virtual Result GetTotalSpaceSize(Out<u64> out_size) override;
+            virtual Result FlushPlaceHolder() override;
+            virtual Result GetSizeFromPlaceHolderId(Out<u64> out, PlaceHolderId placeholder_id) override;
+            virtual Result RepairInvalidFileAttribute() override;
+            virtual Result GetRightsIdFromPlaceHolderIdWithCache(Out<FsRightsId> out_rights_id, Out<u64> out_key_generation, PlaceHolderId placeholder_id, ContentId cache_content_id) override;
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {
                 MAKE_SERVICE_COMMAND_META(ContentStorageInterface, GeneratePlaceHolderId),
@@ -147,7 +185,9 @@ namespace sts::ncm {
             };
     };
 
-    class ReadOnlyContentStorageInterface : public ContentStorageInterface {
+    class ReadOnlyContentStorageInterface : public IContentStorage {
+        public:
+            Result Initialize(const char* root_path, MakeContentPathFunc content_path_func);
         public:
             virtual Result GeneratePlaceHolderId(OutPointerWithServerSize<PlaceHolderId, 0x1> out) override;
             virtual Result CreatePlaceHolder(PlaceHolderId placeholder_id, ContentId content_id, u64 size) override;

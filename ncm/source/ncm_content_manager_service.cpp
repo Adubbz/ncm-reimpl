@@ -16,6 +16,7 @@
 
 #include "ncm_content_manager_service.hpp"
 #include "ncm_utils.hpp"
+#include "ncm_make_path.hpp"
 
 namespace sts::ncm {
 
@@ -166,7 +167,7 @@ namespace sts::ncm {
         return ResultSuccess;
     }
 
-    Result ContentManagerService::OpenContentStorage(Out<std::shared_ptr<ContentStorageInterface>> out, StorageId storage_id) {
+    Result ContentManagerService::OpenContentStorage(Out<std::shared_ptr<IContentStorage>> out, StorageId storage_id) {
         std::scoped_lock<HosMutex> lk(this->mutex);
 
         if (storage_id == StorageId::None || static_cast<u8>(storage_id) == 6) {
@@ -179,7 +180,7 @@ namespace sts::ncm {
             return ResultNcmUnknownStorage;
         }
         
-        std::shared_ptr<ContentStorageInterface> content_storage = entry->content_storage;
+        auto content_storage = entry->content_storage;
 
         if (!content_storage) {
             switch (storage_id) {
@@ -293,7 +294,7 @@ namespace sts::ncm {
         }
 
         entry->content_meta_database = nullptr;
-        entry->store.reset();
+        entry->kvs.reset();
         return ResultSuccess;
     }
 
@@ -315,7 +316,61 @@ namespace sts::ncm {
     }
 
     Result ContentManagerService::ActivateContentStorage(StorageId storage_id) {
-        return ResultKernelConnectionClosed;
+        std::scoped_lock<HosMutex> lk(this->mutex);
+
+        if (storage_id == StorageId::None || static_cast<u8>(storage_id) == 6) {
+            return ResultNcmUnknownStorage;
+        }
+        
+        ContentStorageEntry* entry = this->FindContentStorageEntry(storage_id);
+
+        if (!entry) {
+            return ResultNcmUnknownStorage;
+        }
+
+        /* Already activated. */
+        if (entry->content_storage != nullptr) {
+            return ResultSuccess;
+        }
+
+        if (storage_id == StorageId::GameCard) {
+            FsGameCardHandle gc_hnd;
+            R_TRY(GetGameCardHandle(&gc_hnd));
+            R_TRY(MountGameCardPartition(entry->mount_point, gc_hnd, FsGameCardPartiton_Secure));
+            auto mount_guard = SCOPE_GUARD { Unmount(entry->mount_point); };
+            auto content_storage = std::make_shared<ReadOnlyContentStorageInterface>();
+            
+            R_TRY(content_storage->Initialize(entry->root_path, path::MakeContentPathFlat));
+            entry->content_storage = std::move(content_storage);
+            mount_guard.Cancel();
+        } else {
+            R_TRY(MountContentStorage(entry->mount_point, entry->content_storage_id));
+            auto mount_guard = SCOPE_GUARD { Unmount(entry->mount_point); };
+            MakeContentPathFunc content_path_func = nullptr;
+            MakePlaceHolderPathFunc placeholder_path_func = nullptr;
+            bool delay_flush = false;
+            auto content_storage = std::make_shared<ContentStorageInterface>();
+
+            switch (storage_id) {
+                case StorageId::NandSystem:
+                    content_path_func = path::MakeContentPathFlat;
+                    placeholder_path_func = path::MakePlaceHolderPathFlat;
+                    break;
+
+                case StorageId::SdCard:
+                    delay_flush = true;
+                default:
+                    content_path_func = path::MakeContentPathHashByteLayered;
+                    placeholder_path_func = path::MakePlaceHolderPathHashByteLayered;
+                    break;
+            }
+
+            R_TRY(content_storage->Initialize(entry->root_path, content_path_func, placeholder_path_func, delay_flush));
+            entry->content_storage = std::move(content_storage);
+            mount_guard.Cancel();
+        }
+
+        return ResultSuccess;
     }
 
     Result ContentManagerService::InactivateContentStorage(StorageId storage_id) {

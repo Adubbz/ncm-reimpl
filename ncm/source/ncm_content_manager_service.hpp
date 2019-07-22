@@ -48,7 +48,7 @@ namespace sts::ncm {
                 char root_path[128];
                 StorageId storage_id;
                 FsContentStorageId content_storage_id;
-                std::shared_ptr<ContentStorageInterface> content_storage;
+                std::shared_ptr<IContentStorage> content_storage;
             };
 
             struct SaveDataMeta {
@@ -67,7 +67,7 @@ namespace sts::ncm {
                 StorageId storage_id;
                 SaveDataMeta save_meta;
                 std::shared_ptr<ContentMetaDatabaseInterface> content_meta_database;
-                std::optional<kvdb::MemoryKeyValueStore<ContentMetaKey>> store;
+                std::optional<kvdb::MemoryKeyValueStore<ContentMetaKey>> kvs;
                 u32 max_content_metas;
             };
         private:
@@ -88,7 +88,7 @@ namespace sts::ncm {
             virtual Result CreateContentMetaDatabase(StorageId storage_id);
             virtual Result VerifyContentStorage(StorageId storage_id);
             virtual Result VerifyContentMetaDatabase(StorageId storage_id);
-            virtual Result OpenContentStorage(Out<std::shared_ptr<ContentStorageInterface>> out, StorageId storage_id);
+            virtual Result OpenContentStorage(Out<std::shared_ptr<IContentStorage>> out, StorageId storage_id);
             virtual Result OpenContentMetaDatabase(Out<std::shared_ptr<ContentMetaDatabaseInterface>> out, StorageId storage_id);
             virtual Result CloseContentStorageForcibly(StorageId storage_id);
             virtual Result CloseContentMetaDatabaseForcibly(StorageId storage_id);
