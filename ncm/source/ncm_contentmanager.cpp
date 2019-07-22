@@ -377,7 +377,25 @@ namespace sts::ncm {
     }
 
     Result ContentManagerService::InactivateContentStorage(StorageId storage_id) {
-        return ResultKernelConnectionClosed;
+        std::scoped_lock<HosMutex> lk(this->mutex);
+
+        if (storage_id == StorageId::None || static_cast<u8>(storage_id) == 6) {
+            return ResultNcmUnknownStorage;
+        }
+        
+        ContentStorageEntry* entry = this->FindContentStorageEntry(storage_id);
+
+        if (!entry) {
+            return ResultNcmUnknownStorage;
+        }
+
+        if (entry->content_storage != nullptr) {
+            entry->content_storage->DisableForcibly();
+            entry->content_storage = nullptr;
+            Unmount(entry->mount_point);
+        }
+
+        return ResultSuccess;
     }
 
     Result ContentManagerService::ActivateContentMetaDatabase(StorageId storage_id) {
