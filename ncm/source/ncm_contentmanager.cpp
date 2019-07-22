@@ -390,12 +390,14 @@ namespace sts::ncm {
             return ResultNcmUnknownStorage;
         }
 
-        if (entry->content_storage != nullptr) {
-            entry->content_storage->DisableForcibly();
-            entry->content_storage = nullptr;
-            Unmount(entry->mount_point);
+        /* Already inactivated. */
+        if (entry->content_storage == nullptr) {
+            return ResultSuccess;
         }
 
+        entry->content_storage->DisableForcibly();
+        entry->content_storage = nullptr;
+        Unmount(entry->mount_point);
         return ResultSuccess;
     }
 
@@ -436,7 +438,29 @@ namespace sts::ncm {
     }
 
     Result ContentManagerService::InactivateContentMetaDatabase(StorageId storage_id) {
-        return ResultKernelConnectionClosed;
+        std::scoped_lock<HosMutex> lk(this->mutex);
+
+        if (storage_id == StorageId::None || static_cast<u8>(storage_id) == 6) {
+            return ResultNcmUnknownStorage;
+        }
+        
+        ContentMetaDBEntry* entry = this->FindContentMetaDBEntry(storage_id);
+
+        /* Already inactivated. */
+        if (entry->content_meta_database == nullptr) {
+            return ResultSuccess;
+        }
+
+        entry->content_meta_database->DisableForcibly();
+        entry->content_meta_database = nullptr;
+        /* This should lead to Index's destructor performing cleanup for us. */
+        entry->kvs.reset();
+
+        if (storage_id != StorageId::GameCard) {
+            Unmount(entry->mount_point);
+        }
+
+        return ResultSuccess;
     }
 
 }
