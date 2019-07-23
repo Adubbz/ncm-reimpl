@@ -20,6 +20,7 @@
 #include <stratosphere/kvdb/kvdb_memory_key_value_store.hpp>
 #include <optional>
 
+#include "ncm_fs.hpp"
 #include "ncm_icontentmetadatabase.hpp"
 #include "ncm_icontentstorage.hpp"
 
@@ -49,6 +50,20 @@ namespace sts::ncm {
                 StorageId storage_id;
                 FsContentStorageId content_storage_id;
                 std::shared_ptr<IContentStorage> content_storage;
+
+                inline ContentStorageEntry() : storage_id(StorageId::None),
+                    content_storage_id(FS_CONTENTSTORAGEID_NandSystem), content_storage(nullptr) {
+                    mount_point[0] = '\0';
+                    root_path[0] = '\0';
+                }
+
+                inline ContentStorageEntry(StorageId storage_id, FsContentStorageId content_storage_id) :
+                    storage_id(storage_id), content_storage_id(content_storage_id), content_storage(nullptr)
+                {
+                    MountName mount_name = CreateUniqueMountName();
+                    strcpy(this->mount_point, mount_name.name);
+                    snprintf(this->root_path, 0x80, "%s:/", this->mount_point);
+                }
             };
 
             struct SaveDataMeta {
@@ -69,17 +84,27 @@ namespace sts::ncm {
                 std::shared_ptr<IContentMetaDatabase> content_meta_database;
                 std::optional<kvdb::MemoryKeyValueStore<ContentMetaKey>> kvs;
                 u32 max_content_metas;
+
+                inline ContentMetaDBEntry() : storage_id(StorageId::None), save_meta({0}), 
+                    content_meta_database(nullptr), kvs(std::nullopt), max_content_metas(0) {
+                    mount_point[0] = '\0';
+                    meta_path[0] = '\0';
+                }
+
+                Result Initialize(StorageId storage_id, SaveDataMeta& save_meta, size_t max_content_metas);
             };
         private:
             static constexpr size_t MaxContentStorageEntries = 8;
             static constexpr size_t MaxContentMetaDBEntries = 8;
 
             HosMutex mutex;
-            bool initialized;
+            bool initialized = false;
             ContentStorageEntry content_storage_entries[MaxContentStorageEntries];
             ContentMetaDBEntry content_meta_entries[MaxContentMetaDBEntries];
             u32 num_content_storage_entries;
             u32 num_content_meta_entries;
+        public: 
+            Result Initialize();
         private:
             ContentStorageEntry* FindContentStorageEntry(StorageId storage_id);
             ContentMetaDBEntry* FindContentMetaDBEntry(StorageId storage_id);

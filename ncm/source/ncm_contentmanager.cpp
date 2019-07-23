@@ -17,12 +17,81 @@
 #include "ncm_contentmanager.hpp"
 #include "ncm_contentmetadatabase.hpp"
 #include "ncm_contentstorage.hpp"
-#include "ncm_fs.hpp"
 #include "ncm_utils.hpp"
 #include "ncm_make_path.hpp"
 #include "ncm_readonlycontentstorage.hpp"
 
 namespace sts::ncm {
+
+    Result ContentManagerService::ContentMetaDBEntry::Initialize(StorageId storage_id, SaveDataMeta& save_meta, size_t max_content_metas) {
+        this->storage_id = storage_id;
+        this->max_content_metas = max_content_metas;
+        this->save_meta = save_meta;
+        this->content_meta_database = nullptr;
+        this->kvs.reset();
+        MountName mount_name = CreateUniqueMountName();
+        strcpy(this->mount_point, mount_name.name);
+        this->mount_point[0] = '#';
+        snprintf(this->meta_path, 0x80, "%s:/meta", this->mount_point);
+        return ResultSuccess;
+    }
+
+    Result ContentManagerService::Initialize() {
+        std::scoped_lock<HosMutex> lk(this->mutex);
+
+        /* Already initialized. */
+        if (this->initialized) {
+            return ResultSuccess;
+        }
+        
+        size_t prev_num_content_storage_entries = this->num_content_storage_entries;
+
+        for (size_t i = 0; i < ContentManagerService::MaxContentStorageEntries; i++) {
+            ContentStorageEntry* entry = &this->content_storage_entries[i];
+            entry->storage_id = StorageId::None;
+        }
+
+        for (size_t i = 0; i < ContentManagerService::MaxContentMetaDBEntries; i++) {
+            ContentMetaDBEntry* entry = &this->content_meta_entries[i];
+            entry->storage_id = StorageId::None;
+        }
+
+        this->num_content_storage_entries++;
+        auto storage_entry = &this->content_storage_entries[prev_num_content_storage_entries];
+
+        /* First, setup the NandSystem storage entry. */
+        *storage_entry = ContentStorageEntry(StorageId::NandSystem, FS_CONTENTSTORAGEID_NandSystem);
+
+        if (R_FAILED(this->VerifyContentStorage(StorageId::NandSystem))) {
+            R_TRY(this->CreateContentStorage(StorageId::NandSystem));
+        }
+
+        R_TRY(this->ActivateContentStorage(StorageId::NandSystem));
+
+        /* Next, the NandSystem content meta database. */
+        SaveDataMeta nand_save_meta;
+        nand_save_meta.id = 0x8000000000000120;
+        nand_save_meta.size = 0x6c000;
+        nand_save_meta.journal_size = 0x6c000;
+        nand_save_meta.flags = 3; /* Unknown. */
+        nand_save_meta.space_id = FsSaveDataSpaceId_NandSystem;
+
+        size_t prev_num_content_meta_entries = this->num_content_meta_entries;
+        this->num_content_meta_entries++;
+        auto content_meta_entry = &this->content_meta_entries[prev_num_content_meta_entries];
+
+        R_TRY(content_meta_entry->Initialize(StorageId::NandSystem, nand_save_meta, 0x800));
+
+        if (R_FAILED(this->VerifyContentMetaDatabase(StorageId::NandSystem))) {
+            R_TRY(this->CreateContentMetaDatabase(StorageId::NandSystem));
+
+            /* TODO */
+        }
+
+        /* TODO */
+
+        return ResultSuccess;
+    }
 
     ContentManagerService::ContentStorageEntry* ContentManagerService::FindContentStorageEntry(StorageId storage_id) {
         for (size_t i = 0; i < ContentManagerService::MaxContentStorageEntries; i++) {
@@ -37,7 +106,7 @@ namespace sts::ncm {
     }
 
     ContentManagerService::ContentMetaDBEntry* ContentManagerService::FindContentMetaDBEntry(StorageId storage_id) {
-        for (size_t i = 0; i < ContentManagerService::MaxContentStorageEntries; i++) {
+        for (size_t i = 0; i < ContentManagerService::MaxContentMetaDBEntries; i++) {
             ContentMetaDBEntry* entry = &this->content_meta_entries[i];
 
             if (entry->storage_id == storage_id) {
