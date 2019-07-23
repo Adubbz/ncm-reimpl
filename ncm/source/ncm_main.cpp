@@ -17,8 +17,9 @@
 #include <switch.h>
 #include <stratosphere.hpp>
 
+#include "impl/ncm_content_manager.hpp"
 #include "lr_manager_service.hpp"
-#include "ncm_contentmanager.hpp"
+#include "ncm_content_manager_service.hpp"
 
 extern "C" {
     extern u32 __start__;
@@ -67,11 +68,11 @@ int main(int argc, char **argv)
             
     auto server_manager = new WaitableManager(2);
     
-    // TODO: Create content manager
-    // TODO: Global content manager var
+    /* Initialize content manager implementation. */
+    R_ASSERT(sts::ncm::impl::InitializeContentManager());
 
-    server_manager->AddWaitable(new ServiceServer<sts::lr::LocationResolverManagerService>("lr", 0x10));
     server_manager->AddWaitable(new ServiceServer<sts::ncm::ContentManagerService>("ncm", 0x10));
+    server_manager->AddWaitable(new ServiceServer<sts::lr::LocationResolverManagerService>("lr", 0x10));
     
     /* Loop forever, servicing our services. */
     server_manager->Process();
