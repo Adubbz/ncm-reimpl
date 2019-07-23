@@ -89,6 +89,14 @@ namespace sts::ncm::impl {
                 snprintf(this->meta_path, 0x80, "%s:/meta", this->mount_point);
                 return ResultSuccess;
             }
+
+            Result InitializeGameCard(size_t max_content_metas) {
+                this->storage_id = StorageId::GameCard;
+                this->max_content_metas = max_content_metas;
+                this->content_meta_database = nullptr;
+                this->kvs.reset();
+                return ResultSuccess;
+            }
         };
 
         constexpr size_t MaxContentStorageEntries = 8;
@@ -135,7 +143,7 @@ namespace sts::ncm::impl {
             return ResultSuccess;
         }
         
-        size_t prev_num_content_storage_entries = g_num_content_storage_entries;
+        size_t cur_storage_index = g_num_content_storage_entries;
 
         for (size_t i = 0; i < MaxContentStorageEntries; i++) {
             ContentStorageEntry* entry = &g_content_storage_entries[i];
@@ -148,7 +156,7 @@ namespace sts::ncm::impl {
         }
 
         g_num_content_storage_entries++;
-        auto storage_entry = &g_content_storage_entries[prev_num_content_storage_entries];
+        auto storage_entry = &g_content_storage_entries[cur_storage_index];
 
         /* First, setup the NandSystem storage entry. */
         *storage_entry = ContentStorageEntry(StorageId::NandSystem, FS_CONTENTSTORAGEID_NandSystem);
@@ -159,29 +167,109 @@ namespace sts::ncm::impl {
 
         R_TRY(ActivateContentStorage(StorageId::NandSystem));
 
-        /* Next, the NandSystem content meta database. */
-        SaveDataMeta nand_save_meta;
-        nand_save_meta.id = 0x8000000000000120;
-        nand_save_meta.size = 0x6c000;
-        nand_save_meta.journal_size = 0x6c000;
-        nand_save_meta.flags = 3; /* Unknown. */
-        nand_save_meta.space_id = FsSaveDataSpaceId_NandSystem;
+        /* Next, the NandSystem content meta entry. */
+        SaveDataMeta nand_system_save_meta;
+        nand_system_save_meta.id = 0x8000000000000120;
+        nand_system_save_meta.size = 0x6c000;
+        nand_system_save_meta.journal_size = 0x6c000;
+        nand_system_save_meta.flags = FsSaveDataFlags_SurviveFactoryReset| FsSaveDataFlags_SurviveFactoryResetForRefurbishment;
+        nand_system_save_meta.space_id = FsSaveDataSpaceId_NandSystem;
 
-        size_t prev_num_content_meta_entries = g_num_content_meta_entries;
+        size_t cur_meta_index = g_num_content_meta_entries;
         g_num_content_meta_entries++;
-        auto content_meta_entry = &g_content_meta_entries[prev_num_content_meta_entries];
+        auto content_meta_entry = &g_content_meta_entries[cur_meta_index];
 
-        R_TRY(content_meta_entry->Initialize(StorageId::NandSystem, nand_save_meta, 0x800));
+        R_TRY(content_meta_entry->Initialize(StorageId::NandSystem, nand_system_save_meta, 0x800));
 
         if (R_FAILED(VerifyContentMetaDatabase(StorageId::NandSystem))) {
             R_TRY(CreateContentMetaDatabase(StorageId::NandSystem));
 
-            /* TODO */
+            /* TODO: N supports a number of unused modes here, we don't bother implementing them currently. */
         }
 
-        /* TODO */
+        u32 current_flags = 0;
+        if (GetRuntimeFirmwareVersion() >= FirmwareVersion_200 && R_SUCCEEDED(GetSaveDataFlags(&current_flags, 0x8000000000000120)) && current_flags != (FsSaveDataFlags_SurviveFactoryReset | FsSaveDataFlags_SurviveFactoryResetForRefurbishment)) {
+            SetSaveDataFlags(0x8000000000000120, FsSaveDataSpaceId_NandSystem, FsSaveDataFlags_SurviveFactoryReset | FsSaveDataFlags_SurviveFactoryResetForRefurbishment);
+        }
+        
+        R_TRY(ActivateContentMetaDatabase(StorageId::NandSystem));
+
+        /* Now for NandUser's content storage entry. */
+        cur_meta_index = g_num_content_meta_entries;
+        g_num_content_meta_entries++;
+        storage_entry = &g_content_storage_entries[cur_storage_index];
+        *storage_entry = ContentStorageEntry(StorageId::NandUser, FS_CONTENTSTORAGEID_NandUser);
+
+        /* And NandUser's content meta entry. */
+        SaveDataMeta nand_user_save_meta;
+        nand_user_save_meta.id = 0x8000000000000121;
+        nand_user_save_meta.size = 0x29e000;
+        nand_user_save_meta.journal_size = 0x29e000;
+        nand_user_save_meta.flags = 0;
+        nand_user_save_meta.space_id = FsSaveDataSpaceId_NandSystem;
+
+        cur_meta_index = g_num_content_meta_entries;
+        g_num_content_meta_entries++;
+        content_meta_entry = &g_content_meta_entries[cur_meta_index];
+
+        R_TRY(content_meta_entry->Initialize(StorageId::NandUser, nand_user_save_meta, 0x2000));
+
+        /* 
+           Beyond this point N no longer appears to bother
+           incrementing the count for content storage entries or content meta entries. 
+        */
+
+        /* Next SdCard's content storage entry. */
+        g_content_storage_entries[2] = ContentStorageEntry(StorageId::SdCard, FS_CONTENTSTORAGEID_SdCard);
+
+        /* And SdCard's content meta entry. */
+        SaveDataMeta sd_card_save_meta;
+        sd_card_save_meta.id = 0x8000000000000124;
+        sd_card_save_meta.size = 0xa08000;
+        sd_card_save_meta.journal_size = 0xa08000;
+        sd_card_save_meta.flags = 0;
+        sd_card_save_meta.space_id = FsSaveDataSpaceId_SdCard;
+
+        content_meta_entry = &g_content_meta_entries[2];
+        R_TRY(content_meta_entry->Initialize(StorageId::SdCard, sd_card_save_meta, 0x2000));
+
+        /* GameCard's content storage entry. */
+        /* N doesn't set a content storage id for game cards, so we'll just use 0 (NandSystem). */
+        g_content_storage_entries[3] = ContentStorageEntry(StorageId::GameCard, FS_CONTENTSTORAGEID_NandSystem);
+
+        /* Lasty, GameCard's content meta entry. */
+        content_meta_entry = &g_content_meta_entries[3];
+        R_TRY(content_meta_entry->InitializeGameCard(0x800));
+
+        g_initialized = true;
 
         return ResultSuccess;
+    }
+
+    void FinalizeContentManager() {
+        {
+            std::scoped_lock<HosMutex> lk(g_mutex);
+
+            for (size_t i = 0; i < MaxContentStorageEntries; i++) {
+                ContentStorageEntry* entry = &g_content_storage_entries[i];
+                InactivateContentStorage(entry->storage_id);
+            }
+
+            for (size_t i = 0; i < MaxContentMetaDBEntries; i++) {
+                ContentMetaDBEntry* entry = &g_content_meta_entries[i];
+                InactivateContentMetaDatabase(entry->storage_id);
+            }
+        }
+
+        for (size_t i = 0; i < MaxContentMetaDBEntries; i++) {
+            ContentMetaDBEntry* entry = &g_content_meta_entries[i];
+            entry->kvs.reset();
+        }
+
+        for (size_t i = 0; i < MaxContentStorageEntries; i++) {
+            ContentStorageEntry* entry = &g_content_storage_entries[i];
+            entry->content_storage = nullptr;
+        }
     }
 
     Result CreateContentStorage(StorageId storage_id) {

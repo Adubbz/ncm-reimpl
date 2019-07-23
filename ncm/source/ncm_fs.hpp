@@ -43,6 +43,9 @@ namespace sts::ncm {
     Result Unmount(const char* mount_point);
     Result ConvertToFsCommonPath(char* out_common_path, size_t len, const char* path);
 
+    Result GetSaveDataFlags(u32* out_flags, u64 save_id);
+    Result SetSaveDataFlags(u64 save_id, FsSaveDataSpaceId space_id, u32 flags);
+
     template<typename F>
     Result TraverseDirectory(const char* root_path, int max_level, F f) {
         bool should_continue = false;

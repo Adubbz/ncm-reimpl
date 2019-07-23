@@ -23,8 +23,9 @@
 
 namespace sts::ncm::impl {
 
-    /* Initialization. */
+    /* Initialization/Finalization. */
     Result InitializeContentManager();
+    void FinalizeContentManager();
 
     /* Content Storage Management. */
     Result CreateContentStorage(StorageId storage_id);
