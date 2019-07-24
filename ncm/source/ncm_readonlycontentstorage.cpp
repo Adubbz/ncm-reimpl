@@ -36,7 +36,7 @@ namespace sts::ncm {
         return ResultSuccess;
     }
 
-    Result ReadOnlyContentStorageInterface::GeneratePlaceHolderId(OutPointerWithServerSize<PlaceHolderId, 0x1> out) {
+    Result ReadOnlyContentStorageInterface::GeneratePlaceHolderId(Out<PlaceHolderId> out) {
         return ResultNcmInvalidContentStorageOperation;
     }
 
@@ -84,7 +84,7 @@ namespace sts::ncm {
         return ResultSuccess;
     }
 
-    Result ReadOnlyContentStorageInterface::GetPath(OutPointerWithClientSize<char> out, ContentId content_id) {
+    Result ReadOnlyContentStorageInterface::GetPath(OutPointerWithServerSize<lr::Path, 0x1> out, ContentId content_id) {
         if (this->disabled) {
             return ResultNcmInvalidContentStorage;
         }
@@ -101,12 +101,12 @@ namespace sts::ncm {
         }
         
         R_TRY(ConvertToFsCommonPath(common_path, FS_MAX_PATH-1, content_path));
-        memcpy(out.pointer, common_path, FS_MAX_PATH-1);
+        *out.pointer = common_path;
 
         return ResultSuccess;
     }
 
-    Result ReadOnlyContentStorageInterface::GetPlaceHolderPath(OutPointerWithClientSize<char> out, PlaceHolderId placeholder_id) {
+    Result ReadOnlyContentStorageInterface::GetPlaceHolderPath(OutPointerWithServerSize<lr::Path, 0x1> out, PlaceHolderId placeholder_id) {
         return ResultNcmInvalidContentStorageOperation;
     }
 

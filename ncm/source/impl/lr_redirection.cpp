@@ -19,6 +19,17 @@
 namespace sts::lr::impl {
 
     bool LocationRedirector::FindRedirection(Path *out, ncm::TitleId title_id) {
+        if (this->redirection_list.empty()) {
+            return false;
+        }
+
+        for (auto it = this->redirection_list.begin(); it != this->redirection_list.end(); it++) {
+            if (it->title_id == title_id) {
+                *out = it->path;
+                return true;
+            }
+        }
+
         return false;
     }
 

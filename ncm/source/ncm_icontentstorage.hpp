@@ -18,6 +18,7 @@
 #include <switch.h>
 #include <stratosphere.hpp>
 
+#include "lr_types.hpp"
 #include "ncm_types.hpp"
 
 namespace sts::ncm {
@@ -59,7 +60,7 @@ namespace sts::ncm {
             MakeContentPathFunc make_content_path_func;
             bool disabled;
         public:
-            virtual Result GeneratePlaceHolderId(OutPointerWithServerSize<PlaceHolderId, 0x1> out) = 0;
+            virtual Result GeneratePlaceHolderId(Out<PlaceHolderId> out) = 0;
             virtual Result CreatePlaceHolder(PlaceHolderId placeholder_id, ContentId content_id, u64 size) = 0;
             virtual Result DeletePlaceHolder(PlaceHolderId placeholder_id) = 0;
             virtual Result HasPlaceHolder(Out<bool> out, PlaceHolderId placeholder_id) = 0;
@@ -67,8 +68,8 @@ namespace sts::ncm {
             virtual Result Register(PlaceHolderId placeholder_id, ContentId content_id) = 0;
             virtual Result Delete(ContentId content_id) = 0;
             virtual Result Has(Out<bool> out, ContentId content_id) = 0;
-            virtual Result GetPath(OutPointerWithClientSize<char> out, ContentId content_id) = 0;
-            virtual Result GetPlaceHolderPath(OutPointerWithClientSize<char> out, PlaceHolderId placeholder_id) = 0;
+            virtual Result GetPath(OutPointerWithServerSize<lr::Path, 0x1> out, ContentId content_id) = 0;
+            virtual Result GetPlaceHolderPath(OutPointerWithServerSize<lr::Path, 0x1> out, PlaceHolderId placeholder_id) = 0;
             virtual Result CleanupAllPlaceHolder() = 0;
             virtual Result ListPlaceHolder(Out<u32> out_count, OutBuffer<PlaceHolderId> out_buf) = 0;
             virtual Result GetContentCount(Out<u32> out_count) = 0;

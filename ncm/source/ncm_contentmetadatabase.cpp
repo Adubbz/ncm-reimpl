@@ -637,6 +637,14 @@ namespace sts::ncm {
         return ResultSuccess;
     }
 
+    Result ContentMetaDatabaseInterface::GetLatestProgram(ContentId* out_content_id, TitleId title_id) {
+        ContentMetaKey key;
+        
+        R_TRY(this->GetLatestContentMetaKey(&key, title_id));
+        R_TRY(this->GetContentIdByType(out_content_id, key, ContentType::Program));
+        return ResultSuccess;
+    }
+
     Result OnMemoryContentMetaDatabaseInterface::GetLatestContentMetaKey(Out<ContentMetaKey> out_key, TitleId tid) {
         if (this->disabled) {
             return ResultNcmInvalidContentMetaDatabase;

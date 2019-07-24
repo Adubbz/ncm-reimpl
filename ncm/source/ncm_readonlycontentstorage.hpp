@@ -26,7 +26,7 @@ namespace sts::ncm {
         public:
             Result Initialize(const char* root_path, MakeContentPathFunc content_path_func);
         public:
-            virtual Result GeneratePlaceHolderId(OutPointerWithServerSize<PlaceHolderId, 0x1> out) override;
+            virtual Result GeneratePlaceHolderId(Out<PlaceHolderId> out) override;
             virtual Result CreatePlaceHolder(PlaceHolderId placeholder_id, ContentId content_id, u64 size) override;
             virtual Result DeletePlaceHolder(PlaceHolderId placeholder_id) override;
             virtual Result HasPlaceHolder(Out<bool> out, PlaceHolderId placeholder_id) override;
@@ -34,8 +34,8 @@ namespace sts::ncm {
             virtual Result Register(PlaceHolderId placeholder_id, ContentId content_id) override;
             virtual Result Delete(ContentId content_id) override;
             virtual Result Has(Out<bool> out, ContentId content_id) override;
-            virtual Result GetPath(OutPointerWithClientSize<char> out, ContentId content_id) override;
-            virtual Result GetPlaceHolderPath(OutPointerWithClientSize<char> out, PlaceHolderId placeholder_id) override;
+            virtual Result GetPath(OutPointerWithServerSize<lr::Path, 0x1> out, ContentId content_id) override;
+            virtual Result GetPlaceHolderPath(OutPointerWithServerSize<lr::Path, 0x1> out, PlaceHolderId placeholder_id) override;
             virtual Result CleanupAllPlaceHolder() override;
             virtual Result ListPlaceHolder(Out<u32> out_count, OutBuffer<PlaceHolderId> out_buf) override;
             virtual Result GetContentCount(Out<u32> out_count) override;

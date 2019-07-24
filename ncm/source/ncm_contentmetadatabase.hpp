@@ -53,6 +53,9 @@ namespace sts::ncm {
             virtual Result GetAttributes(Out<ContentMetaAttribute> out_attributes, ContentMetaKey key) override;
             virtual Result GetRequiredApplicationVersion(Out<u32> out_version, ContentMetaKey key) override;
             virtual Result GetContentIdByTypeAndIdOffset(Out<ContentId> out_content_id, ContentMetaKey key, ContentType type, u8 id_offset) override;
+        
+            /* APIs. */
+            virtual Result GetLatestProgram(ContentId* out_content_id, TitleId title_id) override;
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {
                 MAKE_SERVICE_COMMAND_META(ContentMetaDatabaseInterface, Set),

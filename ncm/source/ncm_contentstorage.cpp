@@ -95,12 +95,12 @@ namespace sts::ncm {
         return ResultSuccess;
     }
 
-    Result ContentStorageInterface::GeneratePlaceHolderId(OutPointerWithServerSize<PlaceHolderId, 0x1> out) {
+    Result ContentStorageInterface::GeneratePlaceHolderId(Out<PlaceHolderId> out) {
         if (this->disabled) {
             return ResultNcmInvalidContentStorage;
         }
 
-        sts::rnd::GenerateRandomBytes(out.pointer, sizeof(NcmNcaId));
+        sts::rnd::GenerateRandomBytes(out.GetPointer(), sizeof(NcmNcaId));
         return ResultSuccess;
     }
 
@@ -240,7 +240,7 @@ namespace sts::ncm {
         return ResultSuccess;
     }
 
-    Result ContentStorageInterface::GetPath(OutPointerWithClientSize<char> out, ContentId content_id) {
+    Result ContentStorageInterface::GetPath(OutPointerWithServerSize<lr::Path, 0x1> out, ContentId content_id) {
         if (this->disabled) {
             return ResultNcmInvalidContentStorage;
         }
@@ -249,12 +249,11 @@ namespace sts::ncm {
         char common_path[FS_MAX_PATH] = {0};
         this->GetContentPath(content_path, content_id);
         R_TRY(ConvertToFsCommonPath(common_path, FS_MAX_PATH-1, content_path));
-        memcpy(out.pointer, common_path, FS_MAX_PATH-1);
-
+        *out.pointer = common_path;
         return ResultSuccess;
     }
 
-    Result ContentStorageInterface::GetPlaceHolderPath(OutPointerWithClientSize<char> out, PlaceHolderId placeholder_id) {
+    Result ContentStorageInterface::GetPlaceHolderPath(OutPointerWithServerSize<lr::Path, 0x1> out, PlaceHolderId placeholder_id) {
         if (this->disabled) {
             return ResultNcmInvalidContentStorage;
         }
@@ -263,8 +262,7 @@ namespace sts::ncm {
         char common_path[FS_MAX_PATH] = {0};
         this->placeholder_accessor.GetPlaceHolderPathUncached(placeholder_path, placeholder_id);
         R_TRY(ConvertToFsCommonPath(common_path, FS_MAX_PATH-1, placeholder_path));
-        memcpy(out.pointer, common_path, FS_MAX_PATH-1);
-
+        *out.pointer = common_path;
         return ResultSuccess;
     }
 

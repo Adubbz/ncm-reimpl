@@ -86,6 +86,9 @@ namespace sts::ncm {
             virtual Result GetAttributes(Out<ContentMetaAttribute> out_attributes, ContentMetaKey key) = 0;
             virtual Result GetRequiredApplicationVersion(Out<u32> out_version, ContentMetaKey key) = 0;
             virtual Result GetContentIdByTypeAndIdOffset(Out<ContentId> out_content_id, ContentMetaKey key, ContentType type, u8 id_offset) = 0;
+
+            /* APIs. */
+            virtual Result GetLatestProgram(ContentId* out_content_id, TitleId title_id) = 0;
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {};
     };
