@@ -31,6 +31,9 @@ namespace sts::ncm::impl {
     namespace {
 
         struct ContentStorageEntry {
+            NON_COPYABLE(ContentStorageEntry);
+            NON_MOVEABLE(ContentStorageEntry);
+
             char mount_point[16];
             char root_path[128];
             StorageId storage_id;
@@ -43,9 +46,10 @@ namespace sts::ncm::impl {
                 root_path[0] = '\0';
             }
 
-            inline ContentStorageEntry(StorageId storage_id, FsContentStorageId content_storage_id) :
-                storage_id(storage_id), content_storage_id(content_storage_id), content_storage(nullptr)
-            {
+            inline void Initialize(StorageId storage_id, FsContentStorageId content_storage_id) {
+                this->storage_id = storage_id;
+                this->content_storage_id = content_storage_id;
+                this->content_storage = nullptr;
                 MountName mount_name = CreateUniqueMountName();
                 strcpy(this->mount_point, mount_name.name);
                 snprintf(this->root_path, 0x80, "%s:/", this->mount_point);
@@ -63,6 +67,9 @@ namespace sts::ncm::impl {
         static_assert(sizeof(SaveDataMeta) == 0x20, "SaveDataMeta definition!");
 
         struct ContentMetaDBEntry {
+            NON_COPYABLE(ContentMetaDBEntry);
+            NON_MOVEABLE(ContentMetaDBEntry);
+
             char mount_point[16];
             char meta_path[128];
             StorageId storage_id;
@@ -159,7 +166,7 @@ namespace sts::ncm::impl {
         auto storage_entry = &g_content_storage_entries[cur_storage_index];
 
         /* First, setup the NandSystem storage entry. */
-        *storage_entry = ContentStorageEntry(StorageId::NandSystem, FS_CONTENTSTORAGEID_NandSystem);
+        storage_entry->Initialize(StorageId::NandSystem, FS_CONTENTSTORAGEID_NandSystem);
 
         if (R_FAILED(VerifyContentStorage(StorageId::NandSystem))) {
             R_TRY(CreateContentStorage(StorageId::NandSystem));
@@ -198,7 +205,7 @@ namespace sts::ncm::impl {
         cur_meta_index = g_num_content_meta_entries;
         g_num_content_meta_entries++;
         storage_entry = &g_content_storage_entries[cur_storage_index];
-        *storage_entry = ContentStorageEntry(StorageId::NandUser, FS_CONTENTSTORAGEID_NandUser);
+        storage_entry->Initialize(StorageId::NandUser, FS_CONTENTSTORAGEID_NandUser);
 
         /* And NandUser's content meta entry. */
         SaveDataMeta nand_user_save_meta;
@@ -220,7 +227,7 @@ namespace sts::ncm::impl {
         */
 
         /* Next SdCard's content storage entry. */
-        g_content_storage_entries[2] = ContentStorageEntry(StorageId::SdCard, FS_CONTENTSTORAGEID_SdCard);
+        g_content_storage_entries[2].Initialize(StorageId::SdCard, FS_CONTENTSTORAGEID_SdCard);
 
         /* And SdCard's content meta entry. */
         SaveDataMeta sd_card_save_meta;
@@ -235,14 +242,13 @@ namespace sts::ncm::impl {
 
         /* GameCard's content storage entry. */
         /* N doesn't set a content storage id for game cards, so we'll just use 0 (NandSystem). */
-        g_content_storage_entries[3] = ContentStorageEntry(StorageId::GameCard, FS_CONTENTSTORAGEID_NandSystem);
+        g_content_storage_entries[3].Initialize(StorageId::GameCard, FS_CONTENTSTORAGEID_NandSystem);
 
         /* Lasty, GameCard's content meta entry. */
         content_meta_entry = &g_content_meta_entries[3];
         R_TRY(content_meta_entry->InitializeGameCard(0x800));
 
         g_initialized = true;
-
         return ResultSuccess;
     }
 
