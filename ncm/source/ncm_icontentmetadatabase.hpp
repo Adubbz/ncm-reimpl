@@ -64,6 +64,7 @@ namespace sts::ncm {
                 strcpy(this->mount_name, mount_name);
             }
         public:
+            /* Actual commands. */
             virtual Result Set(ContentMetaKey key, InBuffer<u8> value) = 0;
             virtual Result Get(Out<u64> out_size, ContentMetaKey key, OutBuffer<u8> out_value) = 0;
             virtual Result Remove(ContentMetaKey key) = 0;

@@ -26,22 +26,21 @@ namespace sts::lr::impl {
         NON_COPYABLE(LocationRedirection);
         NON_MOVEABLE(LocationRedirection);
 
-        private:
+        public:
             ncm::TitleId title_id;
             Path path;
             u32 flags;
+
+            LocationRedirection(ncm::TitleId title_id, const Path& path, u32 flags) :
+                title_id(title_id), path(path), flags(flags) {
+            }
     };
 
     class LocationRedirector {
         NON_COPYABLE(LocationRedirector);
         NON_MOVEABLE(LocationRedirector);
         private:
-            using RedirectionList = sts::util::IntrusiveListBaseTraits<LocationRedirection>::ListType;
-
-            RedirectionList program_list;
-            RedirectionList app_control_list;
-            RedirectionList html_docs_list;
-            RedirectionList legal_info_list;
+            sts::util::IntrusiveListBaseTraits<LocationRedirection>::ListType redirection_list;
         public:
             LocationRedirector();
 

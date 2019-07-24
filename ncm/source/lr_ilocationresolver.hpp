@@ -70,6 +70,11 @@ namespace sts::lr {
             virtual Result EraseApplicationControlRedirection(ncm::TitleId tid) = 0;
             virtual Result EraseApplicationHtmlDocumentRedirection(ncm::TitleId tid) = 0;
             virtual Result EraseApplicationLegalInformationRedirection(ncm::TitleId tid) = 0;
+            virtual Result ResolveProgramPathForDebug(OutPointerWithClientSize<char> out, ncm::TitleId tid) = 0;
+            virtual Result RedirectProgramPathForDebug(ncm::TitleId tid, InPointer<const char> path) = 0;
+            virtual Result RedirectApplicationProgramPathForDebug(ncm::TitleId tid, InPointer<const char> path) = 0;
+            virtual Result EraseProgramRedirectionForDebug(ncm::TitleId tid) = 0;
+            
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {};
     };

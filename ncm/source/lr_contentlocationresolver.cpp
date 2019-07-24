@@ -18,6 +18,69 @@
 
 namespace sts::lr {
 
+    Result ContentLocationResolverInterface::ResolveProgramPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
+        return ResultKernelConnectionClosed;
+    }
 
+    Result ContentLocationResolverInterface::RedirectProgramPath(ncm::TitleId tid, InPointer<const char> path) {
+        program_redirector.SetRedirection(tid, path.pointer);
+        return ResultSuccess;
+    }
+
+    Result ContentLocationResolverInterface::ResolveApplicationControlPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
+        return ResultKernelConnectionClosed;
+    }
+
+    Result ContentLocationResolverInterface::ResolveApplicationHtmlDocumentPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
+        return ResultKernelConnectionClosed;
+    }
+
+    Result ContentLocationResolverInterface::ResolveDataPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
+        return ResultKernelConnectionClosed;
+    }
+
+    Result ContentLocationResolverInterface::RedirectApplicationControlPath(ncm::TitleId tid, InPointer<const char> path) {
+        return ResultKernelConnectionClosed;
+    }
+
+    Result ContentLocationResolverInterface::RedirectApplicationHtmlDocumentPath(ncm::TitleId tid, InPointer<const char> path) {
+        return ResultKernelConnectionClosed;
+    }
+
+    Result ContentLocationResolverInterface::ResolveApplicationLegalInformationPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
+        return ResultKernelConnectionClosed;
+    }
+
+    Result ContentLocationResolverInterface::RedirectApplicationLegalInformationPath(ncm::TitleId tid, InPointer<const char> path) {
+        return ResultKernelConnectionClosed;
+    }
+
+    Result ContentLocationResolverInterface::Refresh() {
+        return ResultKernelConnectionClosed;
+    }
+
+    Result ContentLocationResolverInterface::RedirectApplicationProgramPath(ncm::TitleId tid, InPointer<const char> path) {
+        return ResultKernelConnectionClosed;
+    }
+
+    Result ContentLocationResolverInterface::ClearApplicationRedirection() {
+        return ResultKernelConnectionClosed;
+    }
+
+    Result ContentLocationResolverInterface::EraseProgramRedirection(ncm::TitleId tid) {
+        return ResultKernelConnectionClosed;
+    }
+
+    Result ContentLocationResolverInterface::EraseApplicationControlRedirection(ncm::TitleId tid) {
+        return ResultKernelConnectionClosed;
+    }
+
+    Result ContentLocationResolverInterface::EraseApplicationHtmlDocumentRedirection(ncm::TitleId tid) {
+        return ResultKernelConnectionClosed;
+    }
+
+    Result ContentLocationResolverInterface::EraseApplicationLegalInformationRedirection(ncm::TitleId tid) {
+        return ResultKernelConnectionClosed;
+    }
 
 }

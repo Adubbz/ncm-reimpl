@@ -21,7 +21,16 @@
 namespace sts::lr {
 
     struct Path {
-        char path[FS_MAX_PATH];
+        char path[FS_MAX_PATH-1];
+
+        Path(const char* path) {
+            std::memcpy(this->path, path, FS_MAX_PATH-1);
+        }
+
+        Path& operator=(const Path& other) {
+            std::memcpy(this->path, other.path, FS_MAX_PATH-1);
+            return *this;
+        }
     };
 
 }
