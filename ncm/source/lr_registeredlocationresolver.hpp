@@ -20,7 +20,7 @@
 
 namespace sts::lr {
 
-    class RegisteredLocationResolverService final : public IServiceObject {
+    class RegisteredLocationResolverInterface final : public IServiceObject {
         protected:
             enum class CommandId {
                 ResolveProgramPath = 0,
@@ -45,15 +45,15 @@ namespace sts::lr {
             Result Refresh();
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {
-                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverService, ResolveProgramPath),
-                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverService, RegisterProgramPath),
-                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverService, UnregisterProgramPath),
-                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverService, RedirectProgramPath),
-                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverService, ResolveHtmlDocumentPath,    FirmwareVersion_200),
-                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverService, RegisterHtmlDocumentPath,   FirmwareVersion_200),
-                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverService, UnregisterHtmlDocumentPath, FirmwareVersion_200),
-                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverService, RedirectHtmlDocumentPath,   FirmwareVersion_200),
-                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverService, Refresh,                    FirmwareVersion_700),
+                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverInterface, ResolveProgramPath),
+                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverInterface, RegisterProgramPath),
+                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverInterface, UnregisterProgramPath),
+                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverInterface, RedirectProgramPath),
+                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverInterface, ResolveHtmlDocumentPath,    FirmwareVersion_200),
+                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverInterface, RegisterHtmlDocumentPath,   FirmwareVersion_200),
+                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverInterface, UnregisterHtmlDocumentPath, FirmwareVersion_200),
+                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverInterface, RedirectHtmlDocumentPath,   FirmwareVersion_200),
+                MAKE_SERVICE_COMMAND_META(RegisteredLocationResolverInterface, Refresh,                    FirmwareVersion_700),
             };
     };
 

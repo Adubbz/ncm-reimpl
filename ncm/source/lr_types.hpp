@@ -15,22 +15,13 @@
  */
 
 #pragma once
-#include <list>
-
 #include <switch.h>
 #include <stratosphere.hpp>
 
-namespace sts::lr::reg {
+namespace sts::lr {
 
-    struct LocationListEntry {
-        ncm::TitleId tid;
-        char content_path[FS_MAX_PATH];
-        u8 is_application;
+    struct Path {
+        char path[FS_MAX_PATH];
     };
 
-    char* RedirectPath(std::list<std::shared_ptr<LocationListEntry>>* list, ncm::TitleId tid, const char* path, bool is_application);
-    bool ResolvePath(std::list<std::shared_ptr<LocationListEntry>>* list, char* path_out, ncm::TitleId tid);
-    void EraseRedirectionWithTid(std::list<std::shared_ptr<LocationListEntry>>* list, ncm::TitleId tid);
-    void EraseRedirectionWithMask(std::list<std::shared_ptr<LocationListEntry>>* list, int mask);
-
-};
+}

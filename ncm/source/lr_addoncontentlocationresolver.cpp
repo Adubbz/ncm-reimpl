@@ -14,19 +14,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "lr_add_on_content_location_resolver.hpp"
+#include "lr_addoncontentlocationresolver.hpp"
 
 namespace sts::lr {
 
-    Result AddOnContentLocationResolverService::ResolveAddOnContentPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
+    Result AddOnContentLocationResolverInterface::ResolveAddOnContentPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
         return ResultKernelConnectionClosed;
     }
 
-    Result AddOnContentLocationResolverService::RegisterAddOnContentStorage(ncm::StorageId storage_id, ncm::TitleId tid) {
+    Result AddOnContentLocationResolverInterface::RegisterAddOnContentStorage(ncm::StorageId storage_id, ncm::TitleId tid) {
         return ResultKernelConnectionClosed;
     }
 
-    Result AddOnContentLocationResolverService::UnregisterAllAddOnContentPath() {
+    Result AddOnContentLocationResolverInterface::UnregisterAllAddOnContentPath() {
         return ResultKernelConnectionClosed;
     }
 

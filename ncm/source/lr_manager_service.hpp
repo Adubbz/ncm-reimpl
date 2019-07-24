@@ -18,9 +18,9 @@
 #include <switch.h>
 #include <stratosphere.hpp>
 
-#include "lr_location_resolver.hpp"
-#include "lr_registered_location_resolver.hpp"
-#include "lr_add_on_content_location_resolver.hpp"
+#include "lr_addoncontentlocationresolver.hpp"
+#include "lr_ilocationresolver.hpp"
+#include "lr_registeredlocationresolver.hpp"
 
 namespace sts::lr {
 
@@ -32,23 +32,12 @@ namespace sts::lr {
                 RefreshLocationResolver = 2,
                 OpenAddOnContentLocationResolver = 3,
             };
-        private:
-            struct LocationResolverEntry {
-                bool active;
-                ncm::StorageId storage_id;
-            };
-
-            LocationResolverEntry entries[5] = {0};
-            std::shared_ptr<LocationResolverBase> location_resolvers[5] = {0};
-            HosMutex mutex;
-        private:
-            std::shared_ptr<LocationResolverBase>* GetLocationResolverPtr(ncm::StorageId storage_id);
         public:
             /* Actual commands. */
-            virtual Result OpenLocationResolver(Out<std::shared_ptr<LocationResolverBase>> out, ncm::StorageId storage_id);
-            virtual Result OpenRegisteredLocationResolver(Out<std::shared_ptr<RegisteredLocationResolverService>> out);
+            virtual Result OpenLocationResolver(Out<std::shared_ptr<ILocationResolver>> out, ncm::StorageId storage_id);
+            virtual Result OpenRegisteredLocationResolver(Out<std::shared_ptr<RegisteredLocationResolverInterface>> out);
             virtual Result RefreshLocationResolver(ncm::StorageId storage_id);
-            virtual Result OpenAddOnContentLocationResolver(Out<std::shared_ptr<AddOnContentLocationResolverService>> out);
+            virtual Result OpenAddOnContentLocationResolver(Out<std::shared_ptr<AddOnContentLocationResolverInterface>> out);
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {
                 MAKE_SERVICE_COMMAND_META(LocationResolverManagerService, OpenLocationResolver),
