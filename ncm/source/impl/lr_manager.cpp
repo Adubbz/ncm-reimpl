@@ -14,20 +14,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-#include <switch.h>
-#include <stratosphere.hpp>
-
-#include "../lr_addoncontentlocationresolver.hpp"
-#include "../lr_ilocationresolver.hpp"
-#include "../lr_registeredlocationresolver.hpp"
+#include "lr_manager.hpp"
 
 namespace sts::lr::impl {
 
-    /* Location Resolver API. */
-    Result OpenLocationResolver(Out<std::shared_ptr<ILocationResolver>> out, ncm::StorageId storage_id);
-    Result OpenRegisteredLocationResolver(Out<std::shared_ptr<RegisteredLocationResolverInterface>> out);
-    Result RefreshLocationResolver(ncm::StorageId storage_id);
-    Result OpenAddOnContentLocationResolver(Out<std::shared_ptr<AddOnContentLocationResolverInterface>> out);
+    Result OpenLocationResolver(Out<std::shared_ptr<ILocationResolver>> out, ncm::StorageId storage_id) {
+        return ResultKernelConnectionClosed;
+    }
+
+    Result OpenRegisteredLocationResolver(Out<std::shared_ptr<RegisteredLocationResolverInterface>> out) {
+        return ResultKernelConnectionClosed;
+    }
+    
+    Result RefreshLocationResolver(ncm::StorageId storage_id) {
+        return ResultKernelConnectionClosed;
+    }
+
+    Result OpenAddOnContentLocationResolver(Out<std::shared_ptr<AddOnContentLocationResolverInterface>> out) {
+        return ResultKernelConnectionClosed;
+    }
 
 }

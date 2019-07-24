@@ -14,24 +14,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "impl/lr_manager.hpp"
 #include "lr_manager_service.hpp"
 
 namespace sts::lr {
 
     Result LocationResolverManagerService::OpenLocationResolver(Out<std::shared_ptr<ILocationResolver>> out, ncm::StorageId storage_id) {
-        return ResultKernelConnectionClosed;
+        return impl::OpenLocationResolver(out, storage_id);
     }
 
     Result LocationResolverManagerService::OpenRegisteredLocationResolver(Out<std::shared_ptr<RegisteredLocationResolverInterface>> out) {
-        return ResultKernelConnectionClosed;
+        return impl::OpenRegisteredLocationResolver(out);
     }
 
     Result LocationResolverManagerService::RefreshLocationResolver(ncm::StorageId storage_id) {
-        return ResultKernelConnectionClosed;
+        return impl::RefreshLocationResolver(storage_id);
     }
 
     Result LocationResolverManagerService::OpenAddOnContentLocationResolver(Out<std::shared_ptr<AddOnContentLocationResolverInterface>> out) {
-        return ResultKernelConnectionClosed;
+        return impl::OpenAddOnContentLocationResolver(out);
     }
 
 }
