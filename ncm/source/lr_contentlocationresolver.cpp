@@ -35,7 +35,6 @@ namespace sts::lr {
         } R_END_TRY_CATCH;
         
         R_ASSERT(this->content_storage->GetPath(OutPointerWithServerSize<Path, 0x1>(path.path, FS_MAX_PATH-1), program_content_id));
-        /* Copying ensures path is null-terminated. */
         *out.pointer = path;
         return ResultSuccess;
     }
@@ -46,31 +45,61 @@ namespace sts::lr {
     }
 
     Result ContentLocationResolverInterface::ResolveApplicationControlPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid) {
-        return ResultKernelConnectionClosed;
+        Path path;
+        
+        if (this->app_control_redirector.FindRedirection(&path, tid)) {
+            *out.pointer = path;
+            return ResultSuccess;
+        }
+
+        return ResultLrControlNotFound;
     }
 
     Result ContentLocationResolverInterface::ResolveApplicationHtmlDocumentPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid) {
-        return ResultKernelConnectionClosed;
+        Path path;
+        
+        if (this->html_docs_redirector.FindRedirection(&path, tid)) {
+            *out.pointer = path;
+            return ResultSuccess;
+        }
+
+        return ResultLrHtmlDocumentNotFound;
     }
 
     Result ContentLocationResolverInterface::ResolveDataPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid) {
-        return ResultKernelConnectionClosed;
+        Path path;
+        ncm::ContentId data_content_id;
+
+        R_TRY(this->content_meta_database->GetLatestData(&data_content_id, tid));
+        R_ASSERT(this->content_storage->GetPath(OutPointerWithServerSize<Path, 0x1>(path.path, FS_MAX_PATH-1), data_content_id));
+        *out.pointer = path;
+        return ResultSuccess;
     }
 
     Result ContentLocationResolverInterface::RedirectApplicationControlPath(ncm::TitleId tid, InPointer<const Path> path) {
-        return ResultKernelConnectionClosed;
+        this->app_control_redirector.SetRedirection(tid, *path.pointer, impl::RedirectionFlags_Application);
+        return ResultSuccess;
     }
 
     Result ContentLocationResolverInterface::RedirectApplicationHtmlDocumentPath(ncm::TitleId tid, InPointer<const Path> path) {
-        return ResultKernelConnectionClosed;
+        this->html_docs_redirector.SetRedirection(tid, *path.pointer, impl::RedirectionFlags_Application);
+        return ResultSuccess;
     }
 
     Result ContentLocationResolverInterface::ResolveApplicationLegalInformationPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid) {
-        return ResultKernelConnectionClosed;
+        Path path;
+        
+        if (this->legal_info_redirector.FindRedirection(&path, tid)) {
+            *out.pointer = path;
+            return ResultSuccess;
+        }
+
+        return ResultLrLegalInformationNotFound;
     }
 
     Result ContentLocationResolverInterface::RedirectApplicationLegalInformationPath(ncm::TitleId tid, InPointer<const Path> path) {
-        return ResultKernelConnectionClosed;
+        this->legal_info_redirector.SetRedirection(tid, *path.pointer, impl::RedirectionFlags_Application);
+        return ResultSuccess;
     }
 
     Result ContentLocationResolverInterface::Refresh() {

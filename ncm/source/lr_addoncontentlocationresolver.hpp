@@ -18,6 +18,8 @@
 #include <switch.h>
 #include <stratosphere.hpp>
 
+#include "lr_types.hpp"
+
 namespace sts::lr {
 
     class AddOnContentLocationResolverInterface : public IServiceObject {
@@ -28,7 +30,7 @@ namespace sts::lr {
                 UnregisterAllAddOnContentPath = 2,
             };
         public:
-            virtual Result ResolveAddOnContentPath(OutPointerWithClientSize<char> out, ncm::TitleId tid);
+            virtual Result ResolveAddOnContentPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid);
             virtual Result RegisterAddOnContentStorage(ncm::StorageId storage_id, ncm::TitleId tid);
             virtual Result UnregisterAllAddOnContentPath();
         public:

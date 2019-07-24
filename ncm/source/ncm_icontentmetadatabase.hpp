@@ -89,6 +89,7 @@ namespace sts::ncm {
 
             /* APIs. */
             virtual Result GetLatestProgram(ContentId* out_content_id, TitleId title_id) = 0;
+            virtual Result GetLatestData(ContentId* out_content_id, TitleId title_id) = 0;
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {};
     };

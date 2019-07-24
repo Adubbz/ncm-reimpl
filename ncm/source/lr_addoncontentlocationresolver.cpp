@@ -18,7 +18,7 @@
 
 namespace sts::lr {
 
-    Result AddOnContentLocationResolverInterface::ResolveAddOnContentPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
+    Result AddOnContentLocationResolverInterface::ResolveAddOnContentPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid) {
         return ResultKernelConnectionClosed;
     }
 

@@ -56,6 +56,7 @@ namespace sts::ncm {
         
             /* APIs. */
             virtual Result GetLatestProgram(ContentId* out_content_id, TitleId title_id) override;
+            virtual Result GetLatestData(ContentId* out_content_id, TitleId title_id) override;
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {
                 MAKE_SERVICE_COMMAND_META(ContentMetaDatabaseInterface, Set),

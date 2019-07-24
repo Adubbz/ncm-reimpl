@@ -46,13 +46,11 @@ namespace sts::lr {
                 RedirectApplicationProgramPathForDebug = 18,
                 EraseProgramRedirectionForDebug = 19,
             };
-        private:
-            impl::LocationRedirector redirector;
-            ncm::StorageId storage_id;
-            u64* content_meta_database;
-            u64* content_storage;
         protected:
-            ILocationResolver(ncm::StorageId storage_id) : storage_id(storage_id) {}
+            impl::LocationRedirector program_redirector;
+            impl::LocationRedirector app_control_redirector;
+            impl::LocationRedirector html_docs_redirector;
+            impl::LocationRedirector legal_info_redirector;
         public:
             virtual Result ResolveProgramPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid) = 0;
             virtual Result RedirectProgramPath(ncm::TitleId tid, InPointer<const Path> path) = 0;

@@ -18,11 +18,11 @@
 
 namespace sts::lr {
 
-    Result RegisteredLocationResolverInterface::ResolveProgramPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
+    Result RegisteredLocationResolverInterface::ResolveProgramPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid) {
         return ResultKernelConnectionClosed;
     }
 
-    Result RegisteredLocationResolverInterface::RegisterProgramPath(ncm::TitleId tid, InPointer<const char> path) {
+    Result RegisteredLocationResolverInterface::RegisterProgramPath(ncm::TitleId tid, InPointer<const Path> path) {
         return ResultKernelConnectionClosed;
     }
 
@@ -30,15 +30,15 @@ namespace sts::lr {
         return ResultKernelConnectionClosed;
     }
 
-    Result RegisteredLocationResolverInterface::RedirectProgramPath(ncm::TitleId tid, InPointer<const char> path) {
+    Result RegisteredLocationResolverInterface::RedirectProgramPath(ncm::TitleId tid, InPointer<const Path> path) {
         return ResultKernelConnectionClosed;
     }
 
-    Result RegisteredLocationResolverInterface::ResolveHtmlDocumentPath(OutPointerWithClientSize<char> out, ncm::TitleId tid) {
+    Result RegisteredLocationResolverInterface::ResolveHtmlDocumentPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid) {
         return ResultKernelConnectionClosed;
     }
 
-    Result RegisteredLocationResolverInterface::RegisterHtmlDocumentPath(ncm::TitleId tid, InPointer<const char> path) {
+    Result RegisteredLocationResolverInterface::RegisterHtmlDocumentPath(ncm::TitleId tid, InPointer<const Path> path) {
         return ResultKernelConnectionClosed;
     }
 
@@ -46,7 +46,7 @@ namespace sts::lr {
         return ResultKernelConnectionClosed;
     }
 
-    Result RegisteredLocationResolverInterface::RedirectHtmlDocumentPath(ncm::TitleId tid, InPointer<const char> path) {
+    Result RegisteredLocationResolverInterface::RedirectHtmlDocumentPath(ncm::TitleId tid, InPointer<const Path> path) {
         return ResultKernelConnectionClosed;
     }
 

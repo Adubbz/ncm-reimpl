@@ -18,6 +18,8 @@
 #include <switch.h>
 #include <stratosphere.hpp>
 
+#include "lr_types.hpp"
+
 namespace sts::lr {
 
     class RegisteredLocationResolverInterface final : public IServiceObject {
@@ -34,14 +36,14 @@ namespace sts::lr {
                 Refresh = 8,
             };
         public:
-            Result ResolveProgramPath(OutPointerWithClientSize<char> out, ncm::TitleId tid);
-            Result RegisterProgramPath(ncm::TitleId tid, InPointer<const char> path);
+            Result ResolveProgramPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid);
+            Result RegisterProgramPath(ncm::TitleId tid, InPointer<const Path> path);
             Result UnregisterProgramPath(ncm::TitleId tid);
-            Result RedirectProgramPath(ncm::TitleId tid, InPointer<const char> path);
-            Result ResolveHtmlDocumentPath(OutPointerWithClientSize<char> out, ncm::TitleId tid);
-            Result RegisterHtmlDocumentPath(ncm::TitleId tid, InPointer<const char> path);
+            Result RedirectProgramPath(ncm::TitleId tid, InPointer<const Path> path);
+            Result ResolveHtmlDocumentPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid);
+            Result RegisterHtmlDocumentPath(ncm::TitleId tid, InPointer<const Path> path);
             Result UnregisterHtmlDocumentPath(ncm::TitleId tid);
-            Result RedirectHtmlDocumentPath(ncm::TitleId tid, InPointer<const char> path);
+            Result RedirectHtmlDocumentPath(ncm::TitleId tid, InPointer<const Path> path);
             Result Refresh();
         public:
             DEFINE_SERVICE_DISPATCH_TABLE {
