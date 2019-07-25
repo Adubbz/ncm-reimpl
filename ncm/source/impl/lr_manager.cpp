@@ -14,12 +14,39 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "../lr_contentlocationresolver.hpp"
+#include "../lr_redirectonlylocationresolver.hpp"
 #include "lr_manager.hpp"
 
 namespace sts::lr::impl {
 
+    namespace {
+
+        BoundedMap<ncm::StorageId, std::shared_ptr<ILocationResolver>, 5> g_location_resolvers;
+        std::shared_ptr<AddOnContentLocationResolverInterface> g_registered_location_resolver;
+        std::shared_ptr<AddOnContentLocationResolverInterface> g_add_on_content_location_resolver;
+        HosMutex g_mutex;
+
+    }
+
     Result OpenLocationResolver(Out<std::shared_ptr<ILocationResolver>> out, ncm::StorageId storage_id) {
-        return ResultKernelConnectionClosed;
+        std::scoped_lock lk(g_mutex);
+        auto resolver = g_location_resolvers.Find(storage_id);
+
+        if (!resolver) {
+            if (storage_id == ncm::StorageId::Host) {
+                g_location_resolvers[storage_id] = std::make_shared<RedirectOnlyLocationResolverInterface>();
+            } else {
+                auto content_resolver = std::make_shared<ContentLocationResolverInterface>(storage_id);
+                R_TRY(content_resolver->Refresh());
+                g_location_resolvers[storage_id] = std::move(content_resolver);
+            }
+        }
+
+        /* Make a copy of the resolver for output. */
+        auto tmp_resolver = g_location_resolvers[storage_id];
+        out.SetValue(std::move(tmp_resolver));
+        return ResultSuccess;
     }
 
     Result OpenRegisteredLocationResolver(Out<std::shared_ptr<RegisteredLocationResolverInterface>> out) {

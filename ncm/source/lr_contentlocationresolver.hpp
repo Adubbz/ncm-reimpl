@@ -30,7 +30,7 @@ namespace sts::lr {
             ncm::StorageId storage_id;
             std::shared_ptr<ncm::IContentMetaDatabase> content_meta_database;
             std::shared_ptr<ncm::IContentStorage> content_storage;
-        protected:
+        public:
             ContentLocationResolverInterface(ncm::StorageId storage_id) : storage_id(storage_id) {
             }
 
