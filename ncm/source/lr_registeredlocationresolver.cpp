@@ -18,7 +18,13 @@
 
 namespace sts::lr {
 
+    RegisteredLocationResolverInterface::RegisteredLocationResolverInterface() {
+        this->registered_program_redirector.ClearRedirections();
+        this->registered_html_docs_redirector.ClearRedirections();
+    }
+
     RegisteredLocationResolverInterface::~RegisteredLocationResolverInterface() {
+        /* Ensure entries are deallocated */
         this->html_docs_redirector.ClearRedirections();
         this->program_redirector.ClearRedirections();
     }

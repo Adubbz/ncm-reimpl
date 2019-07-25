@@ -22,9 +22,8 @@
 
 namespace sts::lr {
 
-    class RedirectOnlyLocationResolverInterface : public ContentLocationResolverInterface {
+    class RedirectOnlyLocationResolverInterface : public ILocationResolver {
         public:
-            RedirectOnlyLocationResolverInterface();
             ~RedirectOnlyLocationResolverInterface();
         public:
             virtual Result ResolveProgramPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid) override;

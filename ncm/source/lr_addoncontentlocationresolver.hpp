@@ -33,6 +33,8 @@ namespace sts::lr {
         private:
             impl::AddOnContentRedirector redirector;
         public:
+            AddOnContentLocationResolverInterface();
+        public:
             virtual Result ResolveAddOnContentPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid);
             virtual Result RegisterAddOnContentStorage(ncm::StorageId storage_id, ncm::TitleId tid);
             virtual Result UnregisterAllAddOnContentPath();

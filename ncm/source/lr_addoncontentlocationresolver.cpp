@@ -19,6 +19,10 @@
 
 namespace sts::lr {
 
+    AddOnContentLocationResolverInterface::AddOnContentLocationResolverInterface() {
+        this->redirector.ClearRedirections();
+    }
+
     Result AddOnContentLocationResolverInterface::ResolveAddOnContentPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid) {
         Path path;
         ncm::StorageId storage_id = ncm::StorageId::None;

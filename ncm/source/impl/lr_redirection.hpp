@@ -47,7 +47,7 @@ namespace sts::lr::impl {
         private:
             sts::util::IntrusiveListBaseTraits<LocationRedirection>::ListType redirection_list;
         public:
-            LocationRedirector();
+            LocationRedirector() {}
 
             bool FindRedirection(Path *out, ncm::TitleId title_id);
             void SetRedirection(ncm::TitleId title_id, const Path &path, u32 flags = RedirectionFlags_None);
@@ -60,8 +60,6 @@ namespace sts::lr::impl {
         private:
             BoundedMap<ncm::TitleId, Path, 16> redirections;
         public:
-            RegisteredLocationRedirector();
-
             bool FindRedirection(Path *out, ncm::TitleId title_id);
             bool SetRedirection(ncm::TitleId title_id, const Path& path);
             void EraseRedirection(ncm::TitleId title_id);

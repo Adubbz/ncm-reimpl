@@ -42,6 +42,7 @@ namespace sts::lr {
             impl::LocationRedirector html_docs_redirector;
             impl::RegisteredLocationRedirector registered_html_docs_redirector;
         public:
+            RegisteredLocationResolverInterface();
             ~RegisteredLocationResolverInterface();
 
             Result ResolveProgramPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid);
