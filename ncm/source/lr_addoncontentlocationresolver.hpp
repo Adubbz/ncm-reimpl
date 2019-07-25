@@ -18,6 +18,7 @@
 #include <switch.h>
 #include <stratosphere.hpp>
 
+#include "impl/lr_redirection.hpp"
 #include "lr_types.hpp"
 
 namespace sts::lr {
@@ -29,6 +30,8 @@ namespace sts::lr {
                 RegisterAddOnContentStorage = 1,
                 UnregisterAllAddOnContentPath = 2,
             };
+        private:
+            impl::AddOnContentRedirector redirector;
         public:
             virtual Result ResolveAddOnContentPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid);
             virtual Result RegisterAddOnContentStorage(ncm::StorageId storage_id, ncm::TitleId tid);

@@ -14,20 +14,40 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "impl/ncm_content_manager.hpp"
 #include "lr_addoncontentlocationresolver.hpp"
 
 namespace sts::lr {
 
     Result AddOnContentLocationResolverInterface::ResolveAddOnContentPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid) {
-        return ResultKernelConnectionClosed;
+        Path path;
+        ncm::StorageId storage_id = ncm::StorageId::None;
+
+        if (!this->redirector.FindRedirection(&storage_id, tid)) {
+            return ResultLrAddOnContentNotFound;
+        }
+
+        std::shared_ptr<ncm::IContentMetaDatabase> content_meta_database;
+        std::shared_ptr<ncm::IContentStorage> content_storage;
+        R_TRY(ncm::impl::OpenContentMetaDatabase(&content_meta_database, storage_id));
+        R_TRY(ncm::impl::OpenContentStorage(&content_storage, storage_id));
+
+        ncm::ContentId data_content_id;
+        R_TRY(content_meta_database->GetLatestData(&data_content_id, tid));
+        R_ASSERT(content_storage->GetPath(&path, data_content_id));
+        *out.pointer = path;
+        
+        return ResultSuccess;
     }
 
     Result AddOnContentLocationResolverInterface::RegisterAddOnContentStorage(ncm::StorageId storage_id, ncm::TitleId tid) {
-        return ResultKernelConnectionClosed;
+        R_TRY(this->redirector.SetRedirection(tid, storage_id));
+        return ResultSuccess;
     }
 
     Result AddOnContentLocationResolverInterface::UnregisterAllAddOnContentPath() {
-        return ResultKernelConnectionClosed;
+        this->redirector.ClearRedirections();
+        return ResultSuccess;
     }
 
 }

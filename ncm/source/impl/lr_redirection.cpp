@@ -123,4 +123,43 @@ namespace sts::lr::impl {
         }
     }
 
+    bool AddOnContentRedirector::FindRedirection(ncm::StorageId *out, ncm::TitleId title_id) {
+        for (auto& entry : this->redirections) {
+            if (entry.has_value() && entry->title_id == title_id) {
+                *out = entry->storage_id;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    Result AddOnContentRedirector::SetRedirection(ncm::TitleId title_id, ncm::StorageId storage_id) {
+        std::optional<AddOnContentRedirection>* candidate = nullptr;
+
+        for (auto& entry : this->redirections) {
+            if (entry.has_value()) {
+                if (entry->title_id == title_id) {
+                    candidate = &entry;
+                    break;
+                }
+            } else if (candidate == nullptr) {
+                candidate = &entry; 
+            }
+        }
+
+        if (candidate == nullptr) {
+            return ResultLrTooManyRegisteredPaths;
+        }
+
+        *candidate = std::make_optional<AddOnContentRedirection>(storage_id, title_id);
+        return ResultSuccess;
+    }
+
+    void AddOnContentRedirector::ClearRedirections() {
+        for (auto& entry : this->redirections) {
+            entry.reset();
+        }
+    }
+
 }

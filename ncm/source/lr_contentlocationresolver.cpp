@@ -80,7 +80,7 @@ namespace sts::lr {
         ncm::ContentId data_content_id;
 
         R_TRY(this->content_meta_database->GetLatestData(&data_content_id, tid));
-        R_ASSERT(this->content_storage->GetPath(OutPointerWithServerSize<Path, 0x1>(path.path, FS_MAX_PATH-1), data_content_id));
+        R_ASSERT(this->content_storage->GetPath(&path, data_content_id));
         *out.pointer = path;
         return ResultSuccess;
     }

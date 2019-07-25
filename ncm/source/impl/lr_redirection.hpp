@@ -77,6 +77,26 @@ namespace sts::lr::impl {
             bool SetRedirection(ncm::TitleId title_id, const Path& path);
             void EraseRedirection(ncm::TitleId title_id);
             void ClearRedirections();
-    };    
+    }; 
+
+    class AddOnContentRedirection {
+        public:
+            ncm::StorageId storage_id;
+            ncm::TitleId title_id;
+
+            AddOnContentRedirection(ncm::StorageId storage_id, ncm::TitleId title_id) : storage_id(storage_id), title_id(title_id) {
+            }
+    };
+
+    class AddOnContentRedirector {
+        static constexpr size_t MaxRedirections = 128;
+
+        private:
+            std::array<std::optional<AddOnContentRedirection>, MaxRedirections> redirections;
+        public:
+            bool FindRedirection(ncm::StorageId *out, ncm::TitleId title_id);
+            Result SetRedirection(ncm::TitleId title_id, ncm::StorageId storage_id);
+            void ClearRedirections();
+    };
 
 }
