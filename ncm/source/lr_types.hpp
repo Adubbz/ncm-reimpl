@@ -49,4 +49,6 @@ namespace sts::lr {
         }
     };
 
+    static constexpr Result ResultLrDebugProgramNotFound              = MAKERESULT(Module_Lr, 10);
+
 }

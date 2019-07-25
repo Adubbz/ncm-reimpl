@@ -40,11 +40,17 @@ namespace sts::ncm {
     }
 
     Result ContentManagerService::OpenContentStorage(Out<std::shared_ptr<IContentStorage>> out, StorageId storage_id) {
-        return impl::OpenContentStorage(out, storage_id);
+        std::shared_ptr<IContentStorage> content_storage;
+        R_TRY(impl::OpenContentStorage(&content_storage, storage_id));
+        out.SetValue(std::move(content_storage));
+        return ResultSuccess;
     }
 
     Result ContentManagerService::OpenContentMetaDatabase(Out<std::shared_ptr<IContentMetaDatabase>> out, StorageId storage_id) {
-        return impl::OpenContentMetaDatabase(out, storage_id);
+        std::shared_ptr<IContentMetaDatabase> content_meta_database;
+        R_TRY(impl::OpenContentMetaDatabase(&content_meta_database, storage_id));
+        out.SetValue(std::move(content_meta_database));
+        return ResultSuccess;
     }
 
     Result ContentManagerService::CloseContentStorageForcibly(StorageId storage_id) {

@@ -71,11 +71,17 @@ namespace sts::ncm {
         Rebootless = 2,
     };
 
+    enum class ContentInstallType : u8 {
+        Full = 0,
+        FragmentOnly = 1,
+        Unknown = 7,
+    };
+
     struct ContentMetaKey {
         TitleId id;
         u32 version;
-        ContentMetaType meta_type;
-        ContentMetaAttribute attributes;
+        ContentMetaType type;
+        ContentInstallType install_type;
         u8 padding[2];
 
         bool operator<(const ContentMetaKey& other) const {
@@ -91,13 +97,13 @@ namespace sts::ncm {
                 return false;
             }
             
-            if (this->meta_type < other.meta_type) {
+            if (this->type < other.type) {
                 return true;
-            } else if (this->meta_type != other.meta_type) {
+            } else if (this->type != other.type) {
                 return false;
             }
             
-            return this->attributes < other.attributes;
+            return this->install_type < other.install_type;
         }
 
         bool operator==(const ContentMetaKey& other) const {
@@ -109,11 +115,11 @@ namespace sts::ncm {
                 return false;
             }
 
-            if (this->meta_type != other.meta_type) {
+            if (this->type != other.type) {
                 return false;
             }
 
-            if (this->attributes != other.attributes) {
+            if (this->install_type != other.install_type) {
                 return false;
             }
             

@@ -169,7 +169,7 @@ namespace sts::ncm {
                 break;
             }
 
-            if (entry->GetKey().attributes != ContentMetaAttribute::None) {
+            if (entry->GetKey().install_type != ContentInstallType::Full) {
                 key = entry->GetKey();
                 found_key = true;
             }
@@ -252,7 +252,7 @@ namespace sts::ncm {
         return ResultSuccess;
     }
 
-    Result ContentMetaDatabaseInterface::List(Out<u32> out_entries_total, Out<u32> out_entries_written, OutBuffer<ContentMetaKey> out_info, ContentMetaType meta_type, TitleId application_title_id, TitleId title_id_min, TitleId title_id_max, ContentMetaAttribute attributes) {
+    Result ContentMetaDatabaseInterface::List(Out<u32> out_entries_total, Out<u32> out_entries_written, OutBuffer<ContentMetaKey> out_info, ContentMetaType type, TitleId application_title_id, TitleId title_id_min, TitleId title_id_max, ContentInstallType install_type) {
         if (this->disabled) {
             return ResultNcmInvalidContentMetaDatabase;
         }
@@ -271,7 +271,7 @@ namespace sts::ncm {
             ContentMetaKey key = entry->GetKey();
 
             /* Check if this entry matches the given filters. */
-            if (!((static_cast<u8>(meta_type) == 0 || key.meta_type == meta_type) && (title_id_min <= key.id && key.id <= title_id_max) && (static_cast<u8>(attributes) == 0x7 || key.attributes == attributes))) {
+            if (!((static_cast<u8>(type) == 0 || key.type == type) && (title_id_min <= key.id && key.id <= title_id_max) && (key.install_type == ContentInstallType::Full || key.install_type == install_type))) {
                 continue;
             }
 
@@ -281,10 +281,10 @@ namespace sts::ncm {
                 R_TRY(GetContentMetaValuePointer(&value, &value_size, key, this->kvs));
 
                 /* Each of these types are owned by an application. We need to check if their owner application matches the filter. */
-                if (key.meta_type == ContentMetaType::Application || key.meta_type == ContentMetaType::Patch || key.meta_type == ContentMetaType::AddOnContent || key.meta_type == ContentMetaType::Delta) {
+                if (key.type == ContentMetaType::Application || key.type == ContentMetaType::Patch || key.type == ContentMetaType::AddOnContent || key.type == ContentMetaType::Delta) {
                     TitleId entry_application_tid = key.id;
                     
-                    switch (key.meta_type) {
+                    switch (key.type) {
                         case ContentMetaType::Application:
                             break;
                         default:
@@ -324,7 +324,7 @@ namespace sts::ncm {
         return ResultSuccess;
     }
 
-    Result ContentMetaDatabaseInterface::ListApplication(Out<u32> out_entries_total, Out<u32> out_entries_written, OutBuffer<ApplicationContentMetaKey> out_keys, ContentMetaType meta_type) {
+    Result ContentMetaDatabaseInterface::ListApplication(Out<u32> out_entries_total, Out<u32> out_entries_written, OutBuffer<ApplicationContentMetaKey> out_keys, ContentMetaType type) {
         if (this->disabled) {
             return ResultNcmInvalidContentMetaDatabase;
         }
@@ -343,7 +343,7 @@ namespace sts::ncm {
             ContentMetaKey key = entry->GetKey();
 
             /* Check if this entry matches the given filters. */
-            if (!((static_cast<u8>(meta_type) == 0 || key.meta_type == meta_type))) {
+            if (!((static_cast<u8>(type) == 0 || key.type == type))) {
                 continue;
             }
 
@@ -351,10 +351,10 @@ namespace sts::ncm {
             size_t value_size = 0;
             R_TRY(GetContentMetaValuePointer(&value, &value_size, key, this->kvs));
 
-            if (key.meta_type == ContentMetaType::Application || key.meta_type == ContentMetaType::Patch || key.meta_type == ContentMetaType::AddOnContent || key.meta_type == ContentMetaType::Delta) {
+            if (key.type == ContentMetaType::Application || key.type == ContentMetaType::Patch || key.type == ContentMetaType::AddOnContent || key.type == ContentMetaType::Delta) {
                 TitleId application_tid = key.id;
                 
-                switch (key.meta_type) {
+                switch (key.type) {
                     case ContentMetaType::Application:
                         break;
                     default:
@@ -446,7 +446,7 @@ namespace sts::ncm {
             return ResultNcmInvalidContentMetaDatabase;
         }
 
-        if (key.meta_type != ContentMetaType::Application && key.meta_type != ContentMetaType::Patch) {
+        if (key.type != ContentMetaType::Application && key.type != ContentMetaType::Patch) {
             return ResultNcmInvalidContentMetaKey;
         }
 
@@ -466,7 +466,7 @@ namespace sts::ncm {
             return ResultNcmInvalidContentMetaDatabase;
         }
 
-        if (key.meta_type != ContentMetaType::Application) {
+        if (key.type != ContentMetaType::Application) {
             return ResultNcmInvalidContentMetaKey;
         }
 
@@ -618,7 +618,7 @@ namespace sts::ncm {
             return ResultNcmInvalidContentMetaDatabase;
         }
 
-        if (key.meta_type != ContentMetaType::AddOnContent) {
+        if (key.type != ContentMetaType::AddOnContent) {
             return ResultNcmInvalidContentMetaKey;
         }
 

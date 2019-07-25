@@ -331,7 +331,7 @@ namespace sts::ncm::impl {
         return ResultSuccess;
     }
 
-    Result OpenContentStorage(Out<std::shared_ptr<IContentStorage>> out, StorageId storage_id) {
+    Result OpenContentStorage(std::shared_ptr<IContentStorage>* out, StorageId storage_id) {
         std::scoped_lock<HosMutex> lk(g_mutex);
 
         if (storage_id == StorageId::None || static_cast<u8>(storage_id) == 6) {
@@ -365,7 +365,7 @@ namespace sts::ncm::impl {
             }
         } 
 
-        out.SetValue(std::move(content_storage));
+        *out = std::move(content_storage);
         return ResultSuccess;
     }
 
@@ -545,7 +545,7 @@ namespace sts::ncm::impl {
         return ResultSuccess;
     }
 
-    Result OpenContentMetaDatabase(Out<std::shared_ptr<IContentMetaDatabase>> out, StorageId storage_id) {
+    Result OpenContentMetaDatabase(std::shared_ptr<IContentMetaDatabase>* out, StorageId storage_id) {
         std::scoped_lock<HosMutex> lk(g_mutex);
 
         if (storage_id == StorageId::None || static_cast<u8>(storage_id) == 6) {
@@ -579,7 +579,7 @@ namespace sts::ncm::impl {
             }
         } 
 
-        out.SetValue(std::move(content_meta_db));
+        *out = std::move(content_meta_db);
         return ResultSuccess;
     }
 

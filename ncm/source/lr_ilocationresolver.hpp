@@ -48,6 +48,7 @@ namespace sts::lr {
             };
         protected:
             impl::LocationRedirector program_redirector;
+            impl::LocationRedirector debug_program_redirector;
             impl::LocationRedirector app_control_redirector;
             impl::LocationRedirector html_docs_redirector;
             impl::LocationRedirector legal_info_redirector;

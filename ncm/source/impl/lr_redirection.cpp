@@ -34,7 +34,23 @@ namespace sts::lr::impl {
     }
 
     void LocationRedirector::SetRedirection(ncm::TitleId title_id, const Path &path, u32 flags) {
-        /* Remove any existing entries with this title id. */
+        this->EraseRedirection(title_id);
+        auto redirection = new LocationRedirection(title_id, path, flags);
+        this->redirection_list.push_back(*redirection);
+    }
+
+    void LocationRedirector::SetRedirectionFlags(ncm::TitleId title_id, u32 flags) {
+        if (!this->redirection_list.empty()) {
+            for (auto it = this->redirection_list.begin(); it != this->redirection_list.end(); it++) {
+                if (it->title_id == title_id) {
+                    it->flags = flags;
+                    break;
+                }
+            }
+        }
+    }
+
+    void LocationRedirector::EraseRedirection(ncm::TitleId title_id) {
         if (!this->redirection_list.empty()) {
             for (auto it = this->redirection_list.begin(); it != this->redirection_list.end(); it++) {
                 if (it->title_id == title_id) {
@@ -45,21 +61,18 @@ namespace sts::lr::impl {
                 }
             }
         }
-
-        auto redirection = new LocationRedirection(title_id, path, flags);
-        this->redirection_list.push_back(*redirection);
-    }
-
-    void LocationRedirector::SetRedirectionFlags(ncm::TitleId title_id, u32 flags) {
-
-    }
-
-    void LocationRedirector::EraseRedirection(ncm::TitleId title_id) {
-
     }
 
     void LocationRedirector::ClearRedirections(u32 flags) {
-
+        for (auto it = this->redirection_list.begin(); it != this->redirection_list.end();) {
+            if ((it->flags & flags) == flags) {
+                auto old = it;
+                it = this->redirection_list.erase(it);
+                delete &(*old);
+            } else {
+                it++;
+            }
+        }
     }
 
 }

@@ -28,11 +28,13 @@ namespace sts::lr {
     class ContentLocationResolverInterface : public ILocationResolver {
         private:
             ncm::StorageId storage_id;
-            ncm::IContentMetaDatabase* content_meta_database;
-            ncm::IContentStorage* content_storage;
+            std::shared_ptr<ncm::IContentMetaDatabase> content_meta_database;
+            std::shared_ptr<ncm::IContentStorage> content_storage;
         protected:
             ContentLocationResolverInterface(ncm::StorageId storage_id) : storage_id(storage_id) {
             }
+
+            ~ContentLocationResolverInterface();
         public:
             virtual Result ResolveProgramPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid) override;
             virtual Result RedirectProgramPath(ncm::TitleId tid, InPointer<const Path> path) override;
