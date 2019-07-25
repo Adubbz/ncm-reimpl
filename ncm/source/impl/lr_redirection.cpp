@@ -75,4 +75,52 @@ namespace sts::lr::impl {
         }
     }
 
+    bool RegisteredLocationRedirector::FindRedirection(Path *out, ncm::TitleId title_id) {
+        for (auto& entry : this->redirections) {
+            if (entry.has_value() && entry->title_id == title_id) {
+                *out = entry->path;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    bool RegisteredLocationRedirector::SetRedirection(ncm::TitleId title_id, const Path& path) {
+        std::optional<RegisteredLocationRedirection>* candidate = nullptr;
+
+        for (auto& entry : this->redirections) {
+            if (entry.has_value()) {
+                if (entry->title_id == title_id) {
+                    candidate = &entry;
+                    break;
+                }
+            } else if (candidate == nullptr) {
+                candidate = &entry; 
+            }
+        }
+
+        if (candidate != nullptr) {
+            *candidate = std::make_optional<RegisteredLocationRedirection>(path, title_id);
+            return true;
+        }
+
+        return false;
+    }
+
+    void RegisteredLocationRedirector::EraseRedirection(ncm::TitleId title_id) {
+        for (auto& entry : this->redirections) {
+            if (entry->title_id == title_id) {
+                entry.reset();
+                return;
+            }
+        }
+    }
+
+    void RegisteredLocationRedirector::ClearRedirections() {
+        for (auto& entry : this->redirections) {
+            entry.reset();
+        }
+    }
+
 }

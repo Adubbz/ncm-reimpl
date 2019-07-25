@@ -56,4 +56,27 @@ namespace sts::lr::impl {
             void ClearRedirections(u32 flags = RedirectionFlags_None);
     };
 
+    class RegisteredLocationRedirection {
+        public:
+            Path path;
+            ncm::TitleId title_id;
+
+            RegisteredLocationRedirection(const Path path, const ncm::TitleId title_id) : path(path), title_id(title_id) {
+            }
+    };
+
+    class RegisteredLocationRedirector {
+        static constexpr size_t MaxRedirections = 16;
+
+        private:
+            std::array<std::optional<RegisteredLocationRedirection>, MaxRedirections> redirections;
+        public:
+            RegisteredLocationRedirector();
+
+            bool FindRedirection(Path *out, ncm::TitleId title_id);
+            bool SetRedirection(ncm::TitleId title_id, const Path& path);
+            void EraseRedirection(ncm::TitleId title_id);
+            void ClearRedirections();
+    };    
+
 }

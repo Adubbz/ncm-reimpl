@@ -18,40 +18,85 @@
 
 namespace sts::lr {
 
+    RegisteredLocationResolverInterface::~RegisteredLocationResolverInterface() {
+        this->html_docs_redirector.ClearRedirections();
+        this->program_redirector.ClearRedirections();
+    }
+
     Result RegisteredLocationResolverInterface::ResolveProgramPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid) {
-        return ResultKernelConnectionClosed;
+        Path path;
+        
+        if (!this->program_redirector.FindRedirection(&path, tid)) {
+            if (!this->registered_program_redirector.FindRedirection(&path, tid)) {
+                return ResultLrProgramNotFound;
+            }
+        }
+        
+        *out.pointer = path;
+        return ResultSuccess;
     }
 
     Result RegisteredLocationResolverInterface::RegisterProgramPath(ncm::TitleId tid, InPointer<const Path> path) {
-        return ResultKernelConnectionClosed;
+        Path tmp_path = *path.pointer;
+
+        if (!this->registered_program_redirector.SetRedirection(tid, tmp_path)) {
+            this->registered_program_redirector.ClearRedirections();
+            this->registered_program_redirector.SetRedirection(tid, tmp_path);
+        }
+        
+        return ResultSuccess;
     }
 
     Result RegisteredLocationResolverInterface::UnregisterProgramPath(ncm::TitleId tid) {
-        return ResultKernelConnectionClosed;
+        this->registered_program_redirector.EraseRedirection(tid);
+        return ResultSuccess;
     }
 
     Result RegisteredLocationResolverInterface::RedirectProgramPath(ncm::TitleId tid, InPointer<const Path> path) {
-        return ResultKernelConnectionClosed;
+        Path tmp_path = *path.pointer;
+        this->program_redirector.SetRedirection(tid, tmp_path);
+        return ResultSuccess;
     }
 
     Result RegisteredLocationResolverInterface::ResolveHtmlDocumentPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid) {
-        return ResultKernelConnectionClosed;
+        Path path;
+        
+        if (!this->html_docs_redirector.FindRedirection(&path, tid)) {
+            if (!this->registered_html_docs_redirector.FindRedirection(&path, tid)) {
+                return ResultLrProgramNotFound;
+            }
+        }
+        
+        *out.pointer = path;
+        return ResultLrHtmlDocumentNotFound;
     }
 
     Result RegisteredLocationResolverInterface::RegisterHtmlDocumentPath(ncm::TitleId tid, InPointer<const Path> path) {
-        return ResultKernelConnectionClosed;
+        Path tmp_path = *path.pointer;
+
+        if (!this->registered_html_docs_redirector.SetRedirection(tid, tmp_path)) {
+            this->registered_html_docs_redirector.ClearRedirections();
+            this->registered_html_docs_redirector.SetRedirection(tid, tmp_path);
+        }
+        
+        return ResultSuccess;
     }
 
     Result RegisteredLocationResolverInterface::UnregisterHtmlDocumentPath(ncm::TitleId tid) {
-        return ResultKernelConnectionClosed;
+        this->registered_html_docs_redirector.EraseRedirection(tid);
+        return ResultSuccess;
     }
 
     Result RegisteredLocationResolverInterface::RedirectHtmlDocumentPath(ncm::TitleId tid, InPointer<const Path> path) {
-        return ResultKernelConnectionClosed;
+        Path tmp_path = *path.pointer;
+        this->html_docs_redirector.SetRedirection(tid, tmp_path);
+        return ResultSuccess;
     }
 
     Result RegisteredLocationResolverInterface::Refresh() {
-        return ResultKernelConnectionClosed;
+        this->registered_program_redirector.ClearRedirections();
+        this->registered_html_docs_redirector.ClearRedirections();
+        return ResultSuccess;
     }
 
 }

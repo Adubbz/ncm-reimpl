@@ -18,6 +18,7 @@
 #include <switch.h>
 #include <stratosphere.hpp>
 
+#include "impl/lr_redirection.hpp"
 #include "lr_types.hpp"
 
 namespace sts::lr {
@@ -35,7 +36,14 @@ namespace sts::lr {
                 RedirectHtmlDocumentPath = 7,
                 Refresh = 8,
             };
+        private:
+            impl::LocationRedirector program_redirector;
+            impl::RegisteredLocationRedirector registered_program_redirector;
+            impl::LocationRedirector html_docs_redirector;
+            impl::RegisteredLocationRedirector registered_html_docs_redirector;
         public:
+            ~RegisteredLocationResolverInterface();
+
             Result ResolveProgramPath(OutPointerWithServerSize<Path, 0x1> out, ncm::TitleId tid);
             Result RegisterProgramPath(ncm::TitleId tid, InPointer<const Path> path);
             Result UnregisterProgramPath(ncm::TitleId tid);
